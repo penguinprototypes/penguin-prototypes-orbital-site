@@ -28,13 +28,10 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
-          node-version: lts/*
-
-      - name: Install dependencies
-        run: npm install
+          node-version: '20.19.0'
 
       - name: Build site
-        run: npm run build
+        run: npx --yes vite@latest build
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6

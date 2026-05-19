@@ -29,6 +29,7 @@ const bodyLayer = document.querySelector("#body-layer");
 const orbitSvg = document.querySelector("#orbit-svg");
 const stars = document.querySelector("#stars");
 const backgroundLayer = document.querySelector("#background-layer");
+const introFade = document.querySelector("#intro-fade");
 
 const siteTitle = document.querySelector("#site-title");
 const siteSubtitle = document.querySelector("#site-subtitle");
@@ -57,7 +58,7 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 let frameTime = 0;
 let reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let selectedBodyId = null;
-let selectedIndex = -1;
+let selectedIndex = 0;
 let introStarted = false;
 
 const pointer = {
@@ -78,7 +79,19 @@ const camera = {
   targetScale: 1,
   renderedX: 0,
   renderedY: 0,
-  manualZoom: 1
+  manualZoom: 1,
+  panX: 0,
+  panY: 0
+};
+
+const dragPan = {
+  active: false,
+  moved: false,
+  pointerId: null,
+  startClientX: 0,
+  startClientY: 0,
+  startPanX: 0,
+  startPanY: 0
 };
 
 const systemOrbits = [];
@@ -86,9 +99,14 @@ const localOrbits = [];
 const bodies = [];
 const bodyById = new Map();
 const selectableBodies = [];
+const navigationItems = [];
 
 applySiteConfig();
 prepareIntroShell();
+
+if (SITE.interaction?.dragPanEnabled) {
+  scene.classList.add("drag-pan-enabled");
+}
 
 const centerBody = createCenterBody();
 createOrbitalAnchors(orbitDefinitions);
@@ -109,12 +127,22 @@ window.addEventListener("pointerleave", resetPointerParallax, { passive: true })
 window.addEventListener("keydown", handleKeydown);
 scene.addEventListener("wheel", handleWheelZoom, { passive: false });
 
+scene.addEventListener("pointerdown", beginDragPan);
+window.addEventListener("pointermove", continueDragPan, { passive: false });
+window.addEventListener("pointerup", endDragPan);
+window.addEventListener("pointercancel", endDragPan);
+
 scene.addEventListener("click", event => {
+  if (dragPan.moved) {
+    dragPan.moved = false;
+    return;
+  }
+
   if (event.target.closest(".body") || event.target.closest(".info-panel")) {
     return;
   }
 
-  clearSelection();
+  selectOverview();
 });
 
 panelClose.addEventListener("click", clearSelection);
@@ -122,13 +150,7 @@ panelClose.addEventListener("click", clearSelection);
 navPrev.addEventListener("click", () => navigateBy(-1));
 navNext.addEventListener("click", () => navigateBy(1));
 navCurrent.addEventListener("click", () => {
-  if (selectableBodies.length === 0) return;
-
-  if (selectedIndex < 0) {
-    selectByIndex(0);
-    return;
-  }
-
+  if (navigationItems.length === 0) return;
   selectByIndex(selectedIndex);
 });
 
@@ -136,7 +158,7 @@ zoomInButton.addEventListener("click", () => adjustManualZoom(SITE.interaction.m
 zoomOutButton.addEventListener("click", () => adjustManualZoom(-SITE.interaction.manualZoomStep));
 zoomResetButton.addEventListener("click", resetView);
 
-if (SITE.navigator.selectFirstObjectOnLoad && selectableBodies.length > 0) {
+if (SITE.navigator.selectFirstObjectOnLoad && navigationItems.length > 0) {
   requestAnimationFrame(() => selectByIndex(0));
 }
 
@@ -425,6 +447,14 @@ function prepareIntroShell() {
     "--intro-chrome-duration",
     `${SITE.intro.chromeDurationMs ?? 720}ms`
   );
+  document.documentElement.style.setProperty(
+    "--intro-black-fade-delay",
+    `${SITE.intro.blackFadeDelayMs ?? 90}ms`
+  );
+  document.documentElement.style.setProperty(
+    "--intro-black-fade-duration",
+    `${SITE.intro.blackFadeDurationMs ?? 1450}ms`
+  );
 }
 
 function assignIntroObjectVariables(body, index) {
@@ -462,6 +492,7 @@ function startIntroAnimation() {
   }
 
   introStarted = true;
+  document.body.classList.add("intro-fade-running");
 
   requestAnimationFrame(() => {
     bodies
@@ -492,7 +523,7 @@ function startIntroAnimation() {
   }, chromeDelay);
 
   window.setTimeout(() => {
-    document.body.classList.remove("intro-pending", "intro-running");
+    document.body.classList.remove("intro-pending", "intro-running", "intro-fade-running");
     bodies.forEach(body => {
       body.node?.classList.remove("intro-object", "intro-drop");
       body.node?.style.removeProperty("--intro-offset-x");
@@ -525,28 +556,84 @@ function seededFraction(seed) {
    ============================================================ */
 
 function finalizeNavigator() {
+  navigationItems.length = 0;
+
+  navigationItems.push({
+    type: "overview",
+    label: SITE.navigator?.overviewLabel || "Whole Solar System"
+  });
+
+  const centerEntry = selectableBodies.find(body => body.layerKind === "center");
+  if (centerEntry) {
+    navigationItems.push({
+      type: "body",
+      bodyId: centerEntry.id,
+      label: SITE.navigator?.centerLabel || getBodyDisplayName(centerEntry)
+    });
+  }
+
+  selectableBodies
+    .filter(body => body.layerKind !== "center")
+    .forEach(body => {
+      navigationItems.push({
+        type: "body",
+        bodyId: body.id,
+        label: getBodyDisplayName(body)
+      });
+    });
+
+  selectedIndex = 0;
   updateNavigatorText();
 
-  const disabled = selectableBodies.length === 0;
+  const disabled = navigationItems.length === 0;
   navPrev.disabled = disabled;
   navNext.disabled = disabled;
   navCurrent.disabled = disabled;
 }
 
 function navigateBy(direction) {
-  if (selectableBodies.length === 0) return;
-
-  const nextIndex = selectedIndex < 0
-    ? (direction > 0 ? 0 : selectableBodies.length - 1)
-    : wrapIndex(selectedIndex + direction, selectableBodies.length);
-
-  selectByIndex(nextIndex);
+  if (navigationItems.length === 0) return;
+  selectByIndex(wrapIndex(selectedIndex + direction, navigationItems.length));
 }
 
 function selectByIndex(index) {
-  if (selectableBodies.length === 0) return;
-  const wrapped = wrapIndex(index, selectableBodies.length);
-  selectBody(selectableBodies[wrapped].id);
+  if (navigationItems.length === 0) return;
+
+  const wrapped = wrapIndex(index, navigationItems.length);
+  const item = navigationItems[wrapped];
+  selectedIndex = wrapped;
+
+  if (item.type === "overview") {
+    selectOverview();
+    selectedIndex = wrapped;
+    updateNavigatorText();
+    return;
+  }
+
+  selectBody(item.bodyId);
+}
+
+function selectOverview() {
+  selectedBodyId = null;
+  selectedIndex = Math.max(0, navigationItems.findIndex(item => item.type === "overview"));
+
+  bodies.forEach(candidate => {
+    candidate.node?.classList.remove("selected");
+  });
+
+  infoPanel.classList.remove("open");
+
+  window.setTimeout(() => {
+    if (!selectedBodyId) {
+      infoPanel.hidden = true;
+    }
+  }, reducedMotion ? 0 : 180);
+
+  camera.manualZoom = 1;
+  camera.panX = 0;
+  camera.panY = 0;
+
+  updateNavigatorText();
 }
 
 function selectBody(bodyId) {
@@ -557,7 +644,11 @@ function selectBody(bodyId) {
   }
 
   selectedBodyId = bodyId;
-  selectedIndex = selectableBodies.findIndex(candidate => candidate.id === bodyId);
+
+  const navIndex = navigationItems.findIndex(item => item.type === "body" && item.bodyId === bodyId);
+  if (navIndex >= 0) {
+    selectedIndex = navIndex;
+  }
 
   bodies.forEach(candidate => {
     candidate.node?.classList.toggle("selected", candidate.id === bodyId);
@@ -574,43 +665,30 @@ function selectBody(bodyId) {
 }
 
 function clearSelection() {
-  selectedBodyId = null;
-  selectedIndex = -1;
-
-  bodies.forEach(candidate => {
-    candidate.node?.classList.remove("selected");
-  });
-
-  infoPanel.classList.remove("open");
-
-  window.setTimeout(() => {
-    if (!selectedBodyId) {
-      infoPanel.hidden = true;
-    }
-  }, reducedMotion ? 0 : 180);
-
-  updateNavigatorText();
+  selectOverview();
 }
 
 function resetView() {
-  clearSelection();
-  camera.manualZoom = 1;
+  selectOverview();
 }
 
 function updateNavigatorText() {
-  if (selectableBodies.length === 0) {
+  if (navigationItems.length === 0) {
     navCount.textContent = "0 / 0";
     navName.textContent = "No objects";
     return;
   }
 
-  const body = selectedIndex >= 0
-    ? selectableBodies[selectedIndex]
-    : selectableBodies[0];
+  const item = navigationItems[selectedIndex] || navigationItems[0];
+  navCount.textContent = `${selectedIndex + 1} / ${navigationItems.length}`;
 
-  const countIndex = selectedIndex >= 0 ? selectedIndex + 1 : 1;
-  navCount.textContent = `${countIndex} / ${selectableBodies.length}`;
-  navName.textContent = getBodyDisplayName(body);
+  if (item.type === "overview") {
+    navName.textContent = item.label;
+    return;
+  }
+
+  const body = bodyById.get(item.bodyId);
+  navName.textContent = item.label || (body ? getBodyDisplayName(body) : "Orbital object");
 }
 
 /* ============================================================
@@ -754,12 +832,12 @@ function updateCamera(metrics) {
       : { x: metrics.width * 0.39, y: metrics.height * 0.5 };
 
     camera.targetScale = finalTargetScale;
-    camera.targetX = focusPoint.x - selectedBody.x * finalTargetScale;
-    camera.targetY = focusPoint.y - selectedBody.y * finalTargetScale;
+    camera.targetX = focusPoint.x - selectedBody.x * finalTargetScale + camera.panX;
+    camera.targetY = focusPoint.y - selectedBody.y * finalTargetScale + camera.panY;
   } else {
     camera.targetScale = finalTargetScale;
-    camera.targetX = metrics.cx - metrics.cx * finalTargetScale;
-    camera.targetY = metrics.cy - metrics.cy * finalTargetScale;
+    camera.targetX = metrics.cx - metrics.cx * finalTargetScale + camera.panX;
+    camera.targetY = metrics.cy - metrics.cy * finalTargetScale + camera.panY;
   }
 
   const lerpAmount = reducedMotion ? 1 : SITE.interaction.cameraLerp;
@@ -918,6 +996,80 @@ function handleKeydown(event) {
 
   if (event.key === "0" && !isTypingTarget(event.target)) {
     resetView();
+  }
+}
+
+
+function beginDragPan(event) {
+  if (!SITE.interaction?.dragPanEnabled) return;
+  if (event.button !== 0) return;
+
+  if (
+    event.target.closest(".body") ||
+    event.target.closest(".info-panel") ||
+    event.target.closest("button") ||
+    event.target.closest("a")
+  ) {
+    return;
+  }
+
+  dragPan.active = true;
+  dragPan.moved = false;
+  dragPan.pointerId = event.pointerId;
+  dragPan.startClientX = event.clientX;
+  dragPan.startClientY = event.clientY;
+  dragPan.startPanX = camera.panX;
+  dragPan.startPanY = camera.panY;
+
+  scene.classList.add("is-dragging");
+
+  try {
+    scene.setPointerCapture(event.pointerId);
+  } catch {
+    // Pointer capture is useful, but not required.
+  }
+}
+
+function continueDragPan(event) {
+  if (!dragPan.active || event.pointerId !== dragPan.pointerId) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const multiplier = SITE.interaction?.dragPanMultiplier ?? 1;
+  const deltaX = (event.clientX - dragPan.startClientX) * multiplier;
+  const deltaY = (event.clientY - dragPan.startClientY) * multiplier;
+
+  if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+    dragPan.moved = true;
+  }
+
+  camera.panX = dragPan.startPanX + deltaX;
+  camera.panY = dragPan.startPanY + deltaY;
+}
+
+function endDragPan(event) {
+  if (!dragPan.active) {
+    return;
+  }
+
+  if (
+    event.pointerId !== undefined &&
+    dragPan.pointerId !== null &&
+    event.pointerId !== dragPan.pointerId
+  ) {
+    return;
+  }
+
+  dragPan.active = false;
+  dragPan.pointerId = null;
+  scene.classList.remove("is-dragging");
+
+  try {
+    scene.releasePointerCapture(event.pointerId);
+  } catch {
+    // Pointer capture may already be released.
   }
 }
 

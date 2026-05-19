@@ -52,7 +52,7 @@ export const SITE = {
     image: "/images/core.svg",
     alt: "Penguin Prototypes center emblem",
     size: 150,
-    interactive: false,
+    interactive: true,
 
     info: {
       title: "Penguin Prototypes",
@@ -92,12 +92,18 @@ export const SITE = {
     // Manual zoom controls.
     manualZoomMin: 0.72,
     manualZoomMax: 2.55,
-    manualZoomStep: 0.16
+    manualZoomStep: 0.16,
+
+    // Click-and-drag panning.
+    dragPanEnabled: true,
+    dragPanMultiplier: 1
   },
 
   navigator: {
     visible: true,
-    selectFirstObjectOnLoad: false
+    selectFirstObjectOnLoad: false,
+    overviewLabel: "Whole Solar System",
+    centerLabel: "Center"
   },
 
   /*
@@ -117,6 +123,10 @@ export const SITE = {
 
     centerDelayMs: 760,
     chromeDelayMs: 1040,
-    chromeDurationMs: 720
+    chromeDurationMs: 720,
+
+    // Full-page black fade into the opening sequence.
+    blackFadeDelayMs: 90,
+    blackFadeDurationMs: 1450
   }
 };
