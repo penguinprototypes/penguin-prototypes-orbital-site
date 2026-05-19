@@ -1,0 +1,21 @@
+# A planet with a three-object orbital ring.
+
+planet: /images/planet-gold.svg
+alt: Gold planet
+size: 74
+orbit-radius: 430
+orbit-speed: -0.000052
+start-angle: 2.25
+orbit-line: true
+
+ring-radius: 78
+ring-speed: 0.00074
+ring-start-angle: 0.2
+ring-orbit-line: true
+ring-size: 18
+ring-image: /images/moon-blue.svg
+ring-alt: Blue satellite
+ring-image: /images/moon-rose.svg
+ring-alt: Rose satellite
+ring-image: /images/moon-white.svg
+ring-alt: White satellite

@@ -1,0 +1,17 @@
+# A simple planet with one moon.
+
+planet: /images/planet-blue.svg
+alt: Blue planet
+size: 84
+orbit-radius: 285
+orbit-speed: 0.000085
+start-angle: 0.35
+orbit-line: true
+
+moon: /images/moon-white.svg
+moon-alt: White moon
+moon-size: 22
+moon-radius: 58
+moon-speed: 0.00062
+moon-start-angle: 1.2
+moon-orbit-line: true

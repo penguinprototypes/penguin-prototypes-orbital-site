@@ -1,0 +1,20 @@
+# No planet line here.
+# This creates an invisible anchor that orbits the website center.
+# The three bodies orbit around that invisible moving anchor.
+
+orbit-radius: 555
+orbit-speed: 0.000034
+start-angle: 4.7
+orbit-line: true
+
+ring-radius: 68
+ring-speed: -0.00092
+ring-start-angle: 0.4
+ring-orbit-line: false
+ring-size: 20
+ring-image: /images/satellite-a.svg
+ring-alt: Satellite A
+ring-image: /images/satellite-b.svg
+ring-alt: Satellite B
+ring-image: /images/satellite-c.svg
+ring-alt: Satellite C
