@@ -7,7 +7,7 @@ nav-name: placeholder
 text: placeholder
 alt: placeholder
 size: 74
-orbit-radius: 430
+orbit-radius: 485
 orbit-speed: -0.000052
 start-angle: 2.25
 orbit-line: true
