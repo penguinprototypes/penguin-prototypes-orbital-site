@@ -236,3 +236,10 @@ intro: {
 ```
 
 Controls the opening drop-in sequence. Set `enabled: false` to disable it.
+
+---
+
+## Intro-position stability fix
+
+During the opening animation, orbital motion is now held still until the drop-in sequence finishes.  
+That means planets and moons fall directly into their configured starting positions instead of jittering along moving orbit targets.

@@ -60,6 +60,7 @@ let reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matche
 let selectedBodyId = null;
 let selectedIndex = 0;
 let introStarted = false;
+let introOrbitMotionFrozen = false;
 
 const pointer = {
   normalizedX: 0,
@@ -492,6 +493,7 @@ function startIntroAnimation() {
   }
 
   introStarted = true;
+  introOrbitMotionFrozen = true;
   document.body.classList.add("intro-fade-running");
 
   requestAnimationFrame(() => {
@@ -524,6 +526,7 @@ function startIntroAnimation() {
 
   window.setTimeout(() => {
     document.body.classList.remove("intro-pending", "intro-running", "intro-fade-running");
+    introOrbitMotionFrozen = false;
     bodies.forEach(body => {
       body.node?.classList.remove("intro-object", "intro-drop");
       body.node?.style.removeProperty("--intro-offset-x");
@@ -747,7 +750,7 @@ function updateBodies(timestamp, metrics, responsiveScale) {
       return;
     }
 
-    if (!reducedMotion) {
+    if (!reducedMotion && !introOrbitMotionFrozen) {
       body.angle += body.speed * deltaMs;
     }
 

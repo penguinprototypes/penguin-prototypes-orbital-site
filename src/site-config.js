@@ -114,6 +114,8 @@ export const SITE = {
   */
   intro: {
     enabled: true,
+    // Orbital motion stays frozen until the load-in sequence finishes,
+    // so planets fall cleanly into their actual starting positions.
     objectDropDurationMs: 920,
     objectDropStaggerMs: 52,
     objectRandomDelayMs: 260,
