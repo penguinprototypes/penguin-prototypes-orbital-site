@@ -1,0 +1,23 @@
+# A simple planet with one moon and clickable information panels.
+
+planet: /images/campfire.png
+title: Campfire
+nav-name: Goon Chair
+text: A cozy campfire for sitting around.
+alt: Campfire
+size: 84
+orbit-radius: 285
+orbit-speed: 0.000085
+start-angle: 0.35
+orbit-line: true
+
+moon: /images/chair.png
+moon-title: Goon Chair
+moon-nav-name: Satellite Node
+moon-text: You can infer what this means.
+moon-alt: Goon Chair
+moon-size: 22
+moon-radius: 58
+moon-speed: 0.00062
+moon-start-angle: 1.2
+moon-orbit-line: true
