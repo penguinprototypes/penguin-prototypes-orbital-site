@@ -1,9 +1,0 @@
-<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <radialGradient id="moonBlue" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(28 23) rotate(52) scale(63)">
-      <stop stop-color="#F3FDFF"/>
-      <stop offset="1" stop-color="#418BFF"/>
-    </radialGradient>
-  </defs>
-  <circle cx="40" cy="40" r="32" fill="url(#moonBlue)"/>
-</svg>
