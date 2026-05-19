@@ -14,37 +14,19 @@ ring-orbit-line: false
 ring-size: 20
 
 ring-image: /images/satellite-a.svg
-ring-title: Hidden-Anchor Object A
-ring-nav-name: Object A
-ring-text: These objects orbit around an invisible moving center.
-ring-alt: Satellite A
+ring-title: placeholder
+ring-nav-name: placeholder
+ring-text: placeholder
+ring-alt: placeholder
 
 ring-image: /images/satellite-b.svg
-ring-title: Hidden-Anchor Object B
-ring-nav-name: Object B
-ring-text: This is useful for asteroid clusters, grouped project icons, or decorative constellations.
-ring-alt: Satellite B
+ring-title: placeholder
+ring-nav-name: placeholder
+ring-text: placeholder
+ring-alt: placeholder
 
 ring-image: /images/satellite-c.svg
-ring-title: Hidden-Anchor Object C
-ring-nav-name: Object C
-ring-text: The .orbit file does not need a visible planet image for this to work.
-ring-alt: Satellite C
-
-ring-image: /images/satellite-a.svg
-ring-title: Hidden-Anchor Object A
-ring-nav-name: Object A
-ring-text: These objects orbit around an invisible moving center.
-ring-alt: Satellite A
-
-ring-image: /images/satellite-b.svg
-ring-title: Hidden-Anchor Object B
-ring-nav-name: Object B
-ring-text: This is useful for asteroid clusters, grouped project icons, or decorative constellations.
-ring-alt: Satellite B
-
-ring-image: /images/satellite-c.svg
-ring-title: Hidden-Anchor Object C
-ring-nav-name: Object C
-ring-text: The .orbit file does not need a visible planet image for this to work.
-ring-alt: Satellite C
+ring-title: placeholder
+ring-nav-name: placeholder
+ring-text: placeholder
+ring-alt: placeholder
