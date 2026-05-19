@@ -18,6 +18,6 @@ moon-text: You can infer what this means.
 moon-alt: Goon Chair
 moon-size: 22
 moon-radius: 58
-moon-speed: 0.00062
+moon-speed: 0.01
 moon-start-angle: 1.2
 moon-orbit-line: true
