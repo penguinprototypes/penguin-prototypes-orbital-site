@@ -1,65 +1,238 @@
-# Penguin Prototypes Orbital Placeholder
+# Penguin Prototypes Orbital Placeholder — Interactive Edition
 
-## Run it
+This version includes:
+
+- Mouse-responsive parallax drift
+- Hover enlargement for all planets / moons / ring objects
+- Click-to-focus camera zoom
+- Automatically positioned info textbox beside the selected object
+- Textbox links rendered as buttons
+- Manual zoom in / zoom out / reset buttons
+- Mouse wheel zoom over the scene
+- Left/right navigator bar cycling through all visible planets, moons, and ring objects
+- Load-in animation: objects drop into place in randomized order; the navigator, center, and title/footer finish last
+- Keyboard navigation:
+  - Left / Right arrows: previous / next object
+  - `+` / `-`: zoom in / out
+  - `0`: reset
+  - `Esc`: close textbox / deselect
+- Very easy main-page replacement through `src/site-config.js`
+- Very easy planet / moon / textbox editing through `.orbit` files
+
+---
+
+## Updating an existing GitHub Pages repo
+
+Replace the files in your existing repo with the contents of this project, commit, and push.  
+The existing GitHub Actions Pages deployment file is already included.
+
+---
+
+## Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Then open the local URL Vite prints.
+---
 
-## Add a new planet
+# The two places you edit most often
 
-Create a new file in:
+## 1. Main site / hero / background
+
+Edit:
 
 ```txt
-src/orbits/
+src/site-config.js
 ```
 
-Example:
+This controls:
+
+- Browser tab title
+- Large site title
+- Subtitle
+- Footer
+- Background image
+- Background color/glows
+- Center logo/image
+- Mouse parallax strength
+- Hover scale
+- Selection zoom amount
+
+### Replace the background
+
+1. Put your file in:
+   ```txt
+   public/images/
+   ```
+2. Set:
+   ```js
+   background: {
+     image: "/images/your-background.webp"
+   }
+   ```
+
+### Replace the center image
+
+```js
+center: {
+  image: "/images/your-center-image.png",
+  size: 150
+}
+```
+
+---
+
+## 2. Planets, moons, rings, textboxes, links
+
+Create or edit:
 
 ```txt
-planet: /images/my-planet.png
+src/orbits/*.orbit
+```
+
+Every `.orbit` file becomes one top-level orbital system.
+
+---
+
+# Example planet file
+
+```txt
+planet: /images/planet.png
+title: A Project Planet
+nav-name: Project Planet
+text: This becomes the first paragraph in its textbox.
+text: A second text line becomes a second paragraph.
+link: Visit project | https://example.com
+alt: Project planet image
 size: 80
 orbit-radius: 300
 orbit-speed: 0.00008
 start-angle: 0.4
+orbit-line: true
+```
 
-moon: /images/my-moon.png
+---
+
+# Single moon
+
+```txt
+moon: /images/moon.png
+moon-title: Moon Title
+moon-nav-name: Moon Title
+moon-text: This appears inside the moon's textbox.
+moon-link: Visit moon page | https://example.com
+moon-alt: Moon image
 moon-size: 22
 moon-radius: 55
 moon-speed: 0.0005
 ```
 
-Place your images in:
+---
+
+# Multi-object ring
 
 ```txt
-public/images/
+ring-radius: 70
+ring-speed: 0.0007
+ring-size: 18
+
+ring-image: /images/a.png
+ring-title: Object A
+ring-nav-name: Object A
+ring-text: This text belongs to Object A.
+ring-link: Open A | https://example.com/a
+
+ring-image: /images/b.png
+ring-title: Object B
+ring-nav-name: Object B
+ring-text: This text belongs to Object B.
 ```
 
-## Rules
+Rule:
 
-- A `.orbit` file creates one top-level orbital system.
-- `planet:` is optional.
-- If `planet:` is omitted, the file creates an invisible moving anchor.
-- `moon:` creates a one-object ring.
-- Repeated `ring-image:` lines create a multi-object ring.
-- A ring with one image behaves like a moon.
-- A ring with 2+ images becomes a shared orbit around the parent.
+- A ring with **1 image** functions like a moon.
+- A ring with **2 or more images** becomes a shared orbit around the parent.
+- A `.orbit` file with no `planet:` line creates an invisible moving anchor whose ring objects still orbit it.
+
+---
+
+# Links
+
+Planet links:
+
+```txt
+link: Button Label | https://example.com
+```
+
+Moon links:
+
+```txt
+moon-link: Button Label | https://example.com
+```
+
+Ring-object links:
+
+```txt
+ring-link: Button Label | https://example.com
+```
+
+---
+
+# Navigator behavior
+
+The bottom left/right bar includes every visible:
+
+- planet
+- moon
+- multi-ring object
+- center object only if you set `interactive: true`
+
+It selects and zooms to the body while opening its textbox.
+
+---
+
+# Deployment
+
+The project includes:
+
+```txt
+.github/workflows/deploy.yml
+```
+
+Your GitHub Pages source should remain:
+
+```txt
+GitHub Actions
+```
 
 
-## Deploy to GitHub Pages with a custom domain
+---
 
-This project includes:
+# Intro animation customization
 
-- `vite.config.js` with `base: "/"` for a custom root domain
-- `.github/workflows/deploy.yml` to build and deploy automatically through GitHub Actions
+Edit:
 
-After uploading the project to a new GitHub repository:
+```txt
+src/site-config.js
+```
 
-1. Go to the repository's **Settings → Pages**
-2. Under **Build and deployment → Source**, choose **GitHub Actions**
-3. Wait for the workflow under the **Actions** tab to finish successfully
-4. In **Settings → Pages → Custom domain**, enter `penguinprototypes.com`
-5. Configure DNS at your DNS provider as described in GitHub's custom domain docs
+The section:
+
+```js
+intro: {
+  enabled: true,
+  objectDropDurationMs: 920,
+  objectDropStaggerMs: 52,
+  objectRandomDelayMs: 260,
+  objectStartSpreadX: 540,
+  objectStartSpreadY: 430,
+  objectStartRotationDeg: 24,
+  centerDelayMs: 760,
+  chromeDelayMs: 1040,
+  chromeDurationMs: 720
+}
+```
+
+Controls the opening drop-in sequence. Set `enabled: false` to disable it.

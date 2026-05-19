@@ -1,6 +1,11 @@
-# A simple planet with one moon.
+# A simple planet with one moon and clickable information panels.
 
 planet: /images/planet-blue.svg
+title: Systems Division
+nav-name: Systems Division
+text: This planet demonstrates the automatically formatted textbox system. Repeat the text key to create additional neatly spaced paragraphs.
+text: Clicking a planet zooms the scene toward it while the textbox tracks beside the object.
+link: Penguin Prototypes | https://penguinprototypes.com
 alt: Blue planet
 size: 84
 orbit-radius: 285
@@ -9,6 +14,11 @@ start-angle: 0.35
 orbit-line: true
 
 moon: /images/moon-white.svg
+moon-title: Satellite Node
+moon-nav-name: Satellite Node
+moon-text: This single image is a moon because it is alone on its ring.
+moon-text: Moon descriptions use moon-title, moon-text, and moon-link.
+moon-link: Example link format | https://example.com
 moon-alt: White moon
 moon-size: 22
 moon-radius: 58

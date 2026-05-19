@@ -1,4 +1,3 @@
-# Build and deploy this Vite site to GitHub Pages.
 name: Deploy orbital placeholder to GitHub Pages
 
 on:

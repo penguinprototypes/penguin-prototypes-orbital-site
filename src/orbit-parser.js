@@ -1,35 +1,44 @@
 /**
- * Parser for simple `.orbit` files.
+ * Parser for `.orbit` files.
  *
- * Supported top-level keys:
+ * Planet example:
  *   planet: /images/planet.png
- *   alt: Planet description
+ *   title: The Railyard
+ *   text: This becomes a paragraph in the information box.
+ *   text: Repeating text creates another paragraph.
+ *   link: Read more | https://example.com
+ *   alt: Planet description for screen readers
+ *   nav-name: Optional navigator label
  *   size: 80
  *   orbit-radius: 300
  *   orbit-speed: 0.00008
  *   start-angle: 0.4
  *   orbit-line: true
  *
- * Shorthand single-moon block:
+ * Single moon shorthand:
  *   moon: /images/moon.png
+ *   moon-title: Small Satellite
+ *   moon-text: This text belongs to the moon.
+ *   moon-link: Open link | https://example.com
  *   moon-alt: Moon description
+ *   moon-nav-name: Optional navigator label
  *   moon-size: 22
  *   moon-radius: 55
  *   moon-speed: 0.0005
- *   moon-start-angle: 1.2
- *   moon-orbit-line: true
  *
- * Full ring block:
+ * Multi-object ring:
  *   ring-radius: 70
  *   ring-speed: 0.0007
- *   ring-start-angle: 0
- *   ring-orbit-line: true
  *   ring-size: 18
  *   ring-image: /images/a.png
+ *   ring-title: Satellite A
+ *   ring-text: Text for the latest ring image.
+ *   ring-link: Open A | https://example.com
  *   ring-image: /images/b.png
+ *   ring-title: Satellite B
  *
- * A file may omit `planet:`. In that case, it creates an invisible
- * moving anchor, and any child rings orbit around that invisible anchor.
+ * If a file has no `planet:` line, it creates an invisible moving
+ * anchor. Its child ring objects still orbit around it.
  */
 
 const DEFAULTS = Object.freeze({
@@ -48,7 +57,6 @@ const DEFAULTS = Object.freeze({
 
 function parseBoolean(value, fallback = true) {
   if (typeof value !== "string") return fallback;
-
   const normalized = value.trim().toLowerCase();
 
   if (["true", "yes", "on", "1"].includes(normalized)) return true;
@@ -67,6 +75,32 @@ function stripInlineComment(line) {
   return hashIndex === -1 ? line : line.slice(0, hashIndex);
 }
 
+function createInfo() {
+  return {
+    title: "",
+    paragraphs: [],
+    links: []
+  };
+}
+
+function parseLink(value) {
+  const [rawLabel, ...urlParts] = value.split("|");
+  const label = rawLabel?.trim() || "";
+  const href = urlParts.join("|").trim();
+
+  if (!href) {
+    return {
+      label: label || value.trim(),
+      href: value.trim()
+    };
+  }
+
+  return {
+    label: label || href,
+    href
+  };
+}
+
 function createRing(overrides = {}) {
   return {
     radius: DEFAULTS.ringRadius,
@@ -79,16 +113,27 @@ function createRing(overrides = {}) {
   };
 }
 
+function createRingItem(image = null) {
+  return {
+    image,
+    alt: "",
+    navName: "",
+    info: createInfo()
+  };
+}
+
 export function parseOrbitFile(rawText, sourceName = "unknown.orbit") {
   const definition = {
     sourceName,
     planetImage: null,
     alt: "",
+    navName: "",
     size: DEFAULTS.bodySize,
     orbitRadius: DEFAULTS.orbitRadius,
     orbitSpeed: DEFAULTS.orbitSpeed,
     startAngle: DEFAULTS.startAngle,
     orbitLine: DEFAULTS.orbitLine,
+    info: createInfo(),
     rings: []
   };
 
@@ -106,6 +151,11 @@ export function parseOrbitFile(rawText, sourceName = "unknown.orbit") {
     currentRing = createRing(overrides);
     definition.rings.push(currentRing);
     return currentRing;
+  }
+
+  function latestRingItem() {
+    const ring = ensureCurrentRing();
+    return ring.items.at(-1) || null;
   }
 
   const lines = rawText
@@ -127,13 +177,29 @@ export function parseOrbitFile(rawText, sourceName = "unknown.orbit") {
     const key = rawKey.toLowerCase();
 
     switch (key) {
-      // ---------- Top-level body / system orbit ----------
+      // ---------- Top-level planet / system orbit ----------
       case "planet":
         definition.planetImage = value || null;
         break;
 
+      case "title":
+        definition.info.title = value;
+        break;
+
+      case "text":
+        if (value) definition.info.paragraphs.push(value);
+        break;
+
+      case "link":
+        if (value) definition.info.links.push(parseLink(value));
+        break;
+
       case "alt":
         definition.alt = value;
+        break;
+
+      case "nav-name":
+        definition.navName = value;
         break;
 
       case "size":
@@ -159,20 +225,37 @@ export function parseOrbitFile(rawText, sourceName = "unknown.orbit") {
       // ---------- Single moon shorthand ----------
       case "moon": {
         const ring = beginRing();
-        ring.items.push({
-          image: value || null,
-          alt: ""
-        });
+        ring.items.push(createRingItem(value || null));
+        break;
+      }
+
+      case "moon-title": {
+        const item = latestRingItem();
+        if (item) item.info.title = value;
+        break;
+      }
+
+      case "moon-text": {
+        const item = latestRingItem();
+        if (item && value) item.info.paragraphs.push(value);
+        break;
+      }
+
+      case "moon-link": {
+        const item = latestRingItem();
+        if (item && value) item.info.links.push(parseLink(value));
         break;
       }
 
       case "moon-alt": {
-        const ring = ensureCurrentRing();
-        const latestItem = ring.items.at(-1);
+        const item = latestRingItem();
+        if (item) item.alt = value;
+        break;
+      }
 
-        if (latestItem) {
-          latestItem.alt = value;
-        }
+      case "moon-nav-name": {
+        const item = latestRingItem();
+        if (item) item.navName = value;
         break;
       }
 
@@ -220,19 +303,36 @@ export function parseOrbitFile(rawText, sourceName = "unknown.orbit") {
         break;
 
       case "ring-image":
-        ensureCurrentRing().items.push({
-          image: value || null,
-          alt: ""
-        });
+        ensureCurrentRing().items.push(createRingItem(value || null));
         break;
 
-      case "ring-alt": {
-        const ring = ensureCurrentRing();
-        const latestItem = ring.items.at(-1);
+      case "ring-title": {
+        const item = latestRingItem();
+        if (item) item.info.title = value;
+        break;
+      }
 
-        if (latestItem) {
-          latestItem.alt = value;
-        }
+      case "ring-text": {
+        const item = latestRingItem();
+        if (item && value) item.info.paragraphs.push(value);
+        break;
+      }
+
+      case "ring-link": {
+        const item = latestRingItem();
+        if (item && value) item.info.links.push(parseLink(value));
+        break;
+      }
+
+      case "ring-alt": {
+        const item = latestRingItem();
+        if (item) item.alt = value;
+        break;
+      }
+
+      case "ring-nav-name": {
+        const item = latestRingItem();
+        if (item) item.navName = value;
         break;
       }
 
@@ -243,6 +343,5 @@ export function parseOrbitFile(rawText, sourceName = "unknown.orbit") {
   }
 
   definition.rings = definition.rings.filter(ring => ring.items.length > 0);
-
   return definition;
 }

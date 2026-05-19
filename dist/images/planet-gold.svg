@@ -1,0 +1,12 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="goldPlanet" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(57 44) rotate(52) scale(122)">
+      <stop stop-color="#FFF6D1"/>
+      <stop offset="0.42" stop-color="#F7CC59"/>
+      <stop offset="1" stop-color="#B86A16"/>
+    </radialGradient>
+  </defs>
+  <circle cx="80" cy="80" r="67" fill="url(#goldPlanet)"/>
+  <path d="M28 65C58 81 99 80 133 60" stroke="rgba(255,255,255,0.28)" stroke-width="10" stroke-linecap="round"/>
+  <path d="M36 105C64 91 107 91 132 111" stroke="rgba(95,48,0,0.22)" stroke-width="12" stroke-linecap="round"/>
+</svg>
