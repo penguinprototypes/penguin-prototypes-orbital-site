@@ -243,3 +243,27 @@ Controls the opening drop-in sequence. Set `enabled: false` to disable it.
 
 During the opening animation, orbital motion is now held still until the drop-in sequence finishes.  
 That means planets and moons fall directly into their configured starting positions instead of jittering along moving orbit targets.
+
+
+---
+
+# Intro fade behavior
+
+The drop-in animation for planets and moons has been removed.  
+The solar system is already moving from the first frame, hidden behind a black screen that fades away smoothly.
+
+To edit the fade:
+
+```js
+intro: {
+  enabled: true,
+  blackFadeDelayMs: 90,
+  blackFadeDurationMs: 1450
+}
+```
+
+in:
+
+```txt
+src/site-config.js
+```

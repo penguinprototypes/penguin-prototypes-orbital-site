@@ -60,7 +60,6 @@ let reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matche
 let selectedBodyId = null;
 let selectedIndex = 0;
 let introStarted = false;
-let introOrbitMotionFrozen = false;
 
 const pointer = {
   normalizedX: 0,
@@ -289,13 +288,6 @@ function createCenterBody() {
 
   center.node?.classList.add("center-body");
 
-  if (center.node && shouldAnimateIntro()) {
-    center.node.style.setProperty("--intro-offset-x", "0px");
-    center.node.style.setProperty("--intro-offset-y", "-360px");
-    center.node.style.setProperty("--intro-rotation", "-8deg");
-    center.node.style.setProperty("--intro-object-duration", `${SITE.intro.objectDropDurationMs ?? 920}ms`);
-    center.node.style.setProperty("--intro-delay", "0ms");
-  }
 
   return center;
 }
@@ -354,10 +346,6 @@ function createBody({
   bodies.push(body);
   bodyById.set(id, body);
 
-  if (body.node && shouldAnimateIntro()) {
-    body.node.classList.add("intro-object");
-    assignIntroObjectVariables(body, bodies.length - 1);
-  }
 
   if (body.node && selectable) {
     selectableBodies.push(body);
@@ -431,7 +419,7 @@ function createLocalOrbit() {
 
 
 /* ============================================================
-   INTRO ANIMATION
+   INTRO FADE
    ============================================================ */
 
 function shouldAnimateIntro() {
@@ -445,10 +433,6 @@ function prepareIntroShell() {
 
   document.body.classList.add("intro-pending", "intro-running");
   document.documentElement.style.setProperty(
-    "--intro-chrome-duration",
-    `${SITE.intro.chromeDurationMs ?? 720}ms`
-  );
-  document.documentElement.style.setProperty(
     "--intro-black-fade-delay",
     `${SITE.intro.blackFadeDelayMs ?? 90}ms`
   );
@@ -458,100 +442,20 @@ function prepareIntroShell() {
   );
 }
 
-function assignIntroObjectVariables(body, index) {
-  if (!body.node) return;
-
-  const config = SITE.intro;
-  const seed = stableHash(`${body.id}-${index}`);
-  const randomA = seededFraction(seed * 17 + 3);
-  const randomB = seededFraction(seed * 31 + 11);
-  const randomC = seededFraction(seed * 47 + 19);
-  const randomD = seededFraction(seed * 71 + 29);
-
-  const spreadX = config.objectStartSpreadX ?? 540;
-  const spreadY = config.objectStartSpreadY ?? 430;
-  const rotation = config.objectStartRotationDeg ?? 24;
-
-  const offsetX = (randomA * 2 - 1) * spreadX;
-  const offsetY = -(spreadY * (0.58 + randomB * 0.76));
-  const rotationDeg = (randomC * 2 - 1) * rotation;
-
-  const duration = config.objectDropDurationMs ?? 920;
-  const baseDelay = index * (config.objectDropStaggerMs ?? 52);
-  const randomDelay = randomD * (config.objectRandomDelayMs ?? 260);
-
-  body.node.style.setProperty("--intro-offset-x", `${offsetX.toFixed(1)}px`);
-  body.node.style.setProperty("--intro-offset-y", `${offsetY.toFixed(1)}px`);
-  body.node.style.setProperty("--intro-rotation", `${rotationDeg.toFixed(1)}deg`);
-  body.node.style.setProperty("--intro-object-duration", `${duration}ms`);
-  body.node.style.setProperty("--intro-delay", `${Math.round(baseDelay + randomDelay)}ms`);
-}
-
 function startIntroAnimation() {
   if (!shouldAnimateIntro() || introStarted) {
     return;
   }
 
   introStarted = true;
-  introOrbitMotionFrozen = true;
   document.body.classList.add("intro-fade-running");
 
-  requestAnimationFrame(() => {
-    bodies
-      .filter(body => body.layerKind !== "center")
-      .forEach(body => {
-        body.node?.classList.add("intro-drop");
-      });
-  });
-
-  const config = SITE.intro;
-  const objectDuration = config.objectDropDurationMs ?? 920;
-  const objectStagger = config.objectDropStaggerMs ?? 52;
-  const objectRandom = config.objectRandomDelayMs ?? 260;
-  const longestObjectRun =
-    objectDuration +
-    Math.max(0, bodies.length - 1) * objectStagger +
-    objectRandom;
-
-  const centerDelay = Math.max(config.centerDelayMs ?? 760, longestObjectRun * 0.58);
-  const chromeDelay = Math.max(config.chromeDelayMs ?? 1040, longestObjectRun * 0.82);
-
-  window.setTimeout(() => {
-    centerBody.node?.classList.add("intro-drop");
-  }, centerDelay);
-
-  window.setTimeout(() => {
-    document.body.classList.add("intro-chrome-ready");
-  }, chromeDelay);
+  const fadeDelay = SITE.intro.blackFadeDelayMs ?? 90;
+  const fadeDuration = SITE.intro.blackFadeDurationMs ?? 1450;
 
   window.setTimeout(() => {
     document.body.classList.remove("intro-pending", "intro-running", "intro-fade-running");
-    introOrbitMotionFrozen = false;
-    bodies.forEach(body => {
-      body.node?.classList.remove("intro-object", "intro-drop");
-      body.node?.style.removeProperty("--intro-offset-x");
-      body.node?.style.removeProperty("--intro-offset-y");
-      body.node?.style.removeProperty("--intro-rotation");
-      body.node?.style.removeProperty("--intro-object-duration");
-      body.node?.style.removeProperty("--intro-delay");
-    });
-  }, chromeDelay + (config.chromeDurationMs ?? 720) + 180);
-}
-
-function stableHash(text) {
-  let hash = 2166136261;
-
-  for (let i = 0; i < text.length; i += 1) {
-    hash ^= text.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-
-  return Math.abs(hash);
-}
-
-function seededFraction(seed) {
-  const value = Math.sin(seed * 12.9898) * 43758.5453;
-  return value - Math.floor(value);
+  }, fadeDelay + fadeDuration + 180);
 }
 
 /* ============================================================
@@ -750,7 +654,7 @@ function updateBodies(timestamp, metrics, responsiveScale) {
       return;
     }
 
-    if (!reducedMotion && !introOrbitMotionFrozen) {
+    if (!reducedMotion) {
       body.angle += body.speed * deltaMs;
     }
 

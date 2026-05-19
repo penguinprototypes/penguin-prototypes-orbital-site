@@ -107,27 +107,13 @@ export const SITE = {
   },
 
   /*
-    Intro animation when the page first loads:
-    - Objects drop into place from varied starting positions.
-    - The navigator, center image, and page text finish last.
-    - Set enabled: false to disable it.
+    Opening screen fade:
+    - The solar system is already in motion behind the black screen.
+    - The black screen fades away to reveal the live scene.
+    - Set enabled: false to remove the fade entirely.
   */
   intro: {
     enabled: true,
-    // Orbital motion stays frozen until the load-in sequence finishes,
-    // so planets fall cleanly into their actual starting positions.
-    objectDropDurationMs: 920,
-    objectDropStaggerMs: 52,
-    objectRandomDelayMs: 260,
-    objectStartSpreadX: 540,
-    objectStartSpreadY: 430,
-    objectStartRotationDeg: 24,
-
-    centerDelayMs: 760,
-    chromeDelayMs: 1040,
-    chromeDurationMs: 720,
-
-    // Full-page black fade into the opening sequence.
     blackFadeDelayMs: 90,
     blackFadeDurationMs: 1450
   }
