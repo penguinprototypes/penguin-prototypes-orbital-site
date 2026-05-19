@@ -18,7 +18,7 @@ export const SITE = {
 
   header: {
     title: "Penguin Prototypes",
-    subtitle: "Systems in development"
+    subtitle: ""
   },
 
   footer: "penguinprototypes.com",
@@ -49,15 +49,15 @@ export const SITE = {
     - Text and links here format the same way as planet textboxes.
   */
   center: {
-    image: "/images/core.svg",
-    alt: "Penguin Prototypes center emblem",
+    image: "/images/pp3.png",
+    alt: "Penguin Prototypes",
     size: 150,
     interactive: true,
 
     info: {
       title: "Penguin Prototypes",
       text: [
-        "This center image can be made clickable by setting interactive: true in src/site-config.js."
+        "Penguin Prototypes"
       ],
       links: [
         // { label: "Example", href: "https://example.com" }
