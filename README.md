@@ -267,3 +267,48 @@ in:
 ```txt
 src/site-config.js
 ```
+
+
+---
+
+# Performance settings
+
+Edit:
+
+```txt
+src/site-config.js
+```
+
+The `performance` section now controls the heavier animation work:
+
+```js
+performance: {
+  enabled: true,
+  targetFps: 60,
+  useBackdropBlur: false,
+  useMovingDropShadows: false,
+  reduceParallax: false,
+  reducedParallaxMultiplier: 0.35,
+  pauseWhenHidden: true
+}
+```
+
+Recommended presets:
+
+### Normal
+```js
+targetFps: 60,
+useBackdropBlur: false,
+useMovingDropShadows: false,
+reduceParallax: false
+```
+
+### Lower-power
+```js
+targetFps: 30,
+useBackdropBlur: false,
+useMovingDropShadows: false,
+reduceParallax: true
+```
+
+This update does not change any `.orbit` files or planet/moon definitions.

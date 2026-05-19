@@ -18,7 +18,7 @@ export const SITE = {
 
   header: {
     title: "Penguin Prototypes",
-    subtitle: ""
+    subtitle: "Systems in development"
   },
 
   footer: "penguinprototypes.com",
@@ -49,7 +49,7 @@ export const SITE = {
     - Text and links here format the same way as planet textboxes.
   */
   center: {
-    image: "/images/pp3.png",
+    image: "/images/core.svg",
     alt: "Penguin Prototypes center emblem",
     size: 150,
     interactive: true,
@@ -57,7 +57,7 @@ export const SITE = {
     info: {
       title: "Penguin Prototypes",
       text: [
-        "Penguin Prototypes"
+        "This center image can be made clickable by setting interactive: true in src/site-config.js."
       ],
       links: [
         // { label: "Example", href: "https://example.com" }
@@ -97,6 +97,24 @@ export const SITE = {
     // Click-and-drag panning.
     dragPanEnabled: true,
     dragPanMultiplier: 1
+  },
+
+  /*
+    Performance controls:
+    - targetFps: 60 is the default; 30 is available for slower machines.
+    - useBackdropBlur: false removes expensive glass blur effects.
+    - useMovingDropShadows: false removes animated drop-shadow filters on moving bodies.
+    - reduceParallax: true softens mouse-response movement.
+    - pauseWhenHidden: true stops animation work when the tab is not visible.
+  */
+  performance: {
+    enabled: true,
+    targetFps: 60,
+    useBackdropBlur: false,
+    useMovingDropShadows: false,
+    reduceParallax: false,
+    reducedParallaxMultiplier: 0.35,
+    pauseWhenHidden: true
   },
 
   navigator: {

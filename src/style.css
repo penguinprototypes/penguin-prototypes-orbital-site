@@ -624,3 +624,29 @@ body.intro-fade-running .intro-fade {
     transition-duration: 0ms;
   }
 }
+
+
+/* ============================================================
+   PERFORMANCE MODE
+   ============================================================ */
+
+body.performance-no-blur .info-panel,
+body.performance-no-blur .object-navigator,
+body.performance-no-blur .zoom-controls {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+body.performance-no-moving-shadows .body-image {
+  filter: none;
+}
+
+body.performance-no-moving-shadows .body.center-body {
+  filter: none;
+}
+
+body.performance-no-moving-shadows .body.selectable:hover .body-visual,
+body.performance-no-moving-shadows .body.selectable:focus-visible .body-visual,
+body.performance-no-moving-shadows .body.selected .body-visual {
+  filter: none;
+}

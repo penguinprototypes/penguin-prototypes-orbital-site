@@ -56,7 +56,9 @@ const zoomResetButton = document.querySelector("#zoom-reset");
 const SVG_NS = "http://www.w3.org/2000/svg";
 
 let frameTime = 0;
+let lastRenderedTimestamp = 0;
 let reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let pageHidden = document.hidden;
 let selectedBodyId = null;
 let selectedIndex = 0;
 let introStarted = false;
@@ -115,6 +117,13 @@ startIntroAnimation();
 
 window.addEventListener("resize", () => {
   frameTime = 0;
+  lastRenderedTimestamp = 0;
+});
+
+document.addEventListener("visibilitychange", () => {
+  pageHidden = document.hidden;
+  frameTime = 0;
+  lastRenderedTimestamp = 0;
 });
 
 window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -192,6 +201,16 @@ function applySiteConfig() {
     : "none";
 
   navigatorEl.classList.toggle("hidden", SITE.navigator?.visible === false);
+
+  const performanceEnabled = SITE.performance?.enabled === true;
+  document.body.classList.toggle(
+    "performance-no-blur",
+    performanceEnabled && SITE.performance?.useBackdropBlur === false
+  );
+  document.body.classList.toggle(
+    "performance-no-moving-shadows",
+    performanceEnabled && SITE.performance?.useMovingDropShadows === false
+  );
 }
 
 /* ============================================================
@@ -340,7 +359,11 @@ function createBody({
     scale: 1,
     responsiveScale: 1,
     frontness: 0.5,
-    zIndex: 500
+    zIndex: 500,
+    renderedVisualSize: null,
+    renderedZIndex: null,
+    renderedOpacity: null,
+    renderedTransform: null
   };
 
   bodies.push(body);
@@ -603,6 +626,27 @@ function updateNavigatorText() {
    ============================================================ */
 
 function animate(timestamp) {
+  requestAnimationFrame(animate);
+
+  const performanceEnabled = SITE.performance?.enabled === true;
+
+  if (performanceEnabled && SITE.performance?.pauseWhenHidden === true && pageHidden) {
+    return;
+  }
+
+  const targetFps = performanceEnabled ? Number(SITE.performance?.targetFps || 0) : 0;
+  const minimumFrameGap = targetFps > 0 ? 1000 / targetFps : 0;
+
+  if (
+    minimumFrameGap > 0 &&
+    lastRenderedTimestamp > 0 &&
+    timestamp - lastRenderedTimestamp < minimumFrameGap
+  ) {
+    return;
+  }
+
+  lastRenderedTimestamp = timestamp;
+
   const metrics = getSceneMetrics();
   const responsiveScale = calculateResponsiveScale(metrics);
 
@@ -617,7 +661,6 @@ function animate(timestamp) {
   updateInfoPanelPosition(metrics);
 
   frameTime = timestamp;
-  requestAnimationFrame(animate);
 }
 
 function updateCenterBody(metrics, responsiveScale) {
@@ -717,12 +760,31 @@ function placeVisibleBody(body, {
   }
 
   const visualSize = body.baseSize * responsiveScale;
-  body.node.style.width = `${visualSize}px`;
-  body.node.style.height = `${visualSize}px`;
-  body.node.style.zIndex = String(zIndex);
-  body.node.style.opacity = String(opacity);
-  body.node.style.transform =
+  const transform =
     `translate(${x - visualSize / 2}px, ${y - visualSize / 2}px) scale(${depthScale})`;
+  const opacityString = String(opacity);
+  const zIndexString = String(zIndex);
+
+  if (body.renderedVisualSize !== visualSize) {
+    body.node.style.width = `${visualSize}px`;
+    body.node.style.height = `${visualSize}px`;
+    body.renderedVisualSize = visualSize;
+  }
+
+  if (body.renderedZIndex !== zIndexString) {
+    body.node.style.zIndex = zIndexString;
+    body.renderedZIndex = zIndexString;
+  }
+
+  if (body.renderedOpacity !== opacityString) {
+    body.node.style.opacity = opacityString;
+    body.renderedOpacity = opacityString;
+  }
+
+  if (body.renderedTransform !== transform) {
+    body.node.style.transform = transform;
+    body.renderedTransform = transform;
+  }
 }
 
 function updateCamera(metrics) {
@@ -863,8 +925,16 @@ function handlePointerMove(event) {
   pointer.normalizedX = clamp((localX / rect.width) * 2 - 1, -1, 1);
   pointer.normalizedY = clamp((localY / rect.height) * 2 - 1, -1, 1);
 
-  pointer.targetParallaxX = pointer.normalizedX * SITE.interaction.mouseParallaxX;
-  pointer.targetParallaxY = pointer.normalizedY * SITE.interaction.mouseParallaxY;
+  const performanceEnabled = SITE.performance?.enabled === true;
+  const parallaxMultiplier =
+    performanceEnabled && SITE.performance?.reduceParallax === true
+      ? SITE.performance?.reducedParallaxMultiplier ?? 0.35
+      : 1;
+
+  pointer.targetParallaxX =
+    pointer.normalizedX * SITE.interaction.mouseParallaxX * parallaxMultiplier;
+  pointer.targetParallaxY =
+    pointer.normalizedY * SITE.interaction.mouseParallaxY * parallaxMultiplier;
 }
 
 function resetPointerParallax() {
