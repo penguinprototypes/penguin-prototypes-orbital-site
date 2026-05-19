@@ -2,7 +2,7 @@
 # This creates an invisible anchor that orbits the website center.
 # The three bodies orbit around that invisible moving anchor.
 
-orbit-radius: 600
+orbit-radius: 800
 orbit-speed: 0.000034
 start-angle: 4.7
 orbit-line: true
