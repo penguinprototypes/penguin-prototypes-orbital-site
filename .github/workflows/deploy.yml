@@ -30,11 +30,8 @@ jobs:
         with:
           node-version: '20.19.0'
 
-      - name: Install dependencies
-        run: npm install --include=dev
-
       - name: Build site
-        run: npm run build
+        run: npx --yes vite@latest build
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v6
