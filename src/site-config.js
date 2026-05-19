@@ -57,7 +57,7 @@ export const SITE = {
     info: {
       title: "Penguin Prototypes",
       text: [
-        "This center image can be made clickable by setting interactive: true in src/site-config.js."
+        "Penguin Prototypes"
       ],
       links: [
         // { label: "Example", href: "https://example.com" }
