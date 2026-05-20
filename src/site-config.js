@@ -51,7 +51,7 @@ export const SITE = {
   center: {
     image: "/images/pp3.png",
     alt: "Penguin Prototypes center emblem",
-    size: 150,
+    size: 300,
     interactive: true,
 
     info: {
