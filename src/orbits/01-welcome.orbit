@@ -1,0 +1,12 @@
+# A simple planet with one moon and clickable information panels.
+
+planet: /images/campfire.png
+title: Welcome!
+nav-name: Welcome!
+text: Welcome to the Penguin Prototypes Homepage!
+alt: Welcoming Earth
+size: 84
+orbit-radius: 180
+orbit-speed: 0.001
+start-angle: 1
+orbit-line: false
