@@ -7,7 +7,7 @@ nav-name: Orbital Workshop
 text: This planet demonstrates a multi-object ring. The ring has three images, so they orbit the planet together instead of behaving like a single moon.
 alt: Gold planet
 size: 74
-orbit-radius: 430
+orbit-radius: 580
 orbit-speed: -0.000052
 start-angle: 2.25
 orbit-line: true

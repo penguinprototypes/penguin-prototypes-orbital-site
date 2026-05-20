@@ -7,6 +7,6 @@ text: Welcome to the Penguin Prototypes Homepage!
 alt: Welcoming Earth
 size: 84
 orbit-radius: 180
-orbit-speed: 0.001
+orbit-speed: -0.0001
 start-angle: 1
 orbit-line: false
