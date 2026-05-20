@@ -18,7 +18,7 @@ export const SITE = {
 
   header: {
     title: "Penguin Prototypes",
-    subtitle: "Systems in development"
+    subtitle: ""
   },
 
   footer: "penguinprototypes.com",
@@ -49,7 +49,7 @@ export const SITE = {
     - Text and links here format the same way as planet textboxes.
   */
   center: {
-    image: "/images/core.svg",
+    image: "/images/pp3.png",
     alt: "Penguin Prototypes center emblem",
     size: 150,
     interactive: true,
