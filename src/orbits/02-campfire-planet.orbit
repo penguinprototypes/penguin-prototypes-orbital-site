@@ -12,10 +12,10 @@ start-angle: 0.35
 orbit-line: true
 
 moon: /images/chair.png
-moon-title: Goon Chair
-moon-nav-name: Goon Chair
-moon-text: You can infer what this means.
-moon-alt: Goon Chair
+moon-title: Chair
+moon-nav-name: Chair
+moon-text: Camping
+moon-alt: Chair
 moon-size: 22
 moon-radius: 58
 moon-speed: 0.001

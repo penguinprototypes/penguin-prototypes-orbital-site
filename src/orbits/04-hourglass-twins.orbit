@@ -1,0 +1,26 @@
+# No planet line here.
+# This creates an invisible moving anchor that orbits the website center.
+# The three visible bodies orbit around that invisible anchor.
+
+orbit-radius: 780
+orbit-speed: 0.000034
+start-angle: 4.7
+orbit-line: true
+
+ring-radius: 30
+ring-speed: -0.00001
+ring-start-angle: 0.4
+ring-orbit-line: false
+ring-size: 20
+
+ring-image: /images/ash-twin.png
+ring-title: Ash Twin
+ring-nav-name: Ash Twin
+ring-text: Outer Wilds reference
+ring-alt: Ash Twin
+
+ring-image: /images/ember-twin.png
+ring-title: Ember Twin
+ring-nav-name: Ember Twin
+ring-text: Outer Wilds Reference
+ring-alt: Ember Twin

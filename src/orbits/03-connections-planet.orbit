@@ -19,20 +19,20 @@ ring-orbit-line: true
 ring-size: 18
 
 ring-image: /images/moon-blue.svg
-ring-title: Blue Module
-ring-nav-name: Blue Module
-ring-text: Metadata placed after a ring-image belongs to that exact object.
-ring-link: Open example | https://example.com
-ring-alt: Blue satellite
+ring-title: blue placeholder
+ring-nav-name: blue placeholder
+ring-text: blue placeholder
+ring-link: blue placeholder | https://penguinprototypes.com
+ring-alt: blue placeholder
 
 ring-image: /images/moon-rose.svg
-ring-title: Rose Module
-ring-nav-name: Rose Module
-ring-text: Each body on a shared ring can have separate text and separate links.
-ring-alt: Rose satellite
+ring-title: rede placeholder
+ring-nav-name: red placeholder
+ring-text: red placeholder
+ring-alt: red placeholder
 
 ring-image: /images/moon-white.svg
-ring-title: White Module
-ring-nav-name: White Module
-ring-text: Clicking any ring object opens its own textbox.
-ring-alt: White satellite
+ring-title: white placeholder
+ring-nav-name: white placeholder
+ring-text: white placeholder
+ring-alt: white placeholder
