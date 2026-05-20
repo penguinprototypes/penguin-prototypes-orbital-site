@@ -1,11 +1,11 @@
 # A planet with a three-object orbital ring.
 # Each ring image may have its own title, text, and links.
 
-planet: /images/planet-gold.svg
-title: Orbital Workshop
-nav-name: Orbital Workshop
-text: This planet demonstrates a multi-object ring. The ring has three images, so they orbit the planet together instead of behaving like a single moon.
-alt: Gold planet
+planet: /images/internet.png
+title: Connections
+nav-name: Connections
+text: This is where you'll find Penguin Prototypes' connections.
+alt: Windows 98 Modem
 size: 74
 orbit-radius: 580
 orbit-speed: -0.000052
