@@ -8,7 +8,7 @@ start-angle: 4.7
 orbit-line: true
 
 ring-radius: 30
-ring-speed: -0.00001
+ring-speed: -0.0001
 ring-start-angle: 0.4
 ring-orbit-line: false
 ring-size: 20
