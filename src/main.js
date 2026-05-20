@@ -59,6 +59,7 @@ let frameTime = 0;
 let lastRenderedTimestamp = 0;
 let reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 let pageHidden = document.hidden;
+let starResizeTimer = null;
 let selectedBodyId = null;
 let selectedIndex = 0;
 let introStarted = false;
@@ -104,6 +105,7 @@ const selectableBodies = [];
 const navigationItems = [];
 
 applySiteConfig();
+generateRandomStarfield();
 prepareIntroShell();
 
 if (SITE.interaction?.dragPanEnabled) {
@@ -118,6 +120,13 @@ startIntroAnimation();
 window.addEventListener("resize", () => {
   frameTime = 0;
   lastRenderedTimestamp = 0;
+
+  if (SITE.stars?.enabled !== false && SITE.stars?.regenerateOnResize !== false) {
+    window.clearTimeout(starResizeTimer);
+    starResizeTimer = window.setTimeout(() => {
+      generateRandomStarfield();
+    }, 180);
+  }
 });
 
 document.addEventListener("visibilitychange", () => {
@@ -211,6 +220,54 @@ function applySiteConfig() {
     "performance-no-moving-shadows",
     performanceEnabled && SITE.performance?.useMovingDropShadows === false
   );
+}
+
+/* ============================================================
+   RANDOM STARFIELD
+   ============================================================ */
+
+function generateRandomStarfield() {
+  if (!stars || SITE.stars?.enabled === false) {
+    if (stars) {
+      stars.style.backgroundImage = "none";
+    }
+    return;
+  }
+
+  const width = Math.max(1, window.innerWidth);
+  const height = Math.max(1, window.innerHeight);
+  const count = Math.max(0, Number(SITE.stars?.count ?? 260));
+  const minSize = Math.max(1, Number(SITE.stars?.minSizePx ?? 1));
+  const maxSize = Math.max(minSize, Number(SITE.stars?.maxSizePx ?? 2));
+  const minOpacity = clamp(Number(SITE.stars?.minOpacity ?? 0.22), 0, 1);
+  const maxOpacity = clamp(Number(SITE.stars?.maxOpacity ?? 0.92), minOpacity, 1);
+
+  const rects = [];
+
+  for (let i = 0; i < count; i += 1) {
+    const size = randomRange(minSize, maxSize);
+    const x = randomRange(0, Math.max(0, width - size));
+    const y = randomRange(0, Math.max(0, height - size));
+    const opacity = randomRange(minOpacity, maxOpacity);
+
+    rects.push(
+      `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${size.toFixed(1)}" height="${size.toFixed(1)}" fill="white" fill-opacity="${opacity.toFixed(3)}"/>`
+    );
+  }
+
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">` +
+    rects.join("") +
+    `</svg>`;
+
+  stars.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+  stars.style.backgroundSize = `${width}px ${height}px`;
+  stars.style.backgroundRepeat = "no-repeat";
+  stars.style.backgroundPosition = "center center";
+}
+
+function randomRange(min, max) {
+  return min + Math.random() * (max - min);
 }
 
 /* ============================================================
