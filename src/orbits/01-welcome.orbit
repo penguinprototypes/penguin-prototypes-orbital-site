@@ -1,6 +1,6 @@
 # A simple planet with one moon and clickable information panels.
 
-planet: /images/campfire.png
+planet: /images/welcome.gif
 title: Welcome!
 nav-name: Welcome!
 text: Welcome to the Penguin Prototypes Homepage!
