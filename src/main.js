@@ -1,5 +1,6 @@
 import "./style.css";
 import { parseOrbitFile } from "./orbit-parser.js";
+import { parseSystemJsonFile } from "./system-json-parser.js";
 import { SITE } from "./site-config.js";
 
 /*
@@ -20,9 +21,24 @@ const rawOrbitFiles = import.meta.glob("./orbits/*.orbit", {
   eager: true
 });
 
+const rawSystemFiles = import.meta.glob("./systems/*.system.json", {
+  query: "?raw",
+  import: "default",
+  eager: true
+});
+
 const orbitDefinitions = Object.entries(rawOrbitFiles)
   .map(([path, rawText]) => parseOrbitFile(rawText, path))
   .sort((a, b) => a.sourceName.localeCompare(b.sourceName));
+
+const systemDefinitions = Object.entries(rawSystemFiles)
+  .map(([path, rawText]) => parseSystemJsonFile(rawText, path))
+  .sort((a, b) => a.sourceName.localeCompare(b.sourceName));
+
+const rootDefinitions = [
+  ...orbitDefinitions.map(convertOrbitDefinitionToTree),
+  ...systemDefinitions
+].sort((a, b) => a.sourceName.localeCompare(b.sourceName));
 
 const scene = document.querySelector("#scene");
 const bodyLayer = document.querySelector("#body-layer");
@@ -113,7 +129,7 @@ if (SITE.interaction?.dragPanEnabled) {
 }
 
 const centerBody = createCenterBody();
-createOrbitalAnchors(orbitDefinitions);
+createBodyTrees(rootDefinitions);
 finalizeNavigator();
 startIntroAnimation();
 
@@ -274,73 +290,104 @@ function randomRange(min, max) {
    SCENE CREATION
    ============================================================ */
 
-function createOrbitalAnchors(definitions) {
-  return definitions.map((definition, index) => {
-    const anchor = createBody({
-      id: `anchor-${index}`,
-      image: definition.planetImage,
-      alt: definition.alt,
-      navName: definition.navName,
-      size: definition.size,
-      visible: Boolean(definition.planetImage),
-      radius: definition.orbitRadius,
-      speed: definition.orbitSpeed,
-      angle: definition.startAngle,
-      hostId: "SCENE_CENTER",
-      layerKind: "system",
-      kindLabel: "Planet",
-      info: definition.info
-    });
+function convertOrbitDefinitionToTree(definition) {
+  const rootBody = {
+    sourceName: definition.sourceName,
+    image: definition.planetImage,
+    alt: definition.alt,
+    navName: definition.navName,
+    size: definition.planetImage ? definition.size : 0,
+    orbitRadius: definition.orbitRadius,
+    orbitSpeed: definition.orbitSpeed,
+    startAngle: definition.startAngle,
+    orbitLine: definition.orbitLine,
+    kindLabel: definition.planetImage ? "Planet" : "Invisible anchor",
+    info: definition.info,
+    children: []
+  };
 
-    if (definition.orbitLine) {
-      const orbit = createSystemOrbit(index === 0);
-      systemOrbits.push({ ellipse: orbit, radius: definition.orbitRadius });
-    }
-
-    definition.rings.forEach((ring, ringIndex) => {
-      createChildRing({
-        hostBody: anchor,
-        ring,
-        ringIndex
+  definition.rings.forEach((ring, ringIndex) => {
+    ring.items.forEach((item, itemIndex) => {
+      rootBody.children.push({
+        sourceName: `${definition.sourceName}#ring-${ringIndex}-item-${itemIndex}`,
+        image: item.image,
+        alt: item.alt,
+        navName: item.navName,
+        size: ring.itemSize,
+        orbitRadius: ring.radius,
+        orbitSpeed: ring.speed,
+        startAngle:
+          ring.startAngle +
+          evenlySpacedAngle(itemIndex, ring.items.length),
+        orbitLine: ring.orbitLine,
+        kindLabel: ring.items.length === 1 ? "Moon" : "Orbiting object",
+        info: item.info,
+        children: []
       });
     });
+  });
 
-    return anchor;
+  return rootBody;
+}
+
+function createBodyTrees(definitions) {
+  return definitions.map((definition, index) => {
+    return createBodyTree({
+      definition,
+      hostId: "SCENE_CENTER",
+      depth: 0,
+      indexPath: `${index}`
+    });
   });
 }
 
-function createChildRing({ hostBody, ring, ringIndex }) {
-  if (ring.orbitLine) {
-    const localOrbit = createLocalOrbit();
-    localOrbits.push({
-      ellipse: localOrbit,
-      hostId: hostBody.id,
-      radius: ring.radius
-    });
+function createBodyTree({ definition, hostId, depth, indexPath }) {
+  const isRootBody = hostId === "SCENE_CENTER";
+  const body = createBody({
+    id: `tree-${indexPath}`,
+    image: definition.image,
+    alt: definition.alt,
+    navName: definition.navName,
+    size: definition.size,
+    visible: Boolean(definition.image),
+    radius: definition.orbitRadius,
+    speed: definition.orbitSpeed,
+    angle: definition.startAngle,
+    hostId,
+    layerKind: isRootBody ? "system" : "local",
+    kindLabel: definition.kindLabel || (isRootBody ? "System body" : "Orbital body"),
+    info: definition.info
+  });
+
+  if (definition.orbitLine) {
+    if (isRootBody) {
+      const orbit = createSystemOrbit(depth === 0);
+      systemOrbits.push({
+        ellipse: orbit,
+        radius: definition.orbitRadius
+      });
+    } else {
+      const localOrbit = createLocalOrbit();
+      localOrbits.push({
+        ellipse: localOrbit,
+        hostId,
+        radius: definition.orbitRadius
+      });
+    }
   }
 
-  ring.items.forEach((item, itemIndex) => {
-    const itemAngle =
-      ring.startAngle +
-      evenlySpacedAngle(itemIndex, ring.items.length);
-
-    createBody({
-      id: `${hostBody.id}-ring-${ringIndex}-item-${itemIndex}`,
-      image: item.image,
-      alt: item.alt,
-      navName: item.navName,
-      size: ring.itemSize,
-      visible: Boolean(item.image),
-      radius: ring.radius,
-      speed: ring.speed,
-      angle: itemAngle,
-      hostId: hostBody.id,
-      layerKind: "local",
-      kindLabel: ring.items.length === 1 ? "Moon" : "Orbiting object",
-      info: item.info
+  definition.children.forEach((child, childIndex) => {
+    createBodyTree({
+      definition: child,
+      hostId: body.id,
+      depth: depth + 1,
+      indexPath: `${indexPath}-${childIndex}`
     });
   });
+
+  return body;
 }
+
 
 function createCenterBody() {
   const centerInfo = convertSiteInfo(SITE.center?.info);
@@ -1200,22 +1247,31 @@ function calculateResponsiveScale(metrics) {
 function calculateMaximumLogicalExtent() {
   let maxExtent = (SITE.center?.size || 150) / 2;
 
-  orbitDefinitions.forEach(definition => {
-    const baseBodyHalfSize = definition.size / 2;
-    const largestChildRing = definition.rings.reduce((largest, ring) => {
-      const ringExtent = ring.radius + ring.itemSize / 2;
-      return Math.max(largest, ringExtent);
-    }, 0);
-
+  rootDefinitions.forEach(definition => {
     const definitionExtent =
       definition.orbitRadius +
-      Math.max(baseBodyHalfSize, largestChildRing);
+      calculateDefinitionVisualExtent(definition);
 
     maxExtent = Math.max(maxExtent, definitionExtent);
   });
 
   return maxExtent;
 }
+
+function calculateDefinitionVisualExtent(definition) {
+  const ownExtent = (definition.size || 0) / 2;
+
+  const childExtent = definition.children.reduce((largest, child) => {
+    const extent =
+      child.orbitRadius +
+      calculateDefinitionVisualExtent(child);
+
+    return Math.max(largest, extent);
+  }, 0);
+
+  return Math.max(ownExtent, childExtent);
+}
+
 
 function updateOrbitSvg(metrics) {
   orbitSvg.setAttribute("viewBox", `0 0 ${metrics.width} ${metrics.height}`);
