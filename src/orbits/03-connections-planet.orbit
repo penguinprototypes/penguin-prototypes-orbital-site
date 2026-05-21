@@ -1,7 +1,7 @@
 # A planet with a three-object orbital ring.
 # Each ring image may have its own title, text, and links.
 
-planet: /images/internet.png
+planet: /images/internet.ico
 title: Connections
 nav-name: Connections
 text: This is where you'll find Penguin Prototypes' connections.
@@ -18,21 +18,37 @@ ring-start-angle: 0.2
 ring-orbit-line: true
 ring-size: 18
 
-ring-image: /images/moon-blue.svg
-ring-title: blue placeholder
-ring-nav-name: blue placeholder
-ring-text: blue placeholder
-ring-link: blue placeholder | https://penguinprototypes.com
-ring-alt: blue placeholder
+ring-image: /images/mail.ico
+ring-title: Email
+ring-nav-name: Email
+ring-text: The official Penguin Prototypes Email. (Not Implemented)
+ring-link: Link | https://penguinprototypes.com
+ring-alt: Windows 98 Mail Icon
 
-ring-image: /images/moon-rose.svg
-ring-title: rede placeholder
-ring-nav-name: red placeholder
-ring-text: red placeholder
-ring-alt: red placeholder
+ring-image: /images/reddit.png
+ring-title: Reddit
+ring-nav-name: Reddit
+ring-text: The official Penguin Prototypes Reddit. (Not Implemented)
+ring-link: Link | https://penguinprototypes.com
+ring-alt: Reddit Logo
 
-ring-image: /images/moon-white.svg
-ring-title: white placeholder
-ring-nav-name: white placeholder
-ring-text: white placeholder
-ring-alt: white placeholder
+ring-image: /images/discord.png
+ring-title: Discord
+ring-nav-name: Discord
+ring-text: The official Penguin Prototypes Discord. (Not Implemented)
+ring-link: Link | https://penguinprototypes.com
+ring-alt: Discord Logo
+
+ring-image: /images/youtube.png
+ring-title: Youtube
+ring-nav-name: Youtube
+ring-text: The official Penguin Prototypes Youtube. (Not Implemented)
+ring-link: Link | https://penguinprototypes.com
+ring-alt: Youtube Logo
+
+ring-image: /images/bluesky.png
+ring-title: Bluesky
+ring-nav-name: Bluesky
+ring-text: The official Penguin Prototypes Bluesky. (Not Implemented)
+ring-link: Link | https://penguinprototypes.com
+ring-alt: Bluesky Logo
