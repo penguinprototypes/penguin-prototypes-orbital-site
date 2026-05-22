@@ -1,6 +1,6 @@
 {
-  "title": "Outer Wilds Solar System",
-  "navName": "Outer Wilds",
+  "title": "Mysterious Star System",
+  "navName": "Mysterious Star System",
   "singleNavigator": true,
   "image": "/images/ow/sun.svg",
   "alt": "Outer Wilds sun icon",
@@ -193,7 +193,7 @@
           "image": "/images/ow/orbital-probe-cannon.svg",
           "alt": "Orbital Probe Cannon icon",
           "size": 4.5,
-          "orbitRadius": 12,
+          "orbitRadius": 10,
           "orbitSpeed": 0.0011,
           "orbitEccentricity": 0,
           "orbitRotation": 0,
