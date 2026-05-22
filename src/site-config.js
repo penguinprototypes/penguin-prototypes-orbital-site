@@ -91,7 +91,7 @@ export const SITE = {
 
     // Manual zoom controls.
     manualZoomMin: 0.72,
-    manualZoomMax: 3,
+    manualZoomMax: 4,
     manualZoomStep: 0.16,
 
     // Click-and-drag panning.
