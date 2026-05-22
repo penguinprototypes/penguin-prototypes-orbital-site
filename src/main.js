@@ -300,6 +300,9 @@ function convertOrbitDefinitionToTree(definition) {
     orbitRadius: definition.orbitRadius,
     orbitSpeed: definition.orbitSpeed,
     startAngle: definition.startAngle,
+    orbitEccentricity: definition.orbitEccentricity ?? 0,
+    orbitRotation: definition.orbitRotation ?? 0,
+    orbitPeriod: definition.orbitPeriod ?? null,
     orbitLine: definition.orbitLine,
     kindLabel: definition.planetImage ? "Planet" : "Invisible anchor",
     info: definition.info,
@@ -319,6 +322,9 @@ function convertOrbitDefinitionToTree(definition) {
         startAngle:
           ring.startAngle +
           evenlySpacedAngle(itemIndex, ring.items.length),
+        orbitEccentricity: ring.eccentricity ?? 0,
+        orbitRotation: ring.orbitRotation ?? 0,
+        orbitPeriod: ring.period ?? null,
         orbitLine: ring.orbitLine,
         kindLabel: ring.items.length === 1 ? "Moon" : "Orbiting object",
         info: item.info,
@@ -353,6 +359,9 @@ function createBodyTree({ definition, hostId, depth, indexPath }) {
     radius: definition.orbitRadius,
     speed: definition.orbitSpeed,
     angle: definition.startAngle,
+    eccentricity: definition.orbitEccentricity ?? 0,
+    orbitRotation: definition.orbitRotation ?? 0,
+    period: definition.orbitPeriod ?? null,
     hostId,
     layerKind: isRootBody ? "system" : "local",
     kindLabel: definition.kindLabel || (isRootBody ? "System body" : "Orbital body"),
@@ -364,14 +373,18 @@ function createBodyTree({ definition, hostId, depth, indexPath }) {
       const orbit = createSystemOrbit(depth === 0);
       systemOrbits.push({
         ellipse: orbit,
-        radius: definition.orbitRadius
+        radius: definition.orbitRadius,
+        eccentricity: definition.orbitEccentricity ?? 0,
+        orbitRotation: definition.orbitRotation ?? 0
       });
     } else {
       const localOrbit = createLocalOrbit();
       localOrbits.push({
         ellipse: localOrbit,
         hostId,
-        radius: definition.orbitRadius
+        radius: definition.orbitRadius,
+        eccentricity: definition.orbitEccentricity ?? 0,
+        orbitRotation: definition.orbitRotation ?? 0
       });
     }
   }
@@ -402,6 +415,9 @@ function createCenterBody() {
     radius: 0,
     speed: 0,
     angle: 0,
+    eccentricity: 0,
+    orbitRotation: 0,
+    period: null,
     hostId: "SCENE_CENTER",
     layerKind: "center",
     kindLabel: "Center",
@@ -425,6 +441,9 @@ function createBody({
   radius,
   speed,
   angle,
+  eccentricity = 0,
+  orbitRotation = 0,
+  period = null,
   hostId,
   layerKind,
   kindLabel,
@@ -447,6 +466,10 @@ function createBody({
     radius,
     speed,
     angle,
+    eccentricity,
+    orbitRotation,
+    period,
+    meanAnomaly: angle,
     hostId,
     layerKind,
     kindLabel,
@@ -785,11 +808,16 @@ function updateCenterBody(metrics, responsiveScale) {
 }
 
 function updateSystemOrbits(metrics, responsiveScale) {
-  systemOrbits.forEach(({ ellipse, radius }) => {
-    ellipse.setAttribute("cx", String(metrics.cx));
-    ellipse.setAttribute("cy", String(metrics.cy));
-    ellipse.setAttribute("rx", String(radius * responsiveScale));
-    ellipse.setAttribute("ry", String(radius * SITE.scene.perspective * responsiveScale));
+  systemOrbits.forEach(({ ellipse, radius, eccentricity, orbitRotation }) => {
+    updateOrbitEllipse({
+      ellipse,
+      cx: metrics.cx,
+      cy: metrics.cy,
+      radius: radius * responsiveScale,
+      eccentricity,
+      orbitRotation,
+      perspective: SITE.scene.perspective
+    });
   });
 }
 
@@ -802,16 +830,22 @@ function updateBodies(timestamp, metrics, responsiveScale) {
     }
 
     if (!reducedMotion) {
-      body.angle += body.speed * deltaMs;
+      advanceOrbit(body, deltaMs);
     }
 
     const host = getHostPosition(body.hostId, metrics);
     const scaledRadius = body.radius * responsiveScale;
+    const orbitPosition = getOrbitPosition({
+      radius: scaledRadius,
+      meanAnomaly: body.meanAnomaly,
+      eccentricity: body.eccentricity,
+      orbitRotationDegrees: body.orbitRotation
+    });
 
-    const x = host.x + Math.cos(body.angle) * scaledRadius;
-    const y = host.y + Math.sin(body.angle) * scaledRadius * SITE.scene.perspective;
+    const x = host.x + orbitPosition.x;
+    const y = host.y + orbitPosition.y * SITE.scene.perspective;
 
-    const frontness = (Math.sin(body.angle) + 1) / 2;
+    const frontness = clamp((orbitPosition.unrotatedY / Math.max(1, scaledRadius) + 1) / 2, 0, 1);
     const depthScale =
       1 - SITE.scene.depthScale / 2 +
       frontness * SITE.scene.depthScale;
@@ -837,17 +871,22 @@ function updateBodies(timestamp, metrics, responsiveScale) {
 }
 
 function updateLocalOrbits(responsiveScale) {
-  localOrbits.forEach(({ ellipse, hostId, radius }) => {
+  localOrbits.forEach(({ ellipse, hostId, radius, eccentricity, orbitRotation }) => {
     const host = bodyById.get(hostId);
 
     if (!host) {
       return;
     }
 
-    ellipse.setAttribute("cx", String(host.x));
-    ellipse.setAttribute("cy", String(host.y));
-    ellipse.setAttribute("rx", String(radius * responsiveScale));
-    ellipse.setAttribute("ry", String(radius * SITE.scene.perspective * responsiveScale));
+    updateOrbitEllipse({
+      ellipse,
+      cx: host.x,
+      cy: host.y,
+      radius: radius * responsiveScale,
+      eccentricity,
+      orbitRotation,
+      perspective: SITE.scene.perspective
+    });
   });
 }
 
@@ -1173,6 +1212,138 @@ function adjustManualZoom(delta) {
 }
 
 /* ============================================================
+   ORBIT MATH
+   ============================================================ */
+
+function advanceOrbit(body, deltaMs) {
+  if (body.period && body.period > 0) {
+    const direction = body.speed < 0 ? -1 : 1;
+    body.meanAnomaly += direction * (deltaMs / body.period) * Math.PI * 2;
+  } else {
+    body.meanAnomaly += body.speed * deltaMs;
+  }
+
+  body.angle = body.meanAnomaly;
+}
+
+function getOrbitPosition({
+  radius,
+  meanAnomaly,
+  eccentricity,
+  orbitRotationDegrees
+}) {
+  const e = clamp(Math.abs(eccentricity || 0), 0, 0.92);
+
+  if (e === 0) {
+    const localX = Math.cos(meanAnomaly) * radius;
+    const localY = Math.sin(meanAnomaly) * radius;
+    const rotated = rotatePoint({
+      x: localX,
+      y: localY,
+      degrees: orbitRotationDegrees
+    });
+
+    return {
+      x: rotated.x,
+      y: rotated.y,
+      unrotatedY: localY
+    };
+  }
+
+  const eccentricAnomaly = solveKepler(meanAnomaly, e);
+  const semiMajorAxis = radius;
+  const semiMinorAxis = semiMajorAxis * Math.sqrt(1 - e * e);
+
+  // The parent body is at one focus of the ellipse.
+  const localX = semiMajorAxis * (Math.cos(eccentricAnomaly) - e);
+  const localY = semiMinorAxis * Math.sin(eccentricAnomaly);
+
+  const rotated = rotatePoint({
+    x: localX,
+    y: localY,
+    degrees: orbitRotationDegrees
+  });
+
+  return {
+    x: rotated.x,
+    y: rotated.y,
+    unrotatedY: localY
+  };
+}
+
+function solveKepler(meanAnomaly, eccentricity) {
+  const normalizedMeanAnomaly = normalizeRadians(meanAnomaly);
+  let eccentricAnomaly = normalizedMeanAnomaly;
+
+  for (let i = 0; i < 6; i += 1) {
+    eccentricAnomaly -=
+      (eccentricAnomaly - eccentricity * Math.sin(eccentricAnomaly) - normalizedMeanAnomaly) /
+      (1 - eccentricity * Math.cos(eccentricAnomaly));
+  }
+
+  return eccentricAnomaly;
+}
+
+function updateOrbitEllipse({
+  ellipse,
+  cx,
+  cy,
+  radius,
+  eccentricity,
+  orbitRotation,
+  perspective
+}) {
+  const e = clamp(Math.abs(eccentricity || 0), 0, 0.92);
+  const semiMajorAxis = radius;
+  const semiMinorAxis = radius * Math.sqrt(1 - e * e);
+
+  // The parent body is at one focus, so the visible ellipse center is offset.
+  const focusOffset = semiMajorAxis * e;
+  const centerOffset = rotatePoint({
+    x: -focusOffset,
+    y: 0,
+    degrees: orbitRotation || 0
+  });
+
+  const ellipseCx = cx + centerOffset.x;
+  const ellipseCy = cy + centerOffset.y * perspective;
+
+  ellipse.setAttribute("cx", String(ellipseCx));
+  ellipse.setAttribute("cy", String(ellipseCy));
+  ellipse.setAttribute("rx", String(semiMajorAxis));
+  ellipse.setAttribute("ry", String(semiMinorAxis * perspective));
+  ellipse.setAttribute(
+    "transform",
+    `rotate(${orbitRotation || 0} ${ellipseCx} ${ellipseCy})`
+  );
+}
+
+function getMaximumOrbitDistance(radius, eccentricity) {
+  const e = clamp(Math.abs(eccentricity || 0), 0, 0.92);
+  return radius * (1 + e);
+}
+
+function rotatePoint({ x, y, degrees }) {
+  const radians = degreesToRadians(degrees || 0);
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+
+  return {
+    x: x * cos - y * sin,
+    y: x * sin + y * cos
+  };
+}
+
+function degreesToRadians(degrees) {
+  return (degrees * Math.PI) / 180;
+}
+
+function normalizeRadians(radians) {
+  const fullTurn = Math.PI * 2;
+  return ((radians % fullTurn) + fullTurn) % fullTurn;
+}
+
+/* ============================================================
    POSITIONING HELPERS
    ============================================================ */
 
@@ -1249,7 +1420,7 @@ function calculateMaximumLogicalExtent() {
 
   rootDefinitions.forEach(definition => {
     const definitionExtent =
-      definition.orbitRadius +
+      getMaximumOrbitDistance(definition.orbitRadius, definition.orbitEccentricity) +
       calculateDefinitionVisualExtent(definition);
 
     maxExtent = Math.max(maxExtent, definitionExtent);
@@ -1263,7 +1434,7 @@ function calculateDefinitionVisualExtent(definition) {
 
   const childExtent = definition.children.reduce((largest, child) => {
     const extent =
-      child.orbitRadius +
+      getMaximumOrbitDistance(child.orbitRadius, child.orbitEccentricity) +
       calculateDefinitionVisualExtent(child);
 
     return Math.max(largest, extent);
