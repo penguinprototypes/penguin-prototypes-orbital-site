@@ -5,7 +5,7 @@
   "image": "/images/ow/sun.svg",
   "alt": "Outer Wilds sun icon",
   "size": 12.0,
-  "orbitRadius": 800,
+  "orbitRadius": 1000,
   "orbitSpeed": 1.8e-05,
   "orbitEccentricity": 0,
   "orbitRotation": 0,
