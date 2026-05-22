@@ -203,7 +203,7 @@ body.intro-fade-running .intro-fade {
 
 .system-orbit {
   stroke: var(--orbit);
-  stroke-width: 1.6;
+  stroke-width: 1.2;
 }
 
 .system-orbit.primary {
@@ -212,7 +212,7 @@ body.intro-fade-running .intro-fade {
 
 .local-orbit {
   stroke: var(--local-orbit);
-  stroke-width: 1.4;
+  stroke-width: 1;
 }
 
 .body {
@@ -628,4 +628,26 @@ body.performance-no-moving-shadows .body.selectable:hover .body-visual,
 body.performance-no-moving-shadows .body.selectable:focus-visible .body-visual,
 body.performance-no-moving-shadows .body.selected .body-visual {
   filter: none;
+}
+
+
+/* ============================================================
+   SHARPER BODY IMAGES
+   ============================================================ */
+
+/*
+  SVGs inside <img> elements can look soft while being transformed,
+  especially when a CSS filter/drop-shadow is applied. Keep the images
+  unfiltered and give the browser a stable composited layer.
+*/
+.body-image {
+  filter: none;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.body-visual {
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }

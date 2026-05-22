@@ -548,6 +548,7 @@ function createBodyNode({ image, alt, bodyId, selectable, hitRadius = null }) {
   const node = document.createElement("div");
   node.className = `body${selectable ? " selectable" : ""}`;
   node.dataset.bodyId = bodyId;
+  node.style.pointerEvents = selectable ? "auto" : "none";
 
   if (selectable) {
     node.tabIndex = 0;
@@ -567,12 +568,14 @@ function createBodyNode({ image, alt, bodyId, selectable, hitRadius = null }) {
     hitArea.style.transform = "translate(-50%, -50%)";
     hitArea.style.background = "transparent";
     hitArea.style.pointerEvents = "auto";
-    hitArea.style.zIndex = "-1";
+    hitArea.style.zIndex = "0";
     node.appendChild(hitArea);
   }
 
   const visual = document.createElement("div");
   visual.className = "body-visual";
+  visual.style.position = "relative";
+  visual.style.zIndex = "1";
 
   if (image) {
     const img = document.createElement("img");
