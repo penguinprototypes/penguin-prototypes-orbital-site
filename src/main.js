@@ -380,8 +380,10 @@ function createBodyTree({
     layerKind: isRootBody ? "system" : "local",
     kindLabel: definition.kindLabel || (isRootBody ? "System body" : "Orbital body"),
     info: definition.info,
+    selectableOverride: definition.selectable,
     navigable,
-    clickFocusId
+    clickFocusId,
+    hitRadius: definition.hitRadius ?? null
   });
 
   if (definition.orbitLine) {
@@ -468,7 +470,8 @@ function createBody({
   info,
   selectableOverride = null,
   navigable = true,
-  clickFocusId = null
+  clickFocusId = null,
+  hitRadius = null
 }) {
   const normalizedInfo = normalizeInfo(info);
   const hasInfo = hasDisplayableInfo(normalizedInfo);
@@ -498,9 +501,10 @@ function createBody({
     selectable,
     navigable,
     clickFocusId,
+    hitRadius,
 
     node: visible
-      ? createBodyNode({ image, alt, bodyId: id, selectable })
+      ? createBodyNode({ image, alt, bodyId: id, selectable, hitRadius })
       : null,
 
     x: 0,
@@ -540,7 +544,7 @@ function createBody({
   return body;
 }
 
-function createBodyNode({ image, alt, bodyId, selectable }) {
+function createBodyNode({ image, alt, bodyId, selectable, hitRadius = null }) {
   const node = document.createElement("div");
   node.className = `body${selectable ? " selectable" : ""}`;
   node.dataset.bodyId = bodyId;
@@ -549,6 +553,22 @@ function createBodyNode({ image, alt, bodyId, selectable }) {
     node.tabIndex = 0;
     node.setAttribute("role", "button");
     node.setAttribute("aria-label", alt ? `Focus ${alt}` : "Focus orbital object");
+  }
+
+  if (selectable && hitRadius && hitRadius > 0) {
+    const hitArea = document.createElement("div");
+    hitArea.className = "body-hit-area";
+    hitArea.style.position = "absolute";
+    hitArea.style.left = "50%";
+    hitArea.style.top = "50%";
+    hitArea.style.width = `${hitRadius * 2}px`;
+    hitArea.style.height = `${hitRadius * 2}px`;
+    hitArea.style.borderRadius = "9999px";
+    hitArea.style.transform = "translate(-50%, -50%)";
+    hitArea.style.background = "transparent";
+    hitArea.style.pointerEvents = "auto";
+    hitArea.style.zIndex = "-1";
+    node.appendChild(hitArea);
   }
 
   const visual = document.createElement("div");

@@ -203,7 +203,7 @@ body.intro-fade-running .intro-fade {
 
 .system-orbit {
   stroke: var(--orbit);
-  stroke-width: 1.2;
+  stroke-width: 1.6;
 }
 
 .system-orbit.primary {
@@ -212,7 +212,7 @@ body.intro-fade-running .intro-fade {
 
 .local-orbit {
   stroke: var(--local-orbit);
-  stroke-width: 1;
+  stroke-width: 1.4;
 }
 
 .body {

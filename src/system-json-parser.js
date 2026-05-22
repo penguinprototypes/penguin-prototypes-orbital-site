@@ -68,6 +68,9 @@ function normalizeBody(body, sourceName, depth) {
     alt: typeof safeBody.alt === "string" ? safeBody.alt : "",
     navName: typeof safeBody.navName === "string" ? safeBody.navName : "",
     size: numberOrDefault(safeBody.size, DEFAULTS.size),
+    hitRadius: safeBody.hitRadius === undefined || safeBody.hitRadius === null
+      ? null
+      : numberOrDefault(safeBody.hitRadius, null),
     orbitRadius: numberOrDefault(safeBody.orbitRadius, DEFAULTS.orbitRadius),
     orbitSpeed: numberOrDefault(safeBody.orbitSpeed, DEFAULTS.orbitSpeed),
     startAngle: numberOrDefault(safeBody.startAngle, DEFAULTS.startAngle),
@@ -77,6 +80,9 @@ function normalizeBody(body, sourceName, depth) {
       ? null
       : numberOrDefault(safeBody.orbitPeriod, null),
     orbitLine: booleanOrDefault(safeBody.orbitLine, DEFAULTS.orbitLine),
+    selectable: safeBody.selectable === undefined
+      ? undefined
+      : booleanOrDefault(safeBody.selectable, true),
     singleNavigator: booleanOrDefault(safeBody.singleNavigator, false),
     navigable: safeBody.navigable === undefined
       ? undefined
