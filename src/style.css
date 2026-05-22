@@ -651,3 +651,24 @@ body.performance-no-moving-shadows .body.selected .body-visual {
   backface-visibility: hidden;
   transform: translateZ(0);
 }
+
+
+/* ============================================================
+   LAYOUT-LEVEL ZOOM SHARPNESS
+   ============================================================ */
+
+/*
+  The camera zoom is now applied by recalculating object positions,
+  image sizes, and orbit radii in JavaScript. The world layers should
+  not be CSS-scaled, because scaling the whole layer can rasterize SVGs
+  and make them look soft when zoomed in.
+*/
+.world-layer {
+  transform: none !important;
+  will-change: auto;
+}
+
+.body-layer,
+.orbit-svg {
+  transform: none !important;
+}

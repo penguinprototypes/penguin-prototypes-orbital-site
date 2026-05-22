@@ -516,7 +516,9 @@ function createBody({
     renderedVisualSize: null,
     renderedZIndex: null,
     renderedOpacity: null,
-    renderedTransform: null
+    renderedTransform: null,
+    renderedHitSize: null,
+    renderState: null
   };
 
   bodies.push(body);
@@ -832,10 +834,11 @@ function animate(timestamp) {
   updatePointerParallax();
   updateOrbitSvg(metrics);
   updateCenterBody(metrics, responsiveScale);
-  updateSystemOrbits(metrics, responsiveScale);
   updateBodies(timestamp, metrics, responsiveScale);
-  updateLocalOrbits(responsiveScale);
   updateCamera(metrics);
+  updateSystemOrbits(metrics, responsiveScale);
+  updateLocalOrbits(responsiveScale);
+  renderBodies();
   applyWorldTransform();
   updateInfoPanelPosition(metrics);
 
@@ -849,14 +852,14 @@ function updateCenterBody(metrics, responsiveScale) {
   centerBody.frontness = 0.5;
   centerBody.responsiveScale = responsiveScale;
 
-  placeVisibleBody(centerBody, {
+  centerBody.renderState = {
     x: metrics.cx,
     y: metrics.cy,
     depthScale: 1,
     responsiveScale,
     zIndex: 500,
     opacity: 1
-  });
+  };
 }
 
 function updateSystemOrbits(metrics, responsiveScale) {
@@ -911,14 +914,14 @@ function updateBodies(timestamp, metrics, responsiveScale) {
     body.responsiveScale = responsiveScale;
     body.zIndex = zIndex;
 
-    placeVisibleBody(body, {
+    body.renderState = {
       x,
       y,
       depthScale,
       responsiveScale,
       zIndex,
       opacity: 0.84 + frontness * 0.16
-    });
+    };
   });
 }
 
@@ -942,6 +945,16 @@ function updateLocalOrbits(responsiveScale) {
   });
 }
 
+function renderBodies() {
+  bodies.forEach(body => {
+    if (!body.renderState) {
+      return;
+    }
+
+    placeVisibleBody(body, body.renderState);
+  });
+}
+
 function placeVisibleBody(body, {
   x,
   y,
@@ -954,9 +967,10 @@ function placeVisibleBody(body, {
     return;
   }
 
-  const visualSize = body.baseSize * responsiveScale;
+  const screenPosition = worldToScreen(x, y);
+  const visualSize = body.baseSize * responsiveScale * camera.scale;
   const transform =
-    `translate(${x - visualSize / 2}px, ${y - visualSize / 2}px) scale(${depthScale})`;
+    `translate(${screenPosition.x - visualSize / 2}px, ${screenPosition.y - visualSize / 2}px) scale(${depthScale})`;
   const opacityString = String(opacity);
   const zIndexString = String(zIndex);
 
@@ -964,6 +978,18 @@ function placeVisibleBody(body, {
     body.node.style.width = `${visualSize}px`;
     body.node.style.height = `${visualSize}px`;
     body.renderedVisualSize = visualSize;
+  }
+
+  if (body.hitRadius) {
+    const hitSize = body.hitRadius * responsiveScale * camera.scale * 2;
+    if (body.renderedHitSize !== hitSize) {
+      const hitArea = body.node.querySelector(".body-hit-area");
+      if (hitArea) {
+        hitArea.style.width = `${hitSize}px`;
+        hitArea.style.height = `${hitSize}px`;
+      }
+      body.renderedHitSize = hitSize;
+    }
   }
 
   if (body.renderedZIndex !== zIndexString) {
@@ -1014,9 +1040,11 @@ function updateCamera(metrics) {
 }
 
 function applyWorldTransform() {
-  scene.style.setProperty("--world-x", `${camera.renderedX}px`);
-  scene.style.setProperty("--world-y", `${camera.renderedY}px`);
-  scene.style.setProperty("--world-scale", String(camera.scale));
+  // Camera zoom is applied to individual object positions/sizes instead of
+  // scaling the entire world layer. This keeps SVG images sharp when zoomed.
+  scene.style.setProperty("--world-x", "0px");
+  scene.style.setProperty("--world-y", "0px");
+  scene.style.setProperty("--world-scale", "1");
 
   stars.style.setProperty("--stars-x", `${pointer.parallaxX * SITE.interaction.starParallaxMultiplier}px`);
   stars.style.setProperty("--stars-y", `${pointer.parallaxY * SITE.interaction.starParallaxMultiplier}px`);
@@ -1357,16 +1385,19 @@ function updateOrbitEllipse({
     degrees: orbitRotation || 0
   });
 
-  const ellipseCx = cx + centerOffset.x;
-  const ellipseCy = cy + centerOffset.y * perspective;
+  const worldEllipseCx = cx + centerOffset.x;
+  const worldEllipseCy = cy + centerOffset.y * perspective;
+  const screenCenter = worldToScreen(worldEllipseCx, worldEllipseCy);
+  const screenSemiMajorAxis = semiMajorAxis * camera.scale;
+  const screenSemiMinorAxis = semiMinorAxis * perspective * camera.scale;
 
-  ellipse.setAttribute("cx", String(ellipseCx));
-  ellipse.setAttribute("cy", String(ellipseCy));
-  ellipse.setAttribute("rx", String(semiMajorAxis));
-  ellipse.setAttribute("ry", String(semiMinorAxis * perspective));
+  ellipse.setAttribute("cx", String(screenCenter.x));
+  ellipse.setAttribute("cy", String(screenCenter.y));
+  ellipse.setAttribute("rx", String(screenSemiMajorAxis));
+  ellipse.setAttribute("ry", String(screenSemiMinorAxis));
   ellipse.setAttribute(
     "transform",
-    `rotate(${orbitRotation || 0} ${ellipseCx} ${ellipseCy})`
+    `rotate(${orbitRotation || 0} ${screenCenter.x} ${screenCenter.y})`
   );
 }
 

@@ -254,5 +254,5 @@
   ],
   "selectable": true,
   "navigable": true,
-  "hitRadius": 90.0
+  "hitRadius": 60.0
 }
