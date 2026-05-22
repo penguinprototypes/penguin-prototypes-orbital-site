@@ -749,6 +749,12 @@ function selectBody(bodyId) {
     return;
   }
 
+  // A previous drag pan should not offset a newly selected object.
+  // Without this, clicking while zoomed/panned can make the camera appear
+  // to move away from the object instead of focusing it.
+  camera.panX = 0;
+  camera.panY = 0;
+
   const infoBodyId = clickedBody.clickFocusId || bodyId;
   const infoBody = bodyById.get(infoBodyId) || clickedBody;
 
@@ -969,8 +975,11 @@ function placeVisibleBody(body, {
 
   const screenPosition = worldToScreen(x, y);
   const visualSize = body.baseSize * responsiveScale * camera.scale;
+  const translateX = roundForTransform(screenPosition.x - visualSize / 2);
+  const translateY = roundForTransform(screenPosition.y - visualSize / 2);
+  const roundedDepthScale = roundForTransform(depthScale);
   const transform =
-    `translate(${screenPosition.x - visualSize / 2}px, ${screenPosition.y - visualSize / 2}px) scale(${depthScale})`;
+    `translate(${translateX}px, ${translateY}px) scale(${roundedDepthScale})`;
   const opacityString = String(opacity);
   const zIndexString = String(zIndex);
 
@@ -1030,7 +1039,14 @@ function updateCamera(metrics) {
     camera.targetY = metrics.cy - metrics.cy * finalTargetScale + camera.panY;
   }
 
-  const lerpAmount = reducedMotion ? 1 : SITE.interaction.cameraLerp;
+  const baseLerp = SITE.interaction.cameraLerp;
+  const selectedTrackingLerp = SITE.interaction.selectedCameraLerp ?? 0.34;
+  const lerpAmount = reducedMotion
+    ? 1
+    : selectedBody
+      ? Math.max(baseLerp, selectedTrackingLerp)
+      : baseLerp;
+
   camera.scale = lerp(camera.scale, camera.targetScale, lerpAmount);
   camera.x = lerp(camera.x, camera.targetX, lerpAmount);
   camera.y = lerp(camera.y, camera.targetY, lerpAmount);
@@ -1613,6 +1629,10 @@ function isExternalHttpLink(href) {
 /* ============================================================
    TINY UTILITIES
    ============================================================ */
+
+function roundForTransform(value) {
+  return Math.round(value * 1000) / 1000;
+}
 
 function lerp(start, end, amount) {
   return start + (end - start) * amount;
