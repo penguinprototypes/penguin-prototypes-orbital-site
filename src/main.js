@@ -724,21 +724,23 @@ function selectBody(bodyId) {
     return;
   }
 
-  const focusBodyId = clickedBody.clickFocusId || bodyId;
-  const body = bodyById.get(focusBodyId) || clickedBody;
+  const infoBodyId = clickedBody.clickFocusId || bodyId;
+  const infoBody = bodyById.get(infoBodyId) || clickedBody;
 
-  selectedBodyId = body.id;
+  // The camera and textbox anchor follow the body that was actually clicked,
+  // while the information content and navigator entry can point to a shared parent.
+  selectedBodyId = clickedBody.id;
 
-  const navIndex = navigationItems.findIndex(item => item.type === "body" && item.bodyId === body.id);
+  const navIndex = navigationItems.findIndex(item => item.type === "body" && item.bodyId === infoBody.id);
   if (navIndex >= 0) {
     selectedIndex = navIndex;
   }
 
   bodies.forEach(candidate => {
-    candidate.node?.classList.toggle("selected", candidate.id === body.id);
+    candidate.node?.classList.toggle("selected", candidate.id === clickedBody.id);
   });
 
-  populateInfoPanel(body);
+  populateInfoPanel(infoBody);
   infoPanel.hidden = false;
 
   requestAnimationFrame(() => {
