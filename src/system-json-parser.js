@@ -71,7 +71,16 @@ function normalizeBody(body, sourceName, depth) {
     orbitRadius: numberOrDefault(safeBody.orbitRadius, DEFAULTS.orbitRadius),
     orbitSpeed: numberOrDefault(safeBody.orbitSpeed, DEFAULTS.orbitSpeed),
     startAngle: numberOrDefault(safeBody.startAngle, DEFAULTS.startAngle),
+    orbitEccentricity: numberOrDefault(safeBody.orbitEccentricity, 0),
+    orbitRotation: numberOrDefault(safeBody.orbitRotation, 0),
+    orbitPeriod: safeBody.orbitPeriod === undefined || safeBody.orbitPeriod === null
+      ? null
+      : numberOrDefault(safeBody.orbitPeriod, null),
     orbitLine: booleanOrDefault(safeBody.orbitLine, DEFAULTS.orbitLine),
+    singleNavigator: booleanOrDefault(safeBody.singleNavigator, false),
+    navigable: safeBody.navigable === undefined
+      ? undefined
+      : booleanOrDefault(safeBody.navigable, true),
     kindLabel: typeof safeBody.kindLabel === "string"
       ? safeBody.kindLabel
       : depth === 0

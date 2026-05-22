@@ -347,8 +347,22 @@ function createBodyTrees(definitions) {
   });
 }
 
-function createBodyTree({ definition, hostId, depth, indexPath }) {
+function createBodyTree({
+  definition,
+  hostId,
+  depth,
+  indexPath,
+  singleNavigator = false,
+  navigatorRootId = null
+}) {
   const isRootBody = hostId === "SCENE_CENTER";
+  const currentSingleNavigator = singleNavigator || definition.singleNavigator === true;
+  const navigable = definition.navigable ?? !(currentSingleNavigator && depth > 0);
+  const clickFocusId =
+    currentSingleNavigator && depth > 0 && navigatorRootId
+      ? navigatorRootId
+      : null;
+
   const body = createBody({
     id: `tree-${indexPath}`,
     image: definition.image,
@@ -365,7 +379,9 @@ function createBodyTree({ definition, hostId, depth, indexPath }) {
     hostId,
     layerKind: isRootBody ? "system" : "local",
     kindLabel: definition.kindLabel || (isRootBody ? "System body" : "Orbital body"),
-    info: definition.info
+    info: definition.info,
+    navigable,
+    clickFocusId
   });
 
   if (definition.orbitLine) {
@@ -394,7 +410,9 @@ function createBodyTree({ definition, hostId, depth, indexPath }) {
       definition: child,
       hostId: body.id,
       depth: depth + 1,
-      indexPath: `${indexPath}-${childIndex}`
+      indexPath: `${indexPath}-${childIndex}`,
+      singleNavigator: currentSingleNavigator,
+      navigatorRootId: navigatorRootId || body.id
     });
   });
 
@@ -448,7 +466,9 @@ function createBody({
   layerKind,
   kindLabel,
   info,
-  selectableOverride = null
+  selectableOverride = null,
+  navigable = true,
+  clickFocusId = null
 }) {
   const normalizedInfo = normalizeInfo(info);
   const hasInfo = hasDisplayableInfo(normalizedInfo);
@@ -476,6 +496,8 @@ function createBody({
     info: normalizedInfo,
     hasInfo,
     selectable,
+    navigable,
+    clickFocusId,
 
     node: visible
       ? createBodyNode({ image, alt, bodyId: id, selectable })
@@ -498,7 +520,9 @@ function createBody({
 
 
   if (body.node && selectable) {
-    selectableBodies.push(body);
+    if (navigable) {
+      selectableBodies.push(body);
+    }
 
     body.node.addEventListener("click", event => {
       event.stopPropagation();
@@ -694,21 +718,24 @@ function selectOverview() {
 }
 
 function selectBody(bodyId) {
-  const body = bodyById.get(bodyId);
+  const clickedBody = bodyById.get(bodyId);
 
-  if (!body || !body.selectable) {
+  if (!clickedBody || !clickedBody.selectable) {
     return;
   }
 
-  selectedBodyId = bodyId;
+  const focusBodyId = clickedBody.clickFocusId || bodyId;
+  const body = bodyById.get(focusBodyId) || clickedBody;
 
-  const navIndex = navigationItems.findIndex(item => item.type === "body" && item.bodyId === bodyId);
+  selectedBodyId = body.id;
+
+  const navIndex = navigationItems.findIndex(item => item.type === "body" && item.bodyId === body.id);
   if (navIndex >= 0) {
     selectedIndex = navIndex;
   }
 
   bodies.forEach(candidate => {
-    candidate.node?.classList.toggle("selected", candidate.id === bodyId);
+    candidate.node?.classList.toggle("selected", candidate.id === body.id);
   });
 
   populateInfoPanel(body);

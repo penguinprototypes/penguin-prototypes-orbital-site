@@ -1,0 +1,247 @@
+{
+  "title": "Outer Wilds Solar System",
+  "navName": "Outer Wilds",
+  "image": "/images/outer-wilds-sun.svg",
+  "alt": "Stylized Outer Wilds inspired sun",
+  "size": 96,
+  "orbitRadius": 360,
+  "orbitSpeed": 1.8e-05,
+  "orbitEccentricity": 0.08,
+  "orbitRotation": 8,
+  "orbitPeriod": 90000,
+  "orbitLine": true,
+  "text": [
+    "A scaled, fan-made representation of the Outer Wilds solar system.",
+    "Orbital distances are scaled from community-measured in-game distances: Hourglass Twins about 5 km, Timber Hearth about 9 km, Brittle Hollow about 12 km, Giant's Deep about 17 km, and Dark Bramble about 20 km from the sun.",
+    "This is only a recommendation / tribute link, not an official or affiliated project.",
+    "This system is configured as one navigable object: clicking any planet or moon focuses the sun/system entry instead of adding every body to the navigator."
+  ],
+  "links": [
+    {
+      "label": "Official Outer Wilds site",
+      "href": "https://www.mobiusdigitalgames.com/outer-wilds.html"
+    },
+    {
+      "label": "Outer Wilds on Steam",
+      "href": "https://store.steampowered.com/app/753640/Outer_Wilds/"
+    }
+  ],
+  "children": [
+    {
+      "title": "Hourglass Twins Barycenter",
+      "navName": "Hourglass Twins",
+      "image": null,
+      "alt": "",
+      "size": 0,
+      "orbitRadius": 90,
+      "orbitSpeed": 0.00033,
+      "orbitEccentricity": 0.02,
+      "orbitRotation": 0,
+      "orbitPeriod": 11107,
+      "orbitLine": true,
+      "text": [
+        "Invisible shared center for Ash Twin and Ember Twin, placed at the scaled 5 km orbit distance."
+      ],
+      "children": [
+        {
+          "title": "Ash Twin",
+          "navName": "Ash Twin",
+          "image": "/images/ash-twin.svg",
+          "alt": "Ash Twin icon",
+          "size": 28,
+          "orbitRadius": 20,
+          "orbitSpeed": 0.0012,
+          "orbitEccentricity": 0,
+          "orbitRotation": 0,
+          "orbitPeriod": 5553,
+          "orbitLine": true,
+          "text": [
+            "Ash Twin, represented as one half of the Hourglass Twins."
+          ],
+          "links": []
+        },
+        {
+          "title": "Ember Twin",
+          "navName": "Ember Twin",
+          "image": "/images/ember-twin.svg",
+          "alt": "Ember Twin icon",
+          "size": 32,
+          "orbitRadius": 20,
+          "orbitSpeed": 0.0012,
+          "orbitEccentricity": 0,
+          "orbitRotation": 0,
+          "orbitPeriod": 5553,
+          "orbitLine": false,
+          "startAngle": 3.14159,
+          "text": [
+            "Ember Twin, represented as the other half of the Hourglass Twins."
+          ],
+          "links": []
+        }
+      ]
+    },
+    {
+      "title": "Timber Hearth",
+      "navName": "Timber Hearth",
+      "image": "/images/timber-hearth.svg",
+      "alt": "Timber Hearth icon",
+      "size": 48,
+      "orbitRadius": 162,
+      "orbitSpeed": 0.00016,
+      "orbitEccentricity": 0.03,
+      "orbitRotation": -7,
+      "orbitPeriod": 25025,
+      "orbitLine": true,
+      "text": [
+        "Timber Hearth, scaled from a measured distance of about 9 km from the sun."
+      ],
+      "links": [],
+      "children": [
+        {
+          "title": "The Attlerock",
+          "navName": "The Attlerock",
+          "image": "/images/attlerock.svg",
+          "alt": "The Attlerock moon icon",
+          "size": 18,
+          "orbitRadius": 45,
+          "orbitSpeed": 0.0008,
+          "orbitEccentricity": 0.04,
+          "orbitRotation": 15,
+          "orbitPeriod": 10324,
+          "orbitLine": true,
+          "text": [
+            "The Attlerock, Timber Hearth's moon."
+          ],
+          "links": []
+        },
+        {
+          "title": "Hearthian Satellite",
+          "navName": "Hearthian Satellite",
+          "image": "/images/hearthian-satellite.svg",
+          "alt": "Hearthian Satellite icon",
+          "size": 16,
+          "orbitRadius": 62,
+          "orbitSpeed": -0.00052,
+          "orbitEccentricity": 0.08,
+          "orbitRotation": -22,
+          "orbitPeriod": 16000,
+          "orbitLine": false,
+          "text": [
+            "A small satellite orbiting Timber Hearth."
+          ],
+          "links": []
+        }
+      ]
+    },
+    {
+      "title": "Brittle Hollow",
+      "navName": "Brittle Hollow",
+      "image": "/images/brittle-hollow.svg",
+      "alt": "Brittle Hollow icon",
+      "size": 56,
+      "orbitRadius": 216,
+      "orbitSpeed": 0.00011,
+      "orbitEccentricity": 0.04,
+      "orbitRotation": 18,
+      "orbitPeriod": 39713,
+      "orbitLine": true,
+      "text": [
+        "Brittle Hollow, scaled from a measured distance of about 12 km from the sun."
+      ],
+      "links": [],
+      "children": [
+        {
+          "title": "Hollow's Lantern",
+          "navName": "Hollow's Lantern",
+          "image": "/images/hollows-lantern.svg",
+          "alt": "Hollow's Lantern moon icon",
+          "size": 22,
+          "orbitRadius": 58,
+          "orbitSpeed": 0.0007,
+          "orbitEccentricity": 0.05,
+          "orbitRotation": 25,
+          "orbitPeriod": 11471,
+          "orbitLine": true,
+          "text": [
+            "Hollow's Lantern, the volcanic moon orbiting Brittle Hollow."
+          ],
+          "links": []
+        }
+      ]
+    },
+    {
+      "title": "Giant's Deep",
+      "navName": "Giant's Deep",
+      "image": "/images/giants-deep.svg",
+      "alt": "Giant's Deep icon",
+      "size": 76,
+      "orbitRadius": 306,
+      "orbitSpeed": 7.5e-05,
+      "orbitEccentricity": 0.03,
+      "orbitRotation": -12,
+      "orbitPeriod": 66327,
+      "orbitLine": true,
+      "text": [
+        "Giant's Deep, scaled from a measured distance of about 17 km from the sun."
+      ],
+      "links": [],
+      "children": [
+        {
+          "title": "Orbital Probe Cannon",
+          "navName": "Orbital Probe Cannon",
+          "image": "/images/orbital-probe-cannon.svg",
+          "alt": "Orbital Probe Cannon icon",
+          "size": 24,
+          "orbitRadius": 68,
+          "orbitSpeed": 0.0011,
+          "orbitEccentricity": 0.02,
+          "orbitRotation": 0,
+          "orbitPeriod": 5109,
+          "orbitLine": true,
+          "text": [
+            "The Nomai Orbital Probe Cannon, represented in orbit around Giant's Deep."
+          ],
+          "links": []
+        }
+      ]
+    },
+    {
+      "title": "Dark Bramble",
+      "navName": "Dark Bramble",
+      "image": "/images/dark-bramble.svg",
+      "alt": "Dark Bramble icon",
+      "size": 70,
+      "orbitRadius": 360,
+      "orbitSpeed": 5.6e-05,
+      "orbitEccentricity": 0.05,
+      "orbitRotation": 5,
+      "orbitPeriod": 88863,
+      "orbitLine": true,
+      "text": [
+        "Dark Bramble, scaled from a measured distance of about 20 km from the sun."
+      ],
+      "links": [],
+      "children": []
+    },
+    {
+      "title": "The Interloper",
+      "navName": "The Interloper",
+      "image": "/images/interloper.svg",
+      "alt": "The Interloper comet icon",
+      "size": 24,
+      "orbitRadius": 239,
+      "orbitSpeed": 0.00013,
+      "orbitEccentricity": 0.82,
+      "orbitRotation": -34,
+      "orbitPeriod": 47885,
+      "orbitLine": true,
+      "text": [
+        "The Interloper, represented with a strongly eccentric comet-like orbit.",
+        "This uses a community-measured semi-major axis of about 13.25 km and focal distance of about 10.85 km, giving an eccentricity of about 0.82."
+      ],
+      "links": [],
+      "children": []
+    }
+  ],
+  "singleNavigator": true
+}
