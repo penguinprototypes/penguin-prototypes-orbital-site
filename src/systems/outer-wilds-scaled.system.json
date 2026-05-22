@@ -1,7 +1,7 @@
 {
   "title": "Outer Wilds Solar System",
   "navName": "Outer Wilds",
-  "image": "/images/outer-wilds-sun.svg",
+  "image": "/images/sun.svg",
   "alt": "Stylized Outer Wilds inspired sun",
   "size": 48.0,
   "orbitRadius": 600,
@@ -112,23 +112,6 @@
           "orbitLine": true,
           "text": [
             "The Attlerock, Timber Hearth's moon."
-          ],
-          "links": []
-        },
-        {
-          "title": "Hearthian Satellite",
-          "navName": "Hearthian Satellite",
-          "image": "/images/hearthian-satellite.svg",
-          "alt": "Hearthian Satellite icon",
-          "size": 8.0,
-          "orbitRadius": 31.0,
-          "orbitSpeed": -0.00052,
-          "orbitEccentricity": 0.08,
-          "orbitRotation": -22,
-          "orbitPeriod": 16000,
-          "orbitLine": false,
-          "text": [
-            "A small satellite orbiting Timber Hearth."
           ],
           "links": []
         }
