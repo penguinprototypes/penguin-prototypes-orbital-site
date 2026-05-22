@@ -12,10 +12,8 @@
   "orbitPeriod": 90000,
   "orbitLine": true,
   "text": [
-    "A scaled, fan-made representation of the Outer Wilds solar system.",
-    "This is only a recommendation / tribute link, not an official or affiliated project.",
-    "The system uses one large invisible circular click area around the sun; the individual planets and moons are decorative and do not create separate navigator entries.",
-    "The mini-system scale has been restored to the previous size while keeping the whole system orbiting the site center at radius 800."
+    "A solar system that seems to have been trapped here.",
+    "Not associated with Outer Wilds or Mobius Digital, just a neat game."
   ],
   "links": [
     {
@@ -256,5 +254,5 @@
   ],
   "selectable": true,
   "navigable": true,
-  "hitRadius": 170.0
+  "hitRadius": 90.0
 }
