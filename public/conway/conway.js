@@ -215,8 +215,8 @@
 
       window.setTimeout(() => {
         document.body.classList.remove("map-fade-active");
-      }, 120);
-    }, 540);
+      }, 45);
+    }, 285);
   }
 
   function handleSpaceMapClick(clickedRule) {
