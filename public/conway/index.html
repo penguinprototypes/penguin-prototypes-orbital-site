@@ -79,7 +79,7 @@
       padding: 26px clamp(18px, 3vw, 44px) 116px;
       display: grid;
       grid-template-rows: auto auto minmax(0, 1fr);
-      gap: 22px;
+      gap: 18px;
       opacity: 0;
       animation: page-fade-in 900ms ease 90ms forwards;
       will-change: opacity;
@@ -131,7 +131,7 @@
 
     .hero {
       max-width: 880px;
-      transform: translate3d(calc(var(--px) * 0.18), calc(var(--py) * 0.18), 0);
+      transform: translate3d(calc(var(--px) * 0.25), calc(var(--py) * 0.25), 0);
       will-change: transform;
     }
 
@@ -171,6 +171,7 @@
       align-self: center;
       gap: clamp(18px, 3vw, 34px);
       min-height: 0;
+      margin-block: auto;
     }
 
     .rule-card,
@@ -185,7 +186,7 @@
 
     .rule-card {
       padding: 22px;
-      transform: translate3d(calc(var(--px) * 0.32), calc(var(--py) * 0.32), 0);
+      transform: translate3d(calc(var(--px) * 0.45), calc(var(--py) * 0.45), 0);
       min-width: 0;
       overflow: hidden;
     }
@@ -232,12 +233,15 @@
       justify-self: stretch;
       padding: 22px;
       color: var(--muted);
-      line-height: 1.55;
-      transform: translate3d(calc(var(--px) * 0.24), calc(var(--py) * 0.24), 0);
+      line-height: 1.5;
+      transform: translate3d(calc(var(--px) * 0.34), calc(var(--py) * 0.34), 0);
+      max-height: min(62vh, 560px);
+      overflow: auto;
     }
 
     .description-card p {
-      margin: 0 0 14px;
+      margin: 0 0 12px;
+      font-size: clamp(14px, 1.05vw, 16px);
     }
 
     .description-card p:last-child {
@@ -258,7 +262,7 @@
       place-items: center;
       perspective: 900px;
       min-width: 0;
-      transform: translate3d(calc(var(--px) * 0.42), calc(var(--py) * 0.42), 0);
+      transform: translate3d(calc(var(--px) * 0.58), calc(var(--py) * 0.58), 0);
       will-change: transform;
     }
 
@@ -631,8 +635,8 @@
           const nx = (event.clientX / w) * 2 - 1;
           const ny = (event.clientY / h) * 2 - 1;
 
-          pointer.targetX = clamp(nx, -1, 1) * 7;
-          pointer.targetY = clamp(ny, -1, 1) * 5;
+          pointer.targetX = clamp(nx, -1, 1) * 10;
+          pointer.targetY = clamp(ny, -1, 1) * 7;
 
           root.style.setProperty("--mouse-x", `${event.clientX}px`);
           root.style.setProperty("--mouse-y", `${event.clientY}px`);
