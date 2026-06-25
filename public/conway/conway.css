@@ -806,9 +806,36 @@ body.map-fade-active #map-fade {
 }
 
 
-@media (max-width: 1060px) {
+
+
+/* Final placement override: keep the right description card screen-centered on desktop/narrow desktop. */
+@media (min-width: 820px) {
   .description-card {
+    position: fixed !important;
+    z-index: 4 !important;
+    right: clamp(18px, 3vw, 44px) !important;
+    top: 50dvh !important;
+    width: min(390px, 27vw) !important;
+    transform: translate3d(
+      calc(var(--px) * 0.38),
+      calc(-50% + (var(--py) * 0.38)),
+      0
+    ) !important;
+    max-height: min(68dvh, 590px) !important;
+    overflow: auto !important;
+    justify-self: auto !important;
+  }
+}
+
+/* Only stack the description when the screen is genuinely too narrow for side panels. */
+@media (max-width: 819px) {
+  .description-card {
+    position: static !important;
+    width: 100% !important;
+    max-width: 760px !important;
     top: auto !important;
-    transform: translate3d(calc(var(--px) * 0.36), calc(var(--py) * 0.36), 0) !important;
+    right: auto !important;
+    transform: translate3d(calc(var(--px) * 0.34), calc(var(--py) * 0.34), 0) !important;
+    max-height: none !important;
   }
 }
