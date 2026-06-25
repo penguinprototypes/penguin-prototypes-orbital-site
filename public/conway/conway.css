@@ -75,28 +75,6 @@ input {
   visibility: hidden;
 }
 
-#map-transition-fade {
-  position: fixed;
-  inset: 0;
-  z-index: 120;
-  pointer-events: none;
-  background: #000;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 520ms ease,
-    visibility 0s linear 520ms;
-}
-
-body.map-transitioning #map-transition-fade {
-  opacity: 1;
-  visibility: visible;
-  transition:
-    opacity 520ms ease,
-    visibility 0s;
-}
-
-
 body.intro-pending #intro-fade,
 body.transitioning #intro-fade {
   opacity: 1;
@@ -225,40 +203,37 @@ h1 {
 }
 
 .sim-layout {
+  position: relative;
   display: grid;
-  grid-template-columns:
-    minmax(280px, 390px)
-    minmax(320px, min(50vw, 680px))
-    minmax(280px, 390px);
-  justify-content: center;
-  align-items: center;
+  grid-template-columns: 1fr;
+  place-items: center;
   align-self: center;
-  gap: clamp(18px, 3vw, 34px);
   min-height: 0;
   margin-block: auto;
-  padding-right: 0;
+  padding: 0;
 }
 
 .rule-card,
 .description-card {
-  width: 100%;
-  max-width: 390px;
-  justify-self: start;
-  padding: 22px;
-  color: var(--muted);
-  line-height: 1.5;
-  transform: translate3d(calc(var(--px) * 0.38), calc(var(--py) * 0.38), 0);
-  max-height: min(68vh, 590px);
-  overflow: auto;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.055), transparent 36%),
+    rgba(5, 10, 22, 0.72);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow), var(--panel-glow);
+  backdrop-filter: blur(18px);
+  will-change: transform;
 }
 
 .rule-card {
+  position: fixed;
+  z-index: 4;
+  left: clamp(18px, 3vw, 44px);
+  top: 50vh;
+  width: min(310px, 23vw);
   padding: 22px;
-  transform: translate3d(calc(var(--px) * 0.50), calc(var(--py) * 0.50), 0);
+  transform: translate3d(calc(var(--px) * 0.50), calc(-50% + (var(--py) * 0.50)), 0);
   min-width: 0;
-  width: 100%;
-  max-width: 390px;
-  justify-self: end;
   overflow: hidden;
 }
 
@@ -359,18 +334,21 @@ h1 {
 }
 
 .universe-stage {
+  position: fixed;
+  z-index: 2;
+  left: 50vw;
+  top: 54vh;
   display: grid;
   place-items: center;
   perspective: 900px;
   min-width: 0;
-  justify-self: center;
-  transform: translate3d(calc(var(--px) * 0.64), calc(var(--py) * 0.64), 0);
+  transform: translate3d(calc(-50% + (var(--px) * 0.64)), calc(-50% + (var(--py) * 0.64)), 0);
   will-change: transform;
 }
 
 .universe-frame {
   position: relative;
-  width: min(62vh, 100%, 680px);
+  width: min(62vh, 46vw, 700px);
   aspect-ratio: 1;
   border: 1px solid rgba(168, 210, 255, 0.35);
   border-radius: 34px;
@@ -696,6 +674,23 @@ h1 {
 }
 
 @media (max-width: 1060px) {
+  .rule-card {
+    position: static;
+    z-index: auto;
+    left: auto;
+    top: auto;
+    width: 100%;
+    transform: translate3d(calc(var(--px) * 0.50), calc(var(--py) * 0.50), 0);
+  }
+
+  .universe-stage {
+    position: static;
+    z-index: auto;
+    left: auto;
+    top: auto;
+    transform: translate3d(calc(var(--px) * 0.64), calc(var(--py) * 0.64), 0);
+  }
+
   body { overflow: auto; }
 
   .page-shell {
@@ -715,6 +710,7 @@ h1 {
   }
 
   .description-card {
+    position: static;
     transform: translate3d(calc(var(--px) * 0.34), calc(var(--py) * 0.34), 0);
     max-height: none;
   }
@@ -783,4 +779,26 @@ h1 {
     --stars-x: 0px !important;
     --stars-y: 0px !important;
   }
+}
+
+
+#map-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  pointer-events: none;
+  background: #000;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 520ms ease,
+    visibility 0s linear 520ms;
+}
+
+body.map-fade-active #map-fade {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 520ms ease,
+    visibility 0s;
 }
