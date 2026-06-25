@@ -25,12 +25,9 @@
       color-scheme: dark;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
-    html,
-    body {
+    html, body {
       min-height: 100%;
       margin: 0;
     }
@@ -46,10 +43,7 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    button,
-    a {
-      font: inherit;
-    }
+    button, a, input { font: inherit; }
 
     #stars {
       position: fixed;
@@ -94,8 +88,10 @@
     .home-link,
     .status-pill,
     .neighbor-orb-panel,
-    .connected-map-panel,
-    .action-cluster button {
+    .live-map-panel,
+    .action-cluster button,
+    .jump-form input,
+    .jump-form button {
       border: 1px solid var(--line);
       background: rgba(7, 14, 30, 0.76);
       color: var(--text);
@@ -126,9 +122,7 @@
       font-size: 12px;
     }
 
-    .status-pill.paused {
-      color: #ffd28c;
-    }
+    .status-pill.paused { color: #ffd28c; }
 
     .hero {
       max-width: 880px;
@@ -136,8 +130,7 @@
       will-change: transform;
     }
 
-    .eyebrow,
-    .card-label {
+    .eyebrow, .card-label {
       margin: 0 0 8px;
       color: var(--accent);
       text-transform: uppercase;
@@ -161,9 +154,7 @@
       line-height: 1.55;
     }
 
-    .subtitle strong {
-      color: var(--text);
-    }
+    .subtitle strong { color: var(--text); }
 
     .sim-layout {
       display: grid;
@@ -219,15 +210,40 @@
       padding-top: 11px;
     }
 
-    .rule-card dt {
-      color: var(--muted);
-    }
+    .rule-card dt { color: var(--muted); }
 
     .rule-card dd {
       margin: 0;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       color: #fff;
       text-align: right;
+    }
+
+    .jump-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .jump-form input {
+      min-width: 0;
+      border-radius: 13px;
+      padding: 9px 10px;
+      outline: none;
+    }
+
+    .jump-form button {
+      border-radius: 13px;
+      padding: 0 12px;
+      cursor: pointer;
+    }
+
+    .jump-error {
+      min-height: 16px;
+      margin-top: 8px;
+      color: #ffaaa8;
+      font-size: 12px;
     }
 
     .description-card {
@@ -249,18 +265,9 @@
       font-size: clamp(14px, 1.05vw, 16px);
     }
 
-    .description-card p:last-child {
-      margin-bottom: 0;
-    }
-
-    .description-card strong,
-    .inspiration {
-      color: var(--text);
-    }
-
-    .inspiration {
-      font-style: italic;
-    }
+    .description-card p:last-child { margin-bottom: 0; }
+    .description-card strong, .inspiration { color: var(--text); }
+    .inspiration { font-style: italic; }
 
     .universe-stage {
       display: grid;
@@ -289,9 +296,7 @@
       transform-origin: center;
     }
 
-    .universe-frame.grow {
-      animation: grow-out 260ms cubic-bezier(0.16, 1, 0.3, 1);
-    }
+    .universe-frame.grow { animation: grow-out 260ms cubic-bezier(0.16, 1, 0.3, 1); }
 
     #universe-canvas {
       width: 100%;
@@ -315,7 +320,7 @@
     }
 
     .neighbor-orb-panel,
-    .connected-map-panel {
+    .live-map-panel {
       position: fixed;
       z-index: 5;
       box-shadow: 0 8px 34px rgba(0, 0, 0, 0.34);
@@ -330,9 +335,7 @@
       user-select: none;
     }
 
-    .orb-title,
-    .map-title,
-    .map-hint {
+    .orb-title, .map-title, .map-hint {
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.14em;
@@ -349,9 +352,7 @@
       cursor: grab;
     }
 
-    #neighbor-orb.dragging {
-      cursor: grabbing;
-    }
+    #neighbor-orb.dragging { cursor: grabbing; }
 
     .orb-shell {
       fill: url(#orb-gradient);
@@ -364,6 +365,25 @@
       fill: none;
       stroke: rgba(169, 214, 255, 0.18);
       stroke-width: 1;
+    }
+
+    .orb-link {
+      stroke: rgba(210, 236, 255, 0.35);
+      stroke-width: 1.15;
+      stroke-linecap: round;
+    }
+
+    .orb-link.birth {
+      stroke: rgba(92, 184, 255, 0.48);
+    }
+
+    .orb-link.survival {
+      stroke: rgba(180, 128, 255, 0.48);
+    }
+
+    .orb-link.invalid {
+      stroke: rgba(160, 170, 190, 0.16);
+      stroke-dasharray: 3 4;
     }
 
     .orb-center-label {
@@ -392,13 +412,8 @@
       stroke-width: 1.2;
     }
 
-    .orb-node.birth circle {
-      fill: rgba(92, 184, 255, 0.92);
-    }
-
-    .orb-node.survival circle {
-      fill: rgba(180, 128, 255, 0.92);
-    }
+    .orb-node.birth circle { fill: rgba(92, 184, 255, 0.92); }
+    .orb-node.survival circle { fill: rgba(180, 128, 255, 0.92); }
 
     .orb-node.invalid {
       opacity: 0.22;
@@ -427,6 +442,17 @@
       stroke-linejoin: round;
     }
 
+    .orb-destination-label {
+      pointer-events: none;
+      fill: rgba(235, 246, 255, 0.92);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 6.8px;
+      paint-order: stroke;
+      stroke: rgba(0, 0, 0, 0.9);
+      stroke-width: 2.8px;
+      stroke-linejoin: round;
+    }
+
     .orb-hover-label {
       min-height: 18px;
       color: var(--muted);
@@ -438,30 +464,37 @@
       text-overflow: ellipsis;
     }
 
-    .connected-map-panel {
+    .live-map-panel {
       left: 310px;
       bottom: 22px;
-      width: 190px;
+      width: 330px;
       border-radius: 20px;
       padding: 10px 12px 11px;
     }
 
-    #connected-map {
+    #live-map {
       display: block;
-      width: 144px;
-      height: 144px;
+      width: 304px;
+      height: 204px;
       margin: 8px auto 6px;
       border-radius: 10px;
       background: #02050c;
       image-rendering: pixelated;
       box-shadow: 0 0 0 1px rgba(168, 210, 255, 0.18);
-      cursor: crosshair;
+      cursor: grab;
+      touch-action: none;
     }
+
+    #live-map.dragging { cursor: grabbing; }
 
     .map-hint {
       font-size: 10px;
       letter-spacing: 0.1em;
+      line-height: 1.35;
     }
+
+    .map-status-live { color: #aefbd0; }
+    .map-status-paused { color: #ffd28c; }
 
     .action-cluster {
       position: fixed;
@@ -495,59 +528,33 @@
     }
 
     @keyframes grow-out {
-      0% {
-        transform: translateY(28px) rotateX(54deg) scale(0.82);
-        opacity: 0.28;
-      }
-      100% {
-        transform: translateY(0) rotateX(0deg) scale(1);
-        opacity: 1;
-      }
+      0% { transform: translateY(28px) rotateX(54deg) scale(0.82); opacity: 0.28; }
+      100% { transform: translateY(0) rotateX(0deg) scale(1); opacity: 1; }
     }
 
-    @media (max-width: 1180px) {
-      .connected-map-panel {
+    @media (max-width: 1380px) {
+      .live-map-panel {
         left: 22px;
         bottom: 318px;
       }
     }
 
     @media (max-width: 1060px) {
-      body {
-        overflow: auto;
-      }
-
-      .page-shell {
-        padding-bottom: 420px;
-      }
-
-      .sim-layout {
-        grid-template-columns: 1fr;
-        padding-right: 0;
-      }
-
-      .rule-card,
-      .description-card {
+      body { overflow: auto; }
+      .page-shell { padding-bottom: 610px; }
+      .sim-layout { grid-template-columns: 1fr; padding-right: 0; }
+      .rule-card, .description-card {
         max-width: 760px;
         width: 100%;
         justify-self: center;
       }
-
       .description-card {
         position: static;
         transform: translate3d(calc(var(--px) * 0.34), calc(var(--py) * 0.34), 0);
         max-height: none;
       }
-
-      .universe-frame {
-        width: min(88vw, 680px);
-      }
-
-      .neighbor-orb-panel {
-        width: min(270px, calc(100vw - 44px));
-      }
-
-      .connected-map-panel {
+      .universe-frame { width: min(88vw, 680px); }
+      .live-map-panel {
         left: 310px;
         bottom: 22px;
       }
@@ -559,16 +566,16 @@
         bottom: 14px;
         width: min(240px, calc(100vw - 28px));
       }
-
-      #neighbor-orb {
-        height: 220px;
-      }
-
-      .connected-map-panel {
+      #neighbor-orb { height: 220px; }
+      .live-map-panel {
         left: 14px;
         bottom: 292px;
+        width: min(330px, calc(100vw - 28px));
       }
-
+      #live-map {
+        width: 100%;
+        height: 204px;
+      }
       .action-cluster {
         right: 14px;
         bottom: 14px;
@@ -580,39 +587,21 @@
       .page-shell {
         padding-left: 14px;
         padding-right: 14px;
-        padding-bottom: 560px;
+        padding-bottom: 720px;
       }
-
-      .neighbor-orb-panel,
-      .connected-map-panel,
-      .action-cluster {
-        position: fixed;
-      }
-
-      .connected-map-panel {
-        left: 14px;
-        bottom: 278px;
-      }
-
+      .live-map-panel { bottom: 278px; }
       .action-cluster {
         left: 14px;
         right: 14px;
-        bottom: 448px;
+        bottom: 510px;
         justify-content: flex-start;
         max-width: none;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .page-shell {
-        opacity: 1;
-        animation: none;
-      }
-
-      .universe-frame.grow {
-        animation: none;
-      }
-
+      .page-shell { opacity: 1; animation: none; }
+      .universe-frame.grow { animation: none; }
       :root {
         --px: 0px !important;
         --py: 0px !important;
@@ -654,6 +643,12 @@
           <div><dt>Generation</dt><dd id="generation">0</dd></div>
           <div><dt>Living cells</dt><dd id="live-count">0</dd></div>
         </dl>
+
+        <form class="jump-form" id="jump-form">
+          <input id="jump-input" type="text" placeholder="B3/S23 or 3323" autocomplete="off">
+          <button type="submit">Go</button>
+        </form>
+        <div class="jump-error" id="jump-error"></div>
       </aside>
 
       <section class="universe-stage" aria-label="Current Conway universe">
@@ -671,19 +666,13 @@
           living cell survives when its neighbor count is in the survival range.
         </p>
         <p>
-          This prototype shows the connected rules: contiguous ranges described by
-          birth start/end and survival start/end. The orb shows nearby universes in
-          that four-dimensional neighborhood.
+          The orb shows nearby connected universes. Its lines now run directly through
+          the universe nodes, so it acts more like a local four-dimensional compass.
         </p>
         <p>
-          The map is the larger connected multiverse: 36 possible birth ranges by
-          36 possible survival ranges. Click any point on it to jump directly there.
-        </p>
-        <p>
-          White cells are newborn, then smoothly shift through red, orange, yellow,
-          green, cyan, blue, purple, and magenta as they age. Reloading, pressing
-          Reset, changing universes, or reaching a static state generates a new
-          random 10×10 seed.
+          The map is a zoomable live view of the larger connected multiverse. Drag it
+          to pan, scroll to zoom, and click a tile to jump. When too many universes are
+          visible, the map pauses those thumbnails and becomes an overview.
         </p>
         <p class="inspiration">Inspired by Cary Huang.</p>
       </aside>
@@ -713,6 +702,8 @@
       <ellipse class="orb-ring ring-b" rx="90" ry="28" transform="rotate(60)"></ellipse>
       <ellipse class="orb-ring ring-c" rx="90" ry="28" transform="rotate(-60)"></ellipse>
 
+      <g id="orb-link-layer"></g>
+
       <text class="orb-center-label" id="orb-current-rule" text-anchor="middle" y="-4">B3/S23</text>
       <text class="orb-center-subtitle" text-anchor="middle" y="16">drag to rotate</text>
 
@@ -721,10 +712,10 @@
     <div id="orb-hover-label" class="orb-hover-label">Click a nearby rule to jump there.</div>
   </section>
 
-  <section class="connected-map-panel" aria-label="Connected multiverse map">
-    <div class="map-title">Connected map</div>
-    <canvas id="connected-map" width="144" height="144"></canvas>
-    <div class="map-hint">36×36 · click to jump</div>
+  <section class="live-map-panel" aria-label="Live connected multiverse map">
+    <div class="map-title">Live multiverse map</div>
+    <canvas id="live-map" width="304" height="204"></canvas>
+    <div id="map-hint" class="map-hint">Drag to pan · scroll to zoom · click to jump</div>
   </section>
 
   <div class="action-cluster" aria-label="Simulation actions">
@@ -742,18 +733,27 @@
       const INITIAL_PATTERN_SIZE = 10;
       const INITIAL_LIVE_CHANCE = 0.34;
       const TICK_MS = 100;
+      const MAP_TICK_MS = 140;
       const STABLE_RESET_DELAY = 2;
+      const MAP_SIMULATION_LIMIT = 48;
+      const MAP_THUMBNAIL_GRID = 12;
 
       const root = document.documentElement;
-      const scene = document.getElementById("scene");
       const stars = document.getElementById("stars");
-      const canvas = document.getElementById("universe-canvas");
-      const frameEl = document.getElementById("universe-frame");
-      const mapCanvas = document.getElementById("connected-map");
-      const mapCtx = mapCanvas.getContext("2d");
 
+      const canvas = document.getElementById("universe-canvas");
+      const ctx = canvas.getContext("2d", { alpha: false });
+      ctx.imageSmoothingEnabled = false;
+      const image = ctx.createImageData(GRID_SIZE, GRID_SIZE);
+
+      const mapCanvas = document.getElementById("live-map");
+      const mapCtx = mapCanvas.getContext("2d", { alpha: false });
+      mapCtx.imageSmoothingEnabled = false;
+
+      const frameEl = document.getElementById("universe-frame");
       const orbSvg = document.getElementById("neighbor-orb");
       const orbNodeLayer = document.getElementById("orb-node-layer");
+      const orbLinkLayer = document.getElementById("orb-link-layer");
       const orbHoverLabel = document.getElementById("orb-hover-label");
       const orbCurrentRule = document.getElementById("orb-current-rule");
 
@@ -768,28 +768,24 @@
       const randomButton = document.getElementById("random-button");
       const resetButton = document.getElementById("reset-button");
       const pauseButton = document.getElementById("pause-button");
+      const mapHint = document.getElementById("map-hint");
+      const jumpForm = document.getElementById("jump-form");
+      const jumpInput = document.getElementById("jump-input");
+      const jumpError = document.getElementById("jump-error");
 
-      const ctx = canvas.getContext("2d", { alpha: false });
-      ctx.imageSmoothingEnabled = false;
-
-      const image = ctx.createImageData(GRID_SIZE, GRID_SIZE);
       const cells = new Uint8Array(CELL_COUNT);
       const nextCells = new Uint8Array(CELL_COUNT);
       const ages = new Uint16Array(CELL_COUNT);
       const nextAges = new Uint16Array(CELL_COUNT);
       const neighbors = Array.from({ length: CELL_COUNT }, () => new Uint16Array(8));
       const connectedIntervals = buildConnectedIntervals();
+      const mapUniverses = new Map();
 
-      let rule = {
-        bStart: 3,
-        bEnd: 3,
-        sStart: 2,
-        sEnd: 3
-      };
-
+      let rule = { bStart: 3, bEnd: 3, sStart: 2, sEnd: 3 };
       let generation = 0;
       let stableTicks = 0;
       let lastTick = 0;
+      let lastMapTick = 0;
       let paused = false;
       let pageHidden = document.hidden;
 
@@ -800,12 +796,17 @@
       let orbLastX = 0;
       let orbLastY = 0;
 
-      const pointer = {
-        targetX: 0,
-        targetY: 0,
-        x: 0,
-        y: 0
+      const mapView = {
+        x: intervalIndex(3, 3) - 4,
+        y: intervalIndex(2, 3) - 3,
+        tile: 28,
+        dragging: false,
+        moved: false,
+        lastX: 0,
+        lastY: 0
       };
+
+      const pointer = { targetX: 0, targetY: 0, x: 0, y: 0 };
 
       const connectedMoves = [
         { axis: "bStart", delta: -1, label: "Bₛ−", kind: "birth", pos: [-0.80, -0.22,  0.52] },
@@ -832,7 +833,6 @@
         resetPattern();
         draw();
         updateUi();
-
         requestAnimationFrame(loop);
       }
 
@@ -850,8 +850,17 @@
           updateUi();
         });
 
-        randomButton.addEventListener("click", () => {
-          randomizeConnectedRule();
+        randomButton.addEventListener("click", randomizeConnectedRule);
+
+        jumpForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const parsed = parseConnectedInput(jumpInput.value);
+          if (!parsed) {
+            jumpError.textContent = "Use B3/S23, B678/S1234, or 3323.";
+            return;
+          }
+          jumpError.textContent = "";
+          setRule(parsed, true);
         });
       }
 
@@ -859,7 +868,6 @@
         window.addEventListener("pointermove", (event) => {
           const w = Math.max(1, window.innerWidth);
           const h = Math.max(1, window.innerHeight);
-
           const nx = (event.clientX / w) * 2 - 1;
           const ny = (event.clientY / h) * 2 - 1;
 
@@ -888,29 +896,22 @@
 
         orbSvg.addEventListener("pointermove", (event) => {
           if (!orbDragging) return;
-
           const dx = event.clientX - orbLastX;
           const dy = event.clientY - orbLastY;
 
-          if (Math.abs(dx) + Math.abs(dy) > 2) {
-            orbMoved = true;
-          }
+          if (Math.abs(dx) + Math.abs(dy) > 2) orbMoved = true;
 
           orbYaw += dx * 0.012;
           orbPitch = clamp(orbPitch - dy * 0.012, -1.1, 1.1);
-
           orbLastX = event.clientX;
           orbLastY = event.clientY;
-
           renderOrb();
         });
 
         orbSvg.addEventListener("pointerup", (event) => {
           orbDragging = false;
           orbSvg.classList.remove("dragging");
-          try {
-            orbSvg.releasePointerCapture(event.pointerId);
-          } catch {}
+          try { orbSvg.releasePointerCapture(event.pointerId); } catch {}
           setTimeout(() => { orbMoved = false; }, 0);
         });
 
@@ -922,29 +923,68 @@
       }
 
       function attachMapHandlers() {
-        mapCanvas.addEventListener("click", (event) => {
-          const rect = mapCanvas.getBoundingClientRect();
-          const x = Math.floor(((event.clientX - rect.left) / rect.width) * 36);
-          const y = Math.floor(((event.clientY - rect.top) / rect.height) * 36);
-
-          if (x < 0 || x >= 36 || y < 0 || y >= 36) return;
-
-          const b = connectedIntervals[x];
-          const s = connectedIntervals[y];
-
-          setRule({
-            bStart: b.start,
-            bEnd: b.end,
-            sStart: s.start,
-            sEnd: s.end
-          });
+        mapCanvas.addEventListener("pointerdown", (event) => {
+          mapView.dragging = true;
+          mapView.moved = false;
+          mapView.lastX = event.clientX;
+          mapView.lastY = event.clientY;
+          mapCanvas.classList.add("dragging");
+          mapCanvas.setPointerCapture(event.pointerId);
         });
+
+        mapCanvas.addEventListener("pointermove", (event) => {
+          if (!mapView.dragging) return;
+
+          const dx = event.clientX - mapView.lastX;
+          const dy = event.clientY - mapView.lastY;
+          if (Math.abs(dx) + Math.abs(dy) > 2) mapView.moved = true;
+
+          mapView.x -= dx / mapView.tile;
+          mapView.y -= dy / mapView.tile;
+          constrainMapView();
+
+          mapView.lastX = event.clientX;
+          mapView.lastY = event.clientY;
+          renderLiveMap();
+        });
+
+        mapCanvas.addEventListener("pointerup", (event) => {
+          mapView.dragging = false;
+          mapCanvas.classList.remove("dragging");
+          try { mapCanvas.releasePointerCapture(event.pointerId); } catch {}
+
+          if (!mapView.moved) {
+            const point = mapPointFromEvent(event);
+            if (point) jumpToMapPoint(point.x, point.y);
+          }
+
+          setTimeout(() => { mapView.moved = false; }, 0);
+        });
+
+        mapCanvas.addEventListener("wheel", (event) => {
+          event.preventDefault();
+          const before = mapWorldFromEvent(event);
+          const factor = event.deltaY > 0 ? 0.86 : 1.16;
+          mapView.tile = clamp(mapView.tile * factor, 4, 56);
+
+          if (before) {
+            const rect = mapCanvas.getBoundingClientRect();
+            const px = ((event.clientX - rect.left) / rect.width) * mapCanvas.width;
+            const py = ((event.clientY - rect.top) / rect.height) * mapCanvas.height;
+            mapView.x = before.x - px / mapView.tile;
+            mapView.y = before.y - py / mapView.tile;
+          }
+
+          constrainMapView();
+          renderLiveMap();
+        }, { passive: false });
       }
 
       function attachVisibilityHandlers() {
         document.addEventListener("visibilitychange", () => {
           pageHidden = document.hidden;
           lastTick = 0;
+          lastMapTick = 0;
         });
 
         window.addEventListener("resize", debounce(generateRandomStarfield, 180));
@@ -958,16 +998,21 @@
 
         if (!paused && timestamp - lastTick >= TICK_MS) {
           lastTick = timestamp;
-          step();
+          stepMainUniverse();
           draw();
           updateLiveStats();
+        }
+
+        if (timestamp - lastMapTick >= MAP_TICK_MS) {
+          lastMapTick = timestamp;
+          updateLiveMapSimulation();
+          renderLiveMap();
         }
       }
 
       function updateParallax() {
         pointer.x = lerp(pointer.x, pointer.targetX, 0.08);
         pointer.y = lerp(pointer.y, pointer.targetY, 0.08);
-
         root.style.setProperty("--px", `${pointer.x}px`);
         root.style.setProperty("--py", `${pointer.y}px`);
         root.style.setProperty("--stars-x", `${pointer.x * 0.55}px`);
@@ -976,7 +1021,6 @@
 
       function generateRandomStarfield() {
         if (!stars) return;
-
         const width = Math.max(1, window.innerWidth);
         const height = Math.max(1, window.innerHeight);
         const count = 280;
@@ -987,10 +1031,7 @@
           const x = randomRange(0, width);
           const y = randomRange(0, height);
           const opacity = randomRange(0.20, 0.92);
-
-          rects.push(
-            `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${size.toFixed(2)}" height="${size.toFixed(2)}" rx="${(size / 2).toFixed(2)}" fill="white" opacity="${opacity.toFixed(3)}"/>`
-          );
+          rects.push(`<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${size.toFixed(2)}" height="${size.toFixed(2)}" rx="${(size / 2).toFixed(2)}" fill="white" opacity="${opacity.toFixed(3)}"/>`);
         }
 
         const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${rects.join("")}</svg>`;
@@ -1011,7 +1052,6 @@
           for (let x = 0; x < GRID_SIZE; x += 1) {
             const i = idx(x, y);
             let k = 0;
-
             for (let dy = -1; dy <= 1; dy += 1) {
               for (let dx = -1; dx <= 1; dx += 1) {
                 if (dx === 0 && dy === 0) continue;
@@ -1030,11 +1070,9 @@
         nextAges.fill(0);
 
         const start = Math.floor((GRID_SIZE - INITIAL_PATTERN_SIZE) / 2);
-
         for (let y = start; y < start + INITIAL_PATTERN_SIZE; y += 1) {
           for (let x = start; x < start + INITIAL_PATTERN_SIZE; x += 1) {
             const i = idx(x, y);
-
             if (Math.random() < INITIAL_LIVE_CHANCE) {
               cells[i] = 1;
               ages[i] = 0;
@@ -1047,67 +1085,50 @@
         animateGrow();
       }
 
-      function step() {
+      function stepMainUniverse() {
+        const changed = stepCells(rule, cells, nextCells, ages, nextAges);
+        generation += 1;
+
+        if (changed) stableTicks = 0;
+        else stableTicks += 1;
+
+        if (stableTicks >= STABLE_RESET_DELAY) resetPattern();
+      }
+
+      function stepCells(ruleObject, cellBuffer, nextCellBuffer, ageBuffer, nextAgeBuffer) {
         let changed = false;
 
         for (let i = 0; i < CELL_COUNT; i += 1) {
-          const neighborCount = countNeighbors(i);
-          const alive = cells[i] === 1;
+          const neighborCount = countNeighborsFrom(cellBuffer, i);
+          const alive = cellBuffer[i] === 1;
           let nextAlive = 0;
 
-          if (alive) {
-            nextAlive = neighborCount >= rule.sStart && neighborCount <= rule.sEnd ? 1 : 0;
-          } else {
-            nextAlive = neighborCount >= rule.bStart && neighborCount <= rule.bEnd ? 1 : 0;
-          }
+          if (alive) nextAlive = neighborCount >= ruleObject.sStart && neighborCount <= ruleObject.sEnd ? 1 : 0;
+          else nextAlive = neighborCount >= ruleObject.bStart && neighborCount <= ruleObject.bEnd ? 1 : 0;
 
-          nextCells[i] = nextAlive;
+          nextCellBuffer[i] = nextAlive;
 
-          if (nextAlive) {
-            nextAges[i] = alive ? Math.min(65535, ages[i] + 1) : 0;
-          } else {
-            nextAges[i] = 0;
-          }
+          if (nextAlive) nextAgeBuffer[i] = alive ? Math.min(65535, ageBuffer[i] + 1) : 0;
+          else nextAgeBuffer[i] = 0;
 
-          if (nextAlive !== cells[i]) changed = true;
+          if (nextAlive !== cellBuffer[i]) changed = true;
         }
 
-        cells.set(nextCells);
-        ages.set(nextAges);
-        generation += 1;
-
-        if (changed) {
-          stableTicks = 0;
-        } else {
-          stableTicks += 1;
-        }
-
-        if (stableTicks >= STABLE_RESET_DELAY) {
-          resetPattern();
-        }
+        cellBuffer.set(nextCellBuffer);
+        ageBuffer.set(nextAgeBuffer);
+        return changed;
       }
 
-      function countNeighbors(i) {
+      function countNeighborsFrom(cellBuffer, i) {
         const list = neighbors[i];
-
-        return (
-          cells[list[0]] +
-          cells[list[1]] +
-          cells[list[2]] +
-          cells[list[3]] +
-          cells[list[4]] +
-          cells[list[5]] +
-          cells[list[6]] +
-          cells[list[7]]
-        );
+        return cellBuffer[list[0]] + cellBuffer[list[1]] + cellBuffer[list[2]] + cellBuffer[list[3]] +
+          cellBuffer[list[4]] + cellBuffer[list[5]] + cellBuffer[list[6]] + cellBuffer[list[7]];
       }
 
       function draw() {
         const data = image.data;
-
         for (let i = 0; i < CELL_COUNT; i += 1) {
           const o = i * 4;
-
           if (cells[i]) {
             const color = colorForAge(ages[i]);
             data[o] = color[0];
@@ -1121,7 +1142,6 @@
             data[o + 3] = 255;
           }
         }
-
         ctx.putImageData(image, 0, 0);
       }
 
@@ -1156,11 +1176,10 @@
             ];
           }
         }
-
         return [255, 255, 255];
       }
 
-      function setRule(nextRule) {
+      function setRule(nextRule, centerMap = false) {
         if (!isValidRule(nextRule)) return;
 
         rule = {
@@ -1170,6 +1189,8 @@
           sEnd: nextRule.sEnd
         };
 
+        if (centerMap) centerMapOnCurrent();
+
         resetPattern();
         draw();
         updateUi();
@@ -1178,25 +1199,56 @@
       function randomizeConnectedRule() {
         const b = connectedIntervals[randomInt(0, connectedIntervals.length - 1)];
         const s = connectedIntervals[randomInt(0, connectedIntervals.length - 1)];
+        setRule({ bStart: b.start, bEnd: b.end, sStart: s.start, sEnd: s.end }, true);
+      }
 
-        setRule({
-          bStart: b.start,
-          bEnd: b.end,
-          sStart: s.start,
-          sEnd: s.end
-        });
+      function parseConnectedInput(raw) {
+        const value = raw.trim().toUpperCase().replace(/\s+/g, "");
+        if (!value) return null;
+
+        const idMatch = value.match(/^([1-8])([1-8])([1-8])([1-8])$/);
+        if (idMatch) {
+          const candidate = {
+            bStart: Number(idMatch[1]),
+            bEnd: Number(idMatch[2]),
+            sStart: Number(idMatch[3]),
+            sEnd: Number(idMatch[4])
+          };
+          return isValidRule(candidate) ? candidate : null;
+        }
+
+        const ruleMatch = value.match(/^B([1-8]+)\/S([1-8]+)$/);
+        if (ruleMatch) {
+          const bDigits = [...new Set(ruleMatch[1].split("").map(Number))].sort((a, b) => a - b);
+          const sDigits = [...new Set(ruleMatch[2].split("").map(Number))].sort((a, b) => a - b);
+          if (!isContiguous(bDigits) || !isContiguous(sDigits)) return null;
+
+          const candidate = {
+            bStart: bDigits[0],
+            bEnd: bDigits[bDigits.length - 1],
+            sStart: sDigits[0],
+            sEnd: sDigits[sDigits.length - 1]
+          };
+          return isValidRule(candidate) ? candidate : null;
+        }
+
+        return null;
+      }
+
+      function isContiguous(values) {
+        if (values.length === 0) return false;
+        for (let i = 1; i < values.length; i += 1) {
+          if (values[i] !== values[i - 1] + 1) return false;
+        }
+        return true;
       }
 
       function isValidRule(candidate) {
         return (
-          candidate.bStart >= 1 &&
-          candidate.bStart <= 8 &&
-          candidate.bEnd >= 1 &&
-          candidate.bEnd <= 8 &&
-          candidate.sStart >= 1 &&
-          candidate.sStart <= 8 &&
-          candidate.sEnd >= 1 &&
-          candidate.sEnd <= 8 &&
+          candidate.bStart >= 1 && candidate.bStart <= 8 &&
+          candidate.bEnd >= 1 && candidate.bEnd <= 8 &&
+          candidate.sStart >= 1 && candidate.sStart <= 8 &&
+          candidate.sEnd >= 1 && candidate.sEnd <= 8 &&
           candidate.bStart <= candidate.bEnd &&
           candidate.sStart <= candidate.sEnd
         );
@@ -1204,42 +1256,36 @@
 
       function updateUi() {
         const compactRule = ruleString(rule);
-
         ruleNameEl.textContent = compactRule;
         ruleNameEl.title = compactRule;
         birthRangeEl.textContent = rangeDash(rule.bStart, rule.bEnd);
         survivalRangeEl.textContent = rangeDash(rule.sStart, rule.sEnd);
         groupNameEl.textContent = `B${rule.bStart}+/S${rule.sStart}+`;
         connectedIdEl.textContent = `${rule.bStart}${rule.bEnd}${rule.sStart}${rule.sEnd}`;
-
         orbCurrentRule.textContent = compactRule;
+        jumpInput.value = compactRule;
         updateLiveStats();
         renderOrb();
-        renderConnectedMap();
+        renderLiveMap();
       }
 
       function updateLiveStats() {
         generationEl.textContent = String(generation);
-        liveCountEl.textContent = String(countLiveCells());
+        liveCountEl.textContent = String(countLiveCells(cells));
       }
 
-      function countLiveCells() {
+      function countLiveCells(cellBuffer) {
         let count = 0;
-        for (let i = 0; i < CELL_COUNT; i += 1) count += cells[i];
+        for (let i = 0; i < CELL_COUNT; i += 1) count += cellBuffer[i];
         return count;
       }
 
       function renderOrb() {
         orbNodeLayer.replaceChildren();
+        orbLinkLayer.replaceChildren();
 
         const nodes = connectedMoves.map((move) => {
-          const candidate = {
-            bStart: rule.bStart,
-            bEnd: rule.bEnd,
-            sStart: rule.sStart,
-            sEnd: rule.sEnd
-          };
-
+          const candidate = { bStart: rule.bStart, bEnd: rule.bEnd, sStart: rule.sStart, sEnd: rule.sEnd };
           candidate[move.axis] += move.delta;
 
           const valid = isValidRule(candidate);
@@ -1247,26 +1293,25 @@
           const depthScale = 0.78 + (rotated.z + 1) * 0.20;
           const radius = valid ? 10 * depthScale : 8 * depthScale;
 
-          return {
-            move,
-            candidate,
-            valid,
-            x: rotated.x * 92,
-            y: rotated.y * 92,
-            z: rotated.z,
-            radius
-          };
+          return { move, candidate, valid, x: rotated.x * 92, y: rotated.y * 92, z: rotated.z, radius };
         }).sort((a, b) => a.z - b.z);
+
+        for (const node of nodes) {
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+          line.classList.add("orb-link", node.move.kind);
+          if (!node.valid) line.classList.add("invalid");
+          line.setAttribute("x1", "0");
+          line.setAttribute("y1", "0");
+          line.setAttribute("x2", node.x.toFixed(2));
+          line.setAttribute("y2", node.y.toFixed(2));
+          orbLinkLayer.append(line);
+        }
 
         for (const node of nodes) {
           const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
           g.classList.add("orb-node", node.move.kind);
           if (!node.valid) g.classList.add("invalid");
-
           g.setAttribute("transform", `translate(${node.x.toFixed(2)} ${node.y.toFixed(2)})`);
-          g.dataset.rule = node.valid ? ruleString(node.candidate) : "invalid";
-          g.dataset.axis = node.move.axis;
-          g.dataset.delta = String(node.move.delta);
 
           const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
           circle.setAttribute("r", node.radius.toFixed(2));
@@ -1276,7 +1321,13 @@
           text.setAttribute("dominant-baseline", "middle");
           text.textContent = node.move.label;
 
-          g.append(circle, text);
+          const dest = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          dest.classList.add("orb-destination-label");
+          dest.setAttribute("text-anchor", "middle");
+          dest.setAttribute("y", String(node.radius + 10));
+          dest.textContent = node.valid ? ruleString(node.candidate) : "";
+
+          g.append(circle, text, dest);
 
           g.addEventListener("mouseenter", () => {
             orbHoverLabel.textContent = node.valid
@@ -1291,66 +1342,198 @@
           g.addEventListener("click", (event) => {
             event.stopPropagation();
             if (orbMoved || !node.valid) return;
-            setRule(node.candidate);
+            setRule(node.candidate, true);
           });
 
           orbNodeLayer.append(g);
         }
       }
 
-      function renderConnectedMap() {
-        const width = mapCanvas.width;
-        const height = mapCanvas.height;
-        const cell = width / 36;
+      function getVisibleMapTiles() {
+        const startX = Math.floor(mapView.x);
+        const startY = Math.floor(mapView.y);
+        const endX = Math.ceil(mapView.x + mapCanvas.width / mapView.tile);
+        const endY = Math.ceil(mapView.y + mapCanvas.height / mapView.tile);
+        const tiles = [];
 
-        mapCtx.clearRect(0, 0, width, height);
-        mapCtx.fillStyle = "#02050c";
-        mapCtx.fillRect(0, 0, width, height);
-
-        const currentBIndex = intervalIndex(rule.bStart, rule.bEnd);
-        const currentSIndex = intervalIndex(rule.sStart, rule.sEnd);
-
-        for (let by = 0; by < 36; by += 1) {
-          const s = connectedIntervals[by];
-
-          for (let bx = 0; bx < 36; bx += 1) {
-            const b = connectedIntervals[bx];
-            const bSize = b.end - b.start + 1;
-            const sSize = s.end - s.start + 1;
-            const brightness = 22 + (bSize + sSize) * 8;
-            const blue = 48 + bSize * 18;
-            const purple = 42 + sSize * 17;
-
-            mapCtx.fillStyle = `rgb(${brightness}, ${Math.floor((blue + purple) * 0.34)}, ${Math.min(255, blue + purple)})`;
-            mapCtx.fillRect(bx * cell, by * cell, Math.ceil(cell), Math.ceil(cell));
+        for (let y = startY; y <= endY; y += 1) {
+          for (let x = startX; x <= endX; x += 1) {
+            if (x >= 0 && x < 36 && y >= 0 && y < 36) {
+              tiles.push({ x, y });
+            }
           }
         }
+        return tiles;
+      }
 
-        // Current B-range column and S-range row.
-        mapCtx.fillStyle = "rgba(255,255,255,0.15)";
-        mapCtx.fillRect(currentBIndex * cell, 0, cell, height);
-        mapCtx.fillRect(0, currentSIndex * cell, width, cell);
+      function updateLiveMapSimulation() {
+        const visible = getVisibleMapTiles();
+        if (paused || visible.length > MAP_SIMULATION_LIMIT) return;
 
-        // Current universe.
+        for (const tile of visible) {
+          const state = getMapUniverse(tile.x, tile.y);
+          const changed = stepCells(state.rule, state.cells, state.nextCells, state.ages, state.nextAges);
+          state.generation += 1;
+
+          if (changed) state.stableTicks = 0;
+          else state.stableTicks += 1;
+
+          if (state.stableTicks >= STABLE_RESET_DELAY) resetMapUniverse(state);
+        }
+      }
+
+      function renderLiveMap() {
+        const visible = getVisibleMapTiles();
+        const liveMode = visible.length <= MAP_SIMULATION_LIMIT;
+        mapCtx.fillStyle = "#02050c";
+        mapCtx.fillRect(0, 0, mapCanvas.width, mapCanvas.height);
+
+        for (const tile of visible) {
+          const sx = Math.round((tile.x - mapView.x) * mapView.tile);
+          const sy = Math.round((tile.y - mapView.y) * mapView.tile);
+          const size = Math.max(1, Math.ceil(mapView.tile));
+          const intervalB = connectedIntervals[tile.x];
+          const intervalS = connectedIntervals[tile.y];
+
+          if (liveMode && mapView.tile >= 10) {
+            const state = getMapUniverse(tile.x, tile.y);
+            drawUniverseThumbnail(state, sx, sy, size);
+          } else {
+            const bSize = intervalB.end - intervalB.start + 1;
+            const sSize = intervalS.end - intervalS.start + 1;
+            mapCtx.fillStyle = `rgb(${22 + (bSize + sSize) * 7}, ${24 + sSize * 12}, ${56 + bSize * 18})`;
+            mapCtx.fillRect(sx, sy, size, size);
+          }
+
+          mapCtx.strokeStyle = "rgba(255,255,255,0.08)";
+          mapCtx.lineWidth = 1;
+          mapCtx.strokeRect(sx + 0.5, sy + 0.5, size, size);
+        }
+
+        const currentX = intervalIndex(rule.bStart, rule.bEnd);
+        const currentY = intervalIndex(rule.sStart, rule.sEnd);
+        const cx = Math.round((currentX - mapView.x) * mapView.tile);
+        const cy = Math.round((currentY - mapView.y) * mapView.tile);
+        const cSize = Math.max(1, Math.ceil(mapView.tile));
+
         mapCtx.strokeStyle = "#ffffff";
         mapCtx.lineWidth = 2;
-        mapCtx.strokeRect(currentBIndex * cell + 1, currentSIndex * cell + 1, cell - 2, cell - 2);
+        mapCtx.strokeRect(cx + 1, cy + 1, cSize - 2, cSize - 2);
 
-        mapCtx.fillStyle = "#ffffff";
-        mapCtx.fillRect(
-          currentBIndex * cell + cell * 0.35,
-          currentSIndex * cell + cell * 0.35,
-          cell * 0.3,
-          cell * 0.3
-        );
+        mapHint.innerHTML = liveMode
+          ? `<span class="map-status-live">live</span> · ${visible.length} universes visible · drag/zoom/click`
+          : `<span class="map-status-paused">overview paused</span> · ${visible.length} universes visible · zoom in for live cells`;
+      }
+
+      function drawUniverseThumbnail(state, sx, sy, size) {
+        mapCtx.fillStyle = "#000";
+        mapCtx.fillRect(sx, sy, size, size);
+
+        const sample = MAP_THUMBNAIL_GRID;
+        const cellSize = size / sample;
+
+        for (let ty = 0; ty < sample; ty += 1) {
+          for (let tx = 0; tx < sample; tx += 1) {
+            const gx = Math.floor((tx / sample) * GRID_SIZE);
+            const gy = Math.floor((ty / sample) * GRID_SIZE);
+            const i = idx(gx, gy);
+
+            if (state.cells[i]) {
+              const color = colorForAge(state.ages[i]);
+              mapCtx.fillStyle = `rgb(${color[0]},${color[1]},${color[2]})`;
+              mapCtx.fillRect(
+                sx + Math.floor(tx * cellSize),
+                sy + Math.floor(ty * cellSize),
+                Math.ceil(cellSize),
+                Math.ceil(cellSize)
+              );
+            }
+          }
+        }
+      }
+
+      function getMapUniverse(x, y) {
+        const key = `${x},${y}`;
+        let state = mapUniverses.get(key);
+        if (state) return state;
+
+        const b = connectedIntervals[x];
+        const s = connectedIntervals[y];
+
+        state = {
+          rule: { bStart: b.start, bEnd: b.end, sStart: s.start, sEnd: s.end },
+          cells: new Uint8Array(CELL_COUNT),
+          nextCells: new Uint8Array(CELL_COUNT),
+          ages: new Uint16Array(CELL_COUNT),
+          nextAges: new Uint16Array(CELL_COUNT),
+          generation: 0,
+          stableTicks: 0
+        };
+
+        resetMapUniverse(state);
+        mapUniverses.set(key, state);
+        return state;
+      }
+
+      function resetMapUniverse(state) {
+        state.cells.fill(0);
+        state.nextCells.fill(0);
+        state.ages.fill(0);
+        state.nextAges.fill(0);
+        const start = Math.floor((GRID_SIZE - INITIAL_PATTERN_SIZE) / 2);
+        // Deterministic-ish seed per reset, but random enough for visual variation.
+        for (let y = start; y < start + INITIAL_PATTERN_SIZE; y += 1) {
+          for (let x = start; x < start + INITIAL_PATTERN_SIZE; x += 1) {
+            const i = idx(x, y);
+            if (Math.random() < INITIAL_LIVE_CHANCE) {
+              state.cells[i] = 1;
+              state.ages[i] = 0;
+            }
+          }
+        }
+        state.generation = 0;
+        state.stableTicks = 0;
+      }
+
+      function mapWorldFromEvent(event) {
+        const rect = mapCanvas.getBoundingClientRect();
+        const px = ((event.clientX - rect.left) / rect.width) * mapCanvas.width;
+        const py = ((event.clientY - rect.top) / rect.height) * mapCanvas.height;
+        return { x: mapView.x + px / mapView.tile, y: mapView.y + py / mapView.tile };
+      }
+
+      function mapPointFromEvent(event) {
+        const world = mapWorldFromEvent(event);
+        if (!world) return null;
+        return { x: Math.floor(world.x), y: Math.floor(world.y) };
+      }
+
+      function jumpToMapPoint(x, y) {
+        if (x < 0 || x >= 36 || y < 0 || y >= 36) return;
+        const b = connectedIntervals[x];
+        const s = connectedIntervals[y];
+        setRule({ bStart: b.start, bEnd: b.end, sStart: s.start, sEnd: s.end });
+      }
+
+      function centerMapOnCurrent() {
+        const currentX = intervalIndex(rule.bStart, rule.bEnd);
+        const currentY = intervalIndex(rule.sStart, rule.sEnd);
+        mapView.x = currentX - mapCanvas.width / mapView.tile / 2 + 0.5;
+        mapView.y = currentY - mapCanvas.height / mapView.tile / 2 + 0.5;
+        constrainMapView();
+      }
+
+      function constrainMapView() {
+        const maxX = 36 - mapCanvas.width / mapView.tile;
+        const maxY = 36 - mapCanvas.height / mapView.tile;
+        mapView.x = clamp(mapView.x, Math.min(0, maxX), Math.max(0, maxX));
+        mapView.y = clamp(mapView.y, Math.min(0, maxY), Math.max(0, maxY));
       }
 
       function buildConnectedIntervals() {
         const intervals = [];
         for (let start = 1; start <= 8; start += 1) {
-          for (let end = start; end <= 8; end += 1) {
-            intervals.push({ start, end });
-          }
+          for (let end = start; end <= 8; end += 1) intervals.push({ start, end });
         }
         return intervals;
       }
@@ -1365,17 +1548,14 @@
 
       function rotatePoint(point, yaw, pitch) {
         let [x, y, z] = point;
-
         const cy = Math.cos(yaw);
         const sy = Math.sin(yaw);
         const x1 = x * cy + z * sy;
         const z1 = -x * sy + z * cy;
-
         const cp = Math.cos(pitch);
         const sp = Math.sin(pitch);
         const y2 = y * cp - z1 * sp;
         const z2 = y * sp + z1 * cp;
-
         return { x: x1, y: y2, z: z2 };
       }
 
