@@ -863,9 +863,7 @@
     const width = window.innerWidth;
     const height = window.innerHeight;
 
-    spaceMapCtx.fillStyle = "#02040b";
-    spaceMapCtx.fillRect(0, 0, width, height);
-
+    drawMapBackdrop(width, height);
     drawMapStars(width, height);
 
     const hitRects = [];
@@ -881,20 +879,92 @@
     spaceMapCanvas._hitRects = hitRects;
   }
 
-  function drawMapStars(width, height) {
-    spaceMapCtx.save();
-    spaceMapCtx.globalAlpha = 0.75;
-    for (let i = 0; i < 180; i += 1) {
-      const x = (i * 137.508 + mapView.x * 0.05) % width;
-      const y = (i * 71.271 + mapView.y * 0.04) % height;
-      const r = (i % 7 === 0 ? 1.5 : 0.8) * Math.sqrt(mapView.zoom);
-      spaceMapCtx.fillStyle = i % 5 === 0 ? "rgba(160,205,255,0.9)" : "rgba(255,255,255,0.75)";
+  function mapStarNoise(seed) {
+    let x = Math.imul(seed ^ 0x9e3779b9, 0x85ebca6b) >>> 0;
+    x = Math.imul(x ^ (x >>> 13), 0xc2b2ae35) >>> 0;
+    x ^= x >>> 16;
+    return (x >>> 0) / 4294967296;
+  }
+
+  function drawMapBackdrop(width, height) {
+    const base = spaceMapCtx.createRadialGradient(
+      width * 0.5,
+      height * 0.48,
+      0,
+      width * 0.5,
+      height * 0.5,
+      Math.max(width, height) * 0.82
+    );
+
+    base.addColorStop(0, "#061326");
+    base.addColorStop(0.46, "#030814");
+    base.addColorStop(1, "#01030a");
+
+    spaceMapCtx.fillStyle = base;
+    spaceMapCtx.fillRect(0, 0, width, height);
+
+    const blueWash = spaceMapCtx.createRadialGradient(width * 0.18, height * 0.18, 0, width * 0.18, height * 0.18, width * 0.62);
+    blueWash.addColorStop(0, "rgba(68, 153, 255, 0.16)");
+    blueWash.addColorStop(1, "rgba(68, 153, 255, 0)");
+    spaceMapCtx.fillStyle = blueWash;
+    spaceMapCtx.fillRect(0, 0, width, height);
+
+    const violetWash = spaceMapCtx.createRadialGradient(width * 0.86, height * 0.76, 0, width * 0.86, height * 0.76, width * 0.58);
+    violetWash.addColorStop(0, "rgba(173, 92, 255, 0.13)");
+    violetWash.addColorStop(1, "rgba(173, 92, 255, 0)");
+    spaceMapCtx.fillStyle = violetWash;
+    spaceMapCtx.fillRect(0, 0, width, height);
+
+    const cyanMist = spaceMapCtx.createRadialGradient(width * 0.52, height * 0.52, 0, width * 0.52, height * 0.52, width * 0.72);
+    cyanMist.addColorStop(0, "rgba(79, 204, 255, 0.055)");
+    cyanMist.addColorStop(1, "rgba(79, 204, 255, 0)");
+    spaceMapCtx.fillStyle = cyanMist;
+    spaceMapCtx.fillRect(0, 0, width, height);
+  }
+
+  function drawMapStarLayer(width, height, count, parallax, radiusMin, radiusMax, alphaMin, alphaMax, seedBase) {
+    const camX = -mapView.x / Math.max(0.0001, mapView.zoom);
+    const camY = -mapView.y / Math.max(0.0001, mapView.zoom);
+    const wrapW = width + 320;
+    const wrapH = height + 320;
+
+    for (let i = 0; i < count; i += 1) {
+      const n1 = mapStarNoise(seedBase + i * 11);
+      const n2 = mapStarNoise(seedBase + i * 17);
+      const n3 = mapStarNoise(seedBase + i * 23);
+      const n4 = mapStarNoise(seedBase + i * 31);
+      const n5 = mapStarNoise(seedBase + i * 43);
+
+      let x = n1 * wrapW - ((camX * parallax) % wrapW) - 160;
+      let y = n2 * wrapH - ((camY * parallax) % wrapH) - 160;
+
+      if (x < -160) x += wrapW;
+      if (x > width + 160) x -= wrapW;
+      if (y < -160) y += wrapH;
+      if (y > height + 160) y -= wrapH;
+
+      const radius = radiusMin + n3 * (radiusMax - radiusMin);
+      const alpha = alphaMin + n4 * (alphaMax - alphaMin);
+      const warm = n5 > 0.88;
+
       spaceMapCtx.beginPath();
-      spaceMapCtx.arc(x, y, r, 0, Math.PI * 2);
+      spaceMapCtx.fillStyle = warm
+        ? `rgba(255, 232, 205, ${alpha * 0.82})`
+        : `rgba(225, 241, 255, ${alpha})`;
+      spaceMapCtx.arc(x, y, radius, 0, Math.PI * 2);
       spaceMapCtx.fill();
     }
+  }
+
+  function drawMapStars(width, height) {
+    spaceMapCtx.save();
+    spaceMapCtx.globalCompositeOperation = "screen";
+    drawMapStarLayer(width, height, 90, 0.018, 0.35, 0.85, 0.20, 0.58, 12013);
+    drawMapStarLayer(width, height, 145, 0.035, 0.22, 0.62, 0.13, 0.42, 39191);
+    drawMapStarLayer(width, height, 230, 0.070, 0.12, 0.38, 0.08, 0.28, 81799);
     spaceMapCtx.restore();
   }
+
 
   function drawSubsetCluster(cluster, bs, ss, hitRects, currentId) {
     const label = `B${bs}+ / S${ss}+`;
