@@ -21,8 +21,8 @@ ring-size: 18
 ring-image: /images/mail.ico
 ring-title: Email
 ring-nav-name: Email
-ring-text: The official Penguin Prototypes Email. (Not Implemented)
-ring-link: Link | https://penguinprototypes.com
+ring-text: The official Penguin Prototypes Email.
+ring-link: Mail | mailto:inquiry@penguinprototypes.com
 ring-alt: Windows 98 Mail Icon
 
 ring-image: /images/reddit.png

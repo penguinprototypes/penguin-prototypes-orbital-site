@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Conway Multiverse | Penguin Prototypes</title>
+  <meta
+    name="description"
+    content="An interactive connected-rule Conway Multiverse viewer for Life-like cellular automata."
+  />
+  <meta property="og:title" content="Conway Multiverse | Penguin Prototypes" />
+  <meta
+    property="og:description"
+    content="Navigate connected B/S cellular automata rules as a four-dimensional multiverse."
+  />
+  <meta property="og:type" content="website" />
+  <link rel="stylesheet" href="./conway.css" />
+</head>
+<body>
+  <div class="stars" aria-hidden="true"></div>
+  <div class="glow glow-a" aria-hidden="true"></div>
+  <div class="glow glow-b" aria-hidden="true"></div>
+
+  <main class="page-shell">
+    <header class="top-bar">
+      <a class="home-link" href="/" aria-label="Back to Penguin Prototypes">← Penguin Prototypes</a>
+      <div class="status-pill" id="status-pill">running</div>
+    </header>
+
+    <section class="hero">
+      <p class="eyebrow">Connected Life-like cellular automata</p>
+      <h1>Conway Multiverse</h1>
+      <p class="subtitle">
+        A small window into the connected-rule subset of the Conway Multiverse.
+        Each universe is a 50×50 toroidal grid with age-colored living cells.
+      </p>
+    </section>
+
+    <section class="sim-layout" aria-label="Conway Multiverse simulation">
+      <aside class="rule-card" aria-label="Current rule">
+        <p class="card-label">Current universe</p>
+        <h2 id="rule-name">B3/S23</h2>
+        <dl>
+          <div>
+            <dt>Birth range</dt>
+            <dd id="birth-range">3</dd>
+          </div>
+          <div>
+            <dt>Survival range</dt>
+            <dd id="survival-range">23</dd>
+          </div>
+          <div>
+            <dt>Group</dt>
+            <dd id="group-name">B3+/S2+</dd>
+          </div>
+          <div>
+            <dt>Generation</dt>
+            <dd id="generation">0</dd>
+          </div>
+          <div>
+            <dt>Living cells</dt>
+            <dd id="live-count">0</dd>
+          </div>
+        </dl>
+      </aside>
+
+      <div class="universe-stage">
+        <div class="universe-frame" id="universe-frame">
+          <canvas
+            id="universe-canvas"
+            width="50"
+            height="50"
+            aria-label="Current Conway universe"
+          ></canvas>
+          <div class="scanline" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <aside class="description-card">
+        <p class="card-label">What you are seeing</p>
+        <p>
+          Life-like cellular automata use rules like <strong>B3/S23</strong>.
+          A dead cell is born if its neighbor count is in the B set; a living
+          cell survives if its neighbor count is in the S set.
+        </p>
+        <p>
+          This page currently shows only the <strong>connected</strong> rules:
+          contiguous ranges such as <strong>B3/S23</strong>,
+          <strong>B678/S1234</strong>, or <strong>B24/S7</strong> if the range
+          itself has no gaps.
+        </p>
+        <p>
+          The eight navigation buttons move through four dimensions:
+          B-start, B-end, S-start, and S-end. The grid wraps at its edges, and
+          a universe resets when it reaches a still/static state.
+        </p>
+      </aside>
+    </section>
+  </main>
+
+  <nav class="dimension-pad" aria-label="Four-dimensional rule navigation">
+    <button data-axis="bStart" data-dir="-1" title="Decrease B start">Bₛ−</button>
+    <button data-axis="bStart" data-dir="1" title="Increase B start">Bₛ+</button>
+    <button data-axis="bEnd" data-dir="-1" title="Decrease B end">Bₑ−</button>
+    <button data-axis="bEnd" data-dir="1" title="Increase B end">Bₑ+</button>
+    <button data-axis="sStart" data-dir="-1" title="Decrease S start">Sₛ−</button>
+    <button data-axis="sStart" data-dir="1" title="Increase S start">Sₛ+</button>
+    <button data-axis="sEnd" data-dir="-1" title="Decrease S end">Sₑ−</button>
+    <button data-axis="sEnd" data-dir="1" title="Increase S end">Sₑ+</button>
+  </nav>
+
+  <button class="random-button" id="random-button" type="button">
+    Random universe
+  </button>
+
+  <button class="pause-button" id="pause-button" type="button">
+    Pause
+  </button>
+
+  <script type="module" src="./conway.js"></script>
+</body>
+</html>
