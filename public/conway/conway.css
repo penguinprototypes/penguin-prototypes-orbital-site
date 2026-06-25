@@ -14,6 +14,7 @@
   --py: 0px;
   --stars-x: 0px;
   --stars-y: 0px;
+  --sim-layout-offset-x: clamp(28px, 4vw, 76px);
   --intro-black-fade-delay: 90ms;
   --intro-black-fade-duration: 1450ms;
   color-scheme: dark;
@@ -211,6 +212,8 @@ h1 {
   min-height: 0;
   margin-block: auto;
   padding-right: min(430px, 28vw);
+  transform: translateX(var(--sim-layout-offset-x));
+  will-change: transform;
 }
 
 .rule-card,
@@ -674,6 +677,7 @@ h1 {
   .sim-layout {
     grid-template-columns: 1fr;
     padding-right: 0;
+    transform: none;
   }
 
   .rule-card,
@@ -775,4 +779,11 @@ body.map-fade-active #map-fade {
   transition:
     opacity 280ms ease,
     visibility 0s;
+}
+
+
+@media (max-width: 1060px) {
+  .sim-layout {
+    transform: none !important;
+  }
 }
