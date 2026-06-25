@@ -4,49 +4,35 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Conway Multiverse | Penguin Prototypes</title>
-  <meta
-    name="description"
-    content="An interactive connected-rule Conway Multiverse viewer for Life-like cellular automata."
-  />
-  <meta property="og:title" content="Conway Multiverse | Penguin Prototypes" />
-  <meta
-    property="og:description"
-    content="Navigate connected B/S cellular automata rules as a four-dimensional multiverse."
-  />
-  <meta property="og:type" content="website" />
+  <meta name="description" content="An interactive connected-rule Conway Multiverse viewer for Life-like cellular automata." />
   <link rel="stylesheet" href="./conway.css" />
 </head>
 <body>
   <div class="fade-curtain" aria-hidden="true"></div>
-  <script>
-    // Failsafe: the intro fade must never be able to permanently cover the page.
-    requestAnimationFrame(() => document.body.classList.add("is-loaded"));
-    setTimeout(() => document.body.classList.add("is-loaded"), 350);
-  </script>
-  <div class="stars" aria-hidden="true"></div>
-  <div class="mouse-glow" aria-hidden="true"></div>
-  <div class="glow glow-a" aria-hidden="true"></div>
-  <div class="glow glow-b" aria-hidden="true"></div>
+  <canvas id="star-canvas" aria-hidden="true"></canvas>
+  <div class="ambient-glow glow-one" aria-hidden="true"></div>
+  <div class="ambient-glow glow-two" aria-hidden="true"></div>
 
-  <main class="page-shell">
-    <header class="top-bar parallax-layer" data-depth="0.22">
-      <a class="home-link" href="/" aria-label="Back to Penguin Prototypes">← Penguin Prototypes</a>
-      <div class="status-pill" id="status-pill">running</div>
+  <main class="page-shell" id="page-shell">
+    <header class="top-bar parallax-layer" data-depth="0.35">
+      <a class="home-link" href="/">← Penguin Prototypes</a>
+      <span class="status-pill" id="status-pill">running</span>
     </header>
 
-    <section class="hero parallax-layer" data-depth="0.12">
+    <section class="hero parallax-layer" data-depth="0.55">
       <p class="eyebrow">Connected Life-like cellular automata</p>
       <h1>Conway Multiverse</h1>
       <p class="subtitle">
-        A small window into the connected-rule subset of the Conway Multiverse.
-        Each universe is a 50×50 toroidal grid with age-colored living cells.
+        A navigable slice of the connected-rule Conway Multiverse, using contiguous
+        birth and survival ranges like <strong>B3/S23</strong> or <strong>B678/S1234</strong>.
       </p>
     </section>
 
-    <section class="sim-layout" aria-label="Conway Multiverse simulation">
-      <aside class="rule-card parallax-layer" data-depth="0.32" aria-label="Current rule">
+    <section class="sim-layout">
+      <aside class="rule-card parallax-layer" data-depth="0.75">
         <p class="card-label">Current universe</p>
-        <h2 id="rule-name">B3/S23</h2>
+        <h2 id="rule-name">B3/S2-3</h2>
+
         <dl>
           <div>
             <dt>Birth range</dt>
@@ -71,55 +57,51 @@
         </dl>
       </aside>
 
-      <div class="universe-stage parallax-layer" data-depth="0.5">
+      <section class="universe-stage parallax-layer" data-depth="1.0" aria-label="Current Conway universe">
         <div class="universe-frame" id="universe-frame">
-          <canvas
-            id="universe-canvas"
-            width="50"
-            height="50"
-            aria-label="Current Conway universe"
-          ></canvas>
-          <div class="scanline" aria-hidden="true"></div>
+          <canvas id="universe-canvas" width="50" height="50"></canvas>
+          <div class="screen-sheen" aria-hidden="true"></div>
         </div>
-      </div>
+      </section>
 
-      <aside class="description-card parallax-layer" data-depth="0.24">
+      <aside class="description-card parallax-layer" data-depth="0.65">
         <p class="card-label">What you are seeing</p>
         <p>
-          Life-like cellular automata use rules like <strong>B3/S23</strong>.
-          A dead cell is born if its neighbor count is in the B set; a living
-          cell survives if its neighbor count is in the S set.
+          A Life-like cellular automaton is controlled by a <strong>B/S rule</strong>.
+          A dead cell is born when its neighbor count is in the birth range, and a
+          living cell survives when its neighbor count is in the survival range.
         </p>
         <p>
-          This page currently shows only the <strong>connected</strong> rules:
-          contiguous birth and survival ranges with no gaps, such as
-          <strong>B3/S23</strong> or <strong>B678/S1234</strong>.
+          This prototype only uses the connected rules for now, meaning each range is
+          continuous. The navigation pad moves through four dimensions:
+          birth start, birth end, survival start, and survival end.
         </p>
         <p>
-          The eight navigation buttons move through four dimensions:
-          B-start, B-end, S-start, and S-end. The grid wraps at its edges, and
-          a universe resets when it reaches a still/static state.
+          White cells are newborn, then smoothly shift through red, orange, yellow,
+          green, cyan, blue, purple, and magenta as they age. If nothing changes, the
+          universe resets with a new 10×10 seed in the center.
         </p>
+        <p class="inspiration">Inspired by Cary Huang.</p>
       </aside>
     </section>
   </main>
 
   <nav class="dimension-pad" aria-label="Four-dimensional rule navigation">
-    <button data-axis="bStart" data-dir="1" title="Increase B start">Bₛ+</button>
-    <button data-axis="bEnd" data-dir="1" title="Increase B end">Bₑ+</button>
-    <button data-axis="sStart" data-dir="1" title="Increase S start">Sₛ+</button>
-    <button data-axis="sEnd" data-dir="1" title="Increase S end">Sₑ+</button>
+    <button type="button" data-axis="bStart" data-dir="1">Bₛ+</button>
+    <button type="button" data-axis="bEnd" data-dir="1">Bₑ+</button>
+    <button type="button" data-axis="sStart" data-dir="1">Sₛ+</button>
+    <button type="button" data-axis="sEnd" data-dir="1">Sₑ+</button>
 
-    <button data-axis="bStart" data-dir="-1" title="Decrease B start">Bₛ−</button>
-    <button data-axis="bEnd" data-dir="-1" title="Decrease B end">Bₑ−</button>
-    <button data-axis="sStart" data-dir="-1" title="Decrease S start">Sₛ−</button>
-    <button data-axis="sEnd" data-dir="-1" title="Decrease S end">Sₑ−</button>
+    <button type="button" data-axis="bStart" data-dir="-1">Bₛ−</button>
+    <button type="button" data-axis="bEnd" data-dir="-1">Bₑ−</button>
+    <button type="button" data-axis="sStart" data-dir="-1">Sₛ−</button>
+    <button type="button" data-axis="sEnd" data-dir="-1">Sₑ−</button>
   </nav>
 
   <div class="action-cluster" aria-label="Simulation actions">
-    <button class="pause-button" id="pause-button" type="button">Pause</button>
-    <button class="reset-button" id="reset-button" type="button">Reset</button>
-    <button class="random-button" id="random-button" type="button">Random universe</button>
+    <button type="button" id="pause-button">Pause</button>
+    <button type="button" id="reset-button">Reset</button>
+    <button type="button" id="random-button">Random universe</button>
   </div>
 
   <script type="module" src="./conway.js"></script>

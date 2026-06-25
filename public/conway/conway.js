@@ -5,20 +5,22 @@ const INITIAL_LIVE_CHANCE = 0.34;
 const TICK_MS = 100;
 const STABLE_RESET_DELAY = 2;
 
-const canvas = document.querySelector("#universe-canvas");
+const canvas = document.getElementById("universe-canvas");
 const ctx = canvas.getContext("2d", { alpha: false });
-const frameEl = document.querySelector("#universe-frame");
+const frameEl = document.getElementById("universe-frame");
+const starCanvas = document.getElementById("star-canvas");
+const starCtx = starCanvas.getContext("2d");
 
-const ruleNameEl = document.querySelector("#rule-name");
-const birthRangeEl = document.querySelector("#birth-range");
-const survivalRangeEl = document.querySelector("#survival-range");
-const groupNameEl = document.querySelector("#group-name");
-const generationEl = document.querySelector("#generation");
-const liveCountEl = document.querySelector("#live-count");
-const statusPill = document.querySelector("#status-pill");
-const randomButton = document.querySelector("#random-button");
-const resetButton = document.querySelector("#reset-button");
-const pauseButton = document.querySelector("#pause-button");
+const ruleNameEl = document.getElementById("rule-name");
+const birthRangeEl = document.getElementById("birth-range");
+const survivalRangeEl = document.getElementById("survival-range");
+const groupNameEl = document.getElementById("group-name");
+const generationEl = document.getElementById("generation");
+const liveCountEl = document.getElementById("live-count");
+const statusPill = document.getElementById("status-pill");
+const randomButton = document.getElementById("random-button");
+const resetButton = document.getElementById("reset-button");
+const pauseButton = document.getElementById("pause-button");
 
 canvas.width = GRID_SIZE;
 canvas.height = GRID_SIZE;
@@ -43,95 +45,114 @@ let generation = 0;
 let stableTicks = 0;
 let lastTick = 0;
 let paused = false;
-let pointerX = 0;
-let pointerY = 0;
+let mouseX = 0;
+let mouseY = 0;
+let stars = [];
 
 precomputeNeighbors();
+setupButtons();
+setupMouseMotion();
+setupStars();
 resetPattern();
 updateUi();
 draw();
-setupParallax();
-
-function markLoaded() {
-  document.body.classList.add("is-loaded");
-}
-
-if (document.readyState === "complete" || document.readyState === "interactive") {
-  markLoaded();
-} else {
-  window.addEventListener("load", markLoaded, { once: true });
-}
-
-setTimeout(markLoaded, 350);
 
 requestAnimationFrame(loop);
 
-document.querySelectorAll(".dimension-pad button").forEach((button) => {
-  button.addEventListener("click", () => {
-    const axis = button.dataset.axis;
-    const dir = Number(button.dataset.dir);
-
-    moveAxis(axis, dir);
+function setupButtons() {
+  document.querySelectorAll(".dimension-pad button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const axis = button.dataset.axis;
+      const dir = Number(button.dataset.dir);
+      moveAxis(axis, dir);
+    });
   });
-});
 
-randomButton.addEventListener("click", () => {
-  randomizeRule();
-});
-
-resetButton.addEventListener("click", () => {
-  resetPattern();
-  draw();
-  updateUi();
-});
-
-pauseButton.addEventListener("click", () => {
-  togglePause();
-});
-
-window.addEventListener("keydown", (event) => {
-  if (event.target && ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName)) {
-    return;
-  }
-
-  const keyMap = {
-    q: ["bStart", -1],
-    w: ["bStart", 1],
-    a: ["bEnd", -1],
-    s: ["bEnd", 1],
-    e: ["sStart", -1],
-    r: ["sStart", 1],
-    d: ["sEnd", -1],
-    f: ["sEnd", 1]
-  };
-
-  const mapped = keyMap[event.key.toLowerCase()];
-
-  if (mapped) {
-    event.preventDefault();
-    moveAxis(mapped[0], mapped[1]);
-  }
-
-  if (event.key === " ") {
-    event.preventDefault();
-    togglePause();
-  }
-
-  if (event.key.toLowerCase() === "x") {
+  randomButton.addEventListener("click", () => {
     randomizeRule();
-  }
+  });
 
-  if (event.key.toLowerCase() === "z") {
+  resetButton.addEventListener("click", () => {
     resetPattern();
     draw();
     updateUi();
+  });
+
+  pauseButton.addEventListener("click", () => {
+    paused = !paused;
+    pauseButton.textContent = paused ? "Resume" : "Pause";
+    statusPill.textContent = paused ? "paused" : "running";
+    statusPill.classList.toggle("paused", paused);
+  });
+}
+
+function setupMouseMotion() {
+  const layers = Array.from(document.querySelectorAll(".parallax-layer"));
+  const glows = Array.from(document.querySelectorAll(".ambient-glow"));
+
+  window.addEventListener("pointermove", (event) => {
+    mouseX = event.clientX / window.innerWidth - 0.5;
+    mouseY = event.clientY / window.innerHeight - 0.5;
+
+    document.documentElement.style.setProperty("--mouse-x", `${event.clientX}px`);
+    document.documentElement.style.setProperty("--mouse-y", `${event.clientY}px`);
+
+    for (const layer of layers) {
+      const depth = Number(layer.dataset.depth || 1);
+      const tx = mouseX * depth * 14;
+      const ty = mouseY * depth * 14;
+      layer.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+    }
+
+    glows.forEach((glow, index) => {
+      const strength = index === 0 ? 28 : -24;
+      glow.style.transform = `translate3d(${mouseX * strength}px, ${mouseY * strength}px, 0)`;
+    });
+  });
+}
+
+function setupStars() {
+  function resize() {
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    starCanvas.width = Math.floor(window.innerWidth * dpr);
+    starCanvas.height = Math.floor(window.innerHeight * dpr);
+    starCanvas.style.width = `${window.innerWidth}px`;
+    starCanvas.style.height = `${window.innerHeight}px`;
+    starCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const count = Math.floor((window.innerWidth * window.innerHeight) / 4200);
+    stars = Array.from({ length: Math.max(110, Math.min(360, count)) }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      r: Math.random() * 1.4 + 0.25,
+      a: Math.random() * 0.65 + 0.2,
+      drift: Math.random() * 0.18 + 0.04
+    }));
   }
-});
+
+  window.addEventListener("resize", resize);
+  resize();
+}
+
+function drawStars(time = 0) {
+  starCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+  for (const star of stars) {
+    const px = star.x + mouseX * star.drift * 42;
+    const py = star.y + mouseY * star.drift * 42 + Math.sin(time * 0.00025 + star.x) * 0.6;
+    starCtx.globalAlpha = star.a;
+    starCtx.fillStyle = "#ffffff";
+    starCtx.beginPath();
+    starCtx.arc(px, py, star.r, 0, Math.PI * 2);
+    starCtx.fill();
+  }
+
+  starCtx.globalAlpha = 1;
+}
 
 function loop(timestamp) {
   requestAnimationFrame(loop);
-
-  updateParallax();
+  drawStars(timestamp);
 
   if (paused) {
     return;
@@ -161,10 +182,7 @@ function precomputeNeighbors() {
 
       for (let dy = -1; dy <= 1; dy += 1) {
         for (let dx = -1; dx <= 1; dx += 1) {
-          if (dx === 0 && dy === 0) {
-            continue;
-          }
-
+          if (dx === 0 && dy === 0) continue;
           neighbors[i][k] = idx(x + dx, y + dy);
           k += 1;
         }
@@ -184,7 +202,6 @@ function resetPattern() {
   for (let y = start; y < start + INITIAL_PATTERN_SIZE; y += 1) {
     for (let x = start; x < start + INITIAL_PATTERN_SIZE; x += 1) {
       const i = idx(x, y);
-
       if (Math.random() < INITIAL_LIVE_CHANCE) {
         cells[i] = 1;
         ages[i] = 0;
@@ -203,7 +220,6 @@ function step() {
   for (let i = 0; i < CELL_COUNT; i += 1) {
     const neighborCount = countNeighbors(i);
     const alive = cells[i] === 1;
-
     let nextAlive = 0;
 
     if (alive) {
@@ -242,18 +258,16 @@ function step() {
 
 function countNeighbors(i) {
   const list = neighbors[i];
-  let count = 0;
-
-  count += cells[list[0]];
-  count += cells[list[1]];
-  count += cells[list[2]];
-  count += cells[list[3]];
-  count += cells[list[4]];
-  count += cells[list[5]];
-  count += cells[list[6]];
-  count += cells[list[7]];
-
-  return count;
+  return (
+    cells[list[0]] +
+    cells[list[1]] +
+    cells[list[2]] +
+    cells[list[3]] +
+    cells[list[4]] +
+    cells[list[5]] +
+    cells[list[6]] +
+    cells[list[7]]
+  );
 }
 
 function draw() {
@@ -279,72 +293,44 @@ function draw() {
   ctx.putImageData(image, 0, 0);
 }
 
-const ageStops = [
-  [0, [255, 255, 255]],
-  [8, [255, 0, 0]],
-  [16, [255, 128, 0]],
-  [32, [255, 255, 0]],
-  [64, [0, 255, 0]],
-  [128, [0, 255, 255]],
-  [256, [0, 96, 255]],
-  [512, [180, 0, 255]],
-  [1024, [255, 0, 255]]
-];
-
 function colorForAge(age) {
-  if (age <= 0) {
-    return ageStops[0][1];
-  }
+  const stops = [
+    [0, [255, 255, 255]],
+    [8, [255, 0, 0]],
+    [16, [255, 128, 0]],
+    [32, [255, 255, 0]],
+    [64, [0, 255, 0]],
+    [128, [0, 255, 255]],
+    [256, [0, 96, 255]],
+    [512, [180, 0, 255]],
+    [1024, [255, 0, 255]]
+  ];
 
-  for (let i = 0; i < ageStops.length - 1; i += 1) {
-    const [ageA, colorA] = ageStops[i];
-    const [ageB, colorB] = ageStops[i + 1];
+  if (age <= stops[0][0]) return stops[0][1];
+  if (age >= stops[stops.length - 1][0]) return stops[stops.length - 1][1];
 
-    if (age >= ageA && age <= ageB) {
-      const t = smoothstep((age - ageA) / (ageB - ageA));
-      return mixColor(colorA, colorB, t);
+  for (let i = 0; i < stops.length - 1; i += 1) {
+    const [a0, c0] = stops[i];
+    const [a1, c1] = stops[i + 1];
+
+    if (age >= a0 && age <= a1) {
+      const t = (age - a0) / (a1 - a0);
+      return [
+        Math.round(lerp(c0[0], c1[0], t)),
+        Math.round(lerp(c0[1], c1[1], t)),
+        Math.round(lerp(c0[2], c1[2], t))
+      ];
     }
   }
 
-  return ageStops[ageStops.length - 1][1];
-}
-
-function mixColor(a, b, t) {
-  return [
-    Math.round(a[0] + (b[0] - a[0]) * t),
-    Math.round(a[1] + (b[1] - a[1]) * t),
-    Math.round(a[2] + (b[2] - a[2]) * t)
-  ];
-}
-
-function smoothstep(t) {
-  t = Math.max(0, Math.min(1, t));
-  return t * t * (3 - 2 * t);
+  return [255, 255, 255];
 }
 
 function moveAxis(axis, dir) {
   const next = { ...rule };
-
   next[axis] += dir;
 
-  next.bStart = clamp(next.bStart, 1, 8);
-  next.bEnd = clamp(next.bEnd, 1, 8);
-  next.sStart = clamp(next.sStart, 1, 8);
-  next.sEnd = clamp(next.sEnd, 1, 8);
-
-  if (axis === "bStart" && next.bStart > next.bEnd) {
-    return;
-  }
-
-  if (axis === "bEnd" && next.bEnd < next.bStart) {
-    return;
-  }
-
-  if (axis === "sStart" && next.sStart > next.sEnd) {
-    return;
-  }
-
-  if (axis === "sEnd" && next.sEnd < next.sStart) {
+  if (!isValidRule(next)) {
     return;
   }
 
@@ -361,49 +347,42 @@ function randomizeRule() {
   const sEnd = randomInt(sStart, 8);
 
   rule = { bStart, bEnd, sStart, sEnd };
-
   resetPattern();
   draw();
   updateUi();
 }
 
-function togglePause() {
-  paused = !paused;
-  pauseButton.textContent = paused ? "Resume" : "Pause";
-  statusPill.textContent = paused ? "paused" : "running";
-  statusPill.classList.toggle("paused", paused);
+function isValidRule(candidate) {
+  return (
+    candidate.bStart >= 1 &&
+    candidate.bStart <= 8 &&
+    candidate.bEnd >= 1 &&
+    candidate.bEnd <= 8 &&
+    candidate.sStart >= 1 &&
+    candidate.sStart <= 8 &&
+    candidate.sEnd >= 1 &&
+    candidate.sEnd <= 8 &&
+    candidate.bStart <= candidate.bEnd &&
+    candidate.sStart <= candidate.sEnd
+  );
 }
 
 function ruleString() {
-  return `B${compactRangeString(rule.bStart, rule.bEnd)}/S${compactRangeString(rule.sStart, rule.sEnd)}`;
+  return `B${rangeStringCompact(rule.bStart, rule.bEnd)}/S${rangeStringCompact(rule.sStart, rule.sEnd)}`;
 }
 
 function groupString() {
   return `B${rule.bStart}+/S${rule.sStart}+`;
 }
 
-function compactRangeString(start, end) {
-  let s = "";
-
-  for (let n = start; n <= end; n += 1) {
-    s += String(n);
-  }
-
-  return s;
-}
-
-function displayRangeString(start, end) {
-  if (start === end) {
-    return String(start);
-  }
-
-  return `${start}-${end}`;
+function rangeStringCompact(start, end) {
+  return start === end ? `${start}` : `${start}-${end}`;
 }
 
 function updateUi() {
   ruleNameEl.textContent = ruleString();
-  birthRangeEl.textContent = displayRangeString(rule.bStart, rule.bEnd);
-  survivalRangeEl.textContent = displayRangeString(rule.sStart, rule.sEnd);
+  birthRangeEl.textContent = rangeStringCompact(rule.bStart, rule.bEnd);
+  survivalRangeEl.textContent = rangeStringCompact(rule.sStart, rule.sEnd);
   groupNameEl.textContent = groupString();
   generationEl.textContent = String(generation);
   liveCountEl.textContent = String(countLiveCells());
@@ -411,44 +390,15 @@ function updateUi() {
   document.querySelectorAll(".dimension-pad button").forEach((button) => {
     const axis = button.dataset.axis;
     const dir = Number(button.dataset.dir);
-    button.disabled = !canMove(axis, dir);
+    const candidate = { ...rule };
+    candidate[axis] += dir;
+    button.disabled = !isValidRule(candidate);
   });
-}
-
-function canMove(axis, dir) {
-  const next = { ...rule };
-  next[axis] += dir;
-
-  if (next[axis] < 1 || next[axis] > 8) {
-    return false;
-  }
-
-  if (axis === "bStart" && next.bStart > next.bEnd) {
-    return false;
-  }
-
-  if (axis === "bEnd" && next.bEnd < next.bStart) {
-    return false;
-  }
-
-  if (axis === "sStart" && next.sStart > next.sEnd) {
-    return false;
-  }
-
-  if (axis === "sEnd" && next.sEnd < next.sStart) {
-    return false;
-  }
-
-  return true;
 }
 
 function countLiveCells() {
   let count = 0;
-
-  for (let i = 0; i < CELL_COUNT; i += 1) {
-    count += cells[i];
-  }
-
+  for (let i = 0; i < CELL_COUNT; i += 1) count += cells[i];
   return count;
 }
 
@@ -458,35 +408,12 @@ function animateGrow() {
   frameEl.classList.add("grow");
 }
 
-function setupParallax() {
-  document.querySelectorAll(".parallax-layer").forEach((el) => {
-    const depth = Number(el.dataset.depth ?? 0.2);
-    el.style.setProperty("--depth-x", `${depth * 0.018}px`);
-    el.style.setProperty("--depth-y", `${depth * 0.018}px`);
-  });
-
-  window.addEventListener("pointermove", (event) => {
-    const nx = (event.clientX / window.innerWidth - 0.5) * 2;
-    const ny = (event.clientY / window.innerHeight - 0.5) * 2;
-
-    pointerX = nx * 42;
-    pointerY = ny * 42;
-  }, { passive: true });
-}
-
-function updateParallax() {
-  const currentX = Number.parseFloat(document.documentElement.style.getPropertyValue("--mouse-x")) || 0;
-  const currentY = Number.parseFloat(document.documentElement.style.getPropertyValue("--mouse-y")) || 0;
-
-  const nextX = currentX + (pointerX - currentX) * 0.08;
-  const nextY = currentY + (pointerY - currentY) * 0.08;
-
-  document.documentElement.style.setProperty("--mouse-x", `${nextX}px`);
-  document.documentElement.style.setProperty("--mouse-y", `${nextY}px`);
-}
-
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
 }
 
 function randomInt(min, max) {
