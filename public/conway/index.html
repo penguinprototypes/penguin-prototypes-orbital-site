@@ -166,12 +166,13 @@
 
     .sim-layout {
       display: grid;
-      grid-template-columns: minmax(220px, 310px) minmax(320px, 1fr) minmax(260px, 390px);
+      grid-template-columns: minmax(220px, 310px) minmax(320px, 1fr);
       align-items: center;
       align-self: center;
       gap: clamp(18px, 3vw, 34px);
       min-height: 0;
       margin-block: auto;
+      padding-right: min(430px, 28vw);
     }
 
     .rule-card,
@@ -186,7 +187,7 @@
 
     .rule-card {
       padding: 22px;
-      transform: translate3d(calc(var(--px) * 0.45), calc(var(--py) * 0.45), 0);
+      transform: translate3d(calc(var(--px) * 0.50), calc(var(--py) * 0.50), 0);
       min-width: 0;
       overflow: hidden;
     }
@@ -229,13 +230,16 @@
     }
 
     .description-card {
-      align-self: center;
-      justify-self: stretch;
+      position: fixed;
+      z-index: 4;
+      top: 50vh;
+      right: clamp(18px, 3vw, 44px);
+      width: min(390px, 27vw);
       padding: 22px;
       color: var(--muted);
       line-height: 1.5;
-      transform: translate3d(calc(var(--px) * 0.34), calc(var(--py) * 0.34), 0);
-      max-height: min(62vh, 560px);
+      transform: translate3d(calc(var(--px) * 0.38), calc(-50% + (var(--py) * 0.38)), 0);
+      max-height: min(68vh, 590px);
       overflow: auto;
     }
 
@@ -262,7 +266,7 @@
       place-items: center;
       perspective: 900px;
       min-width: 0;
-      transform: translate3d(calc(var(--px) * 0.58), calc(var(--py) * 0.58), 0);
+      transform: translate3d(calc(var(--px) * 0.64), calc(var(--py) * 0.64), 0);
       will-change: transform;
     }
 
@@ -397,6 +401,16 @@
         max-width: 760px;
         width: 100%;
         justify-self: center;
+      }
+
+      .description-card {
+        position: static;
+        transform: translate3d(calc(var(--px) * 0.34), calc(var(--py) * 0.34), 0);
+        max-height: none;
+      }
+
+      .sim-layout {
+        padding-right: 0;
       }
 
       .universe-frame {
@@ -635,8 +649,8 @@
           const nx = (event.clientX / w) * 2 - 1;
           const ny = (event.clientY / h) * 2 - 1;
 
-          pointer.targetX = clamp(nx, -1, 1) * 10;
-          pointer.targetY = clamp(ny, -1, 1) * 7;
+          pointer.targetX = clamp(nx, -1, 1) * 12;
+          pointer.targetY = clamp(ny, -1, 1) * 8;
 
           root.style.setProperty("--mouse-x", `${event.clientX}px`);
           root.style.setProperty("--mouse-y", `${event.clientY}px`);
