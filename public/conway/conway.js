@@ -186,8 +186,11 @@
 
   function closeSpaceMapImmediate() {
     mapView.open = false;
+    spaceMapOverlay.style.transition = "none";
     spaceMapOverlay.classList.remove("active");
     spaceMapOverlay.setAttribute("aria-hidden", "true");
+    void spaceMapOverlay.offsetWidth;
+    spaceMapOverlay.style.transition = "";
   }
 
   function transitionThroughBlack(callback) {
@@ -197,7 +200,9 @@
       callback();
       window.setTimeout(() => {
         document.body.classList.remove("transitioning");
-      }, 80);
+      }, 150);
+    }, 540);
+  }, 80);
     }, 520);
   }
 
@@ -927,7 +932,7 @@
     spaceMapCtx.stroke();
     spaceMapCtx.setLineDash([]);
 
-    spaceMapCtx.font = `${Math.max(12, 20 * scale)}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
+    spaceMapCtx.font = `${Math.max(11, 17 * scale)}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
     spaceMapCtx.textAlign = "left";
     spaceMapCtx.textBaseline = "middle";
     spaceMapCtx.fillStyle = "rgba(232, 244, 255, 0.88)";
@@ -956,12 +961,13 @@
           spaceMapCtx.stroke();
         }
 
-        if (scale > 0.55) {
-          spaceMapCtx.font = `${Math.max(7, 10 * scale)}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
+        if (scale > 0.68) {
+          const labelSize = Math.max(5.5, 7.4 * scale);
+          spaceMapCtx.font = `${labelSize}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
           spaceMapCtx.textAlign = "center";
           spaceMapCtx.textBaseline = "top";
-          spaceMapCtx.fillStyle = "rgba(230,242,255,0.9)";
-          spaceMapCtx.fillText(labelRule, x + universeSize / 2, y + universeSize + labelGap * 0.35);
+          spaceMapCtx.fillStyle = "rgba(230,242,255,0.82)";
+          spaceMapCtx.fillText(labelRule, x + universeSize / 2, y + universeSize + labelGap * 0.32);
         }
 
         hitRects.push({
