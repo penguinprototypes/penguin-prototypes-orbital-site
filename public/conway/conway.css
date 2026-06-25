@@ -794,3 +794,21 @@ body.map-fade-active #map-fade {
     transform: translate3d(calc(var(--px) * 0.25), calc(var(--py) * 0.25), 0) !important;
   }
 }
+
+
+@media (min-width: 1061px) {
+  .description-card {
+    position: fixed;
+    right: clamp(18px, 3vw, 44px);
+    top: 50vh;
+    transform: translate3d(calc(var(--px) * 0.36), calc(-50% + (var(--py) * 0.36)), 0);
+  }
+}
+
+
+@media (max-width: 1060px) {
+  .description-card {
+    top: auto !important;
+    transform: translate3d(calc(var(--px) * 0.36), calc(var(--py) * 0.36), 0) !important;
+  }
+}
