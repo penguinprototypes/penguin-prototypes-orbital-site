@@ -1,5 +1,6 @@
 :root {
   --bg: #050912;
+  --transition-black-duration: 520ms;
   --text: #f0f7ff;
   --muted: #a9bad0;
   --accent: #8ed0ff;
@@ -60,6 +61,33 @@ input {
   transform: translate3d(calc(var(--px) * -0.3), calc(var(--py) * -0.3), 0);
   will-change: transform;
 }
+
+#black-transition {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  background: #000;
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--transition-black-duration) ease,
+    visibility 0s linear var(--transition-black-duration);
+}
+
+body.loaded #black-transition {
+  opacity: 0;
+  visibility: hidden;
+}
+
+body.transitioning #black-transition {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity var(--transition-black-duration) ease,
+    visibility 0s;
+}
+
 
 .page-shell {
   position: relative;
@@ -325,9 +353,9 @@ h1 {
 .neighbor-orb-panel {
   position: fixed;
   z-index: 5;
-  left: 22px;
+  left: 360px;
   bottom: 22px;
-  width: 270px;
+  width: 218px;
   border-radius: 24px;
   padding: 12px;
   user-select: none;
@@ -346,7 +374,7 @@ h1 {
 
 #neighbor-orb {
   width: 100%;
-  height: 250px;
+  height: 196px;
   display: block;
   touch-action: none;
   cursor: grab;
@@ -384,14 +412,14 @@ h1 {
   pointer-events: none;
   fill: #fff;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 800;
 }
 
 .orb-center-subtitle {
   pointer-events: none;
   fill: rgba(230, 242, 255, 0.58);
-  font-size: 8px;
+  font-size: 7px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -443,7 +471,7 @@ h1 {
   pointer-events: none;
   fill: rgba(235, 246, 255, 0.92);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 6.8px;
+  font-size: 6.2px;
   paint-order: stroke;
   stroke: rgba(0, 0, 0, 0.9);
   stroke-width: 2.8px;
@@ -493,16 +521,24 @@ h1 {
   position: fixed;
   inset: 0;
   z-index: 40;
-  display: none;
+  display: block;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 420ms ease, visibility 0s linear 420ms;
   background:
-    radial-gradient(circle at 28% 28%, rgba(66, 154, 255, 0.16), transparent 30%),
-    radial-gradient(circle at 76% 68%, rgba(170, 95, 255, 0.12), transparent 32%),
+    radial-gradient(circle at 24% 24%, rgba(66, 154, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 78% 70%, rgba(170, 95, 255, 0.14), transparent 32%),
+    radial-gradient(circle at 50% 50%, rgba(95, 175, 255, 0.06), transparent 55%),
     #02040b;
   overflow: hidden;
 }
 
 .space-map-overlay.active {
-  display: block;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 420ms ease, visibility 0s;
 }
 
 .space-map-topbar {
@@ -512,6 +548,12 @@ h1 {
   top: 20px;
   z-index: 2;
   display: flex;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: rgba(5, 10, 22, 0.62);
+  box-shadow: 0 16px 60px rgba(0,0,0,0.32);
+  backdrop-filter: blur(16px);
   justify-content: space-between;
   gap: 18px;
   align-items: flex-start;
@@ -569,6 +611,13 @@ h1 {
   100% { transform: translateY(0) rotateX(0deg) scale(1); opacity: 1; }
 }
 
+@media (max-width: 1320px) {
+  .neighbor-orb-panel {
+    left: 22px;
+    width: 218px;
+  }
+}
+
 @media (max-width: 1060px) {
   body { overflow: auto; }
 
@@ -603,11 +652,11 @@ h1 {
   .neighbor-orb-panel {
     left: 14px;
     bottom: 14px;
-    width: min(240px, calc(100vw - 28px));
+    width: min(218px, calc(100vw - 28px));
   }
 
   #neighbor-orb {
-    height: 220px;
+    height: 196px;
   }
 
   .action-cluster {

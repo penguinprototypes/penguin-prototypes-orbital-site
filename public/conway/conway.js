@@ -7,6 +7,8 @@
   const INITIAL_LIVE_CHANCE = 0.34;
   const TICK_MS = 100;
   const STABLE_RESET_DELAY = 2;
+  const MAP_SIM_TICK_MS = 120;
+  const MAP_VISIBLE_RUN_LIMIT = 180;
 
   const root = document.documentElement;
   const stars = document.getElementById("stars");
@@ -53,11 +55,13 @@
   const neighbors = Array.from({ length: CELL_COUNT }, () => new Uint16Array(8));
   const connectedIntervals = buildConnectedIntervals();
   const thumbnailCache = new Map();
+  const mapUniverseStates = new Map();
 
   let rule = { bStart: 3, bEnd: 3, sStart: 2, sEnd: 3 };
   let generation = 0;
   let stableTicks = 0;
   let lastTick = 0;
+  let lastMapTick = 0;
   let paused = false;
   let pageHidden = document.hidden;
 
@@ -109,6 +113,11 @@
     drawMainUniverse();
     centerMapOnCurrent();
     updateUi();
+
+    requestAnimationFrame(() => {
+      document.body.classList.add("loaded");
+    });
+
     requestAnimationFrame(loop);
   }
 
@@ -129,15 +138,19 @@
     randomButton.addEventListener("click", randomizeConnectedRule);
 
     mapButton.addEventListener("click", () => {
-      mapView.open = true;
-      spaceMapOverlay.classList.add("active");
-      spaceMapOverlay.setAttribute("aria-hidden", "false");
-      resizeSpaceMapCanvas();
-      centerMapOnCurrent();
-      renderSpaceMap();
+      transitionThroughBlack(() => {
+        mapView.open = true;
+        spaceMapOverlay.classList.add("active");
+        spaceMapOverlay.setAttribute("aria-hidden", "false");
+        resizeSpaceMapCanvas();
+        centerMapOnCurrent();
+        renderSpaceMap();
+      });
     });
 
-    mapCloseButton.addEventListener("click", closeSpaceMap);
+    mapCloseButton.addEventListener("click", () => {
+      transitionThroughBlack(closeSpaceMapImmediate);
+    });
     mapCenterButton.addEventListener("click", () => {
       centerMapOnCurrent();
       renderSpaceMap();
@@ -156,9 +169,24 @@
   }
 
   function closeSpaceMap() {
+    transitionThroughBlack(closeSpaceMapImmediate);
+  }
+
+  function closeSpaceMapImmediate() {
     mapView.open = false;
     spaceMapOverlay.classList.remove("active");
     spaceMapOverlay.setAttribute("aria-hidden", "true");
+  }
+
+  function transitionThroughBlack(callback) {
+    document.body.classList.add("transitioning");
+
+    window.setTimeout(() => {
+      callback();
+      window.setTimeout(() => {
+        document.body.classList.remove("transitioning");
+      }, 80);
+    }, 520);
   }
 
   function attachPointerHandlers() {
@@ -310,7 +338,13 @@
     window.addEventListener("resize", debounce(() => {
       generateRandomStarfield();
       resizeSpaceMapCanvas();
-      if (mapView.open) renderSpaceMap();
+      if (mapView.open) {
+      if (timestamp - lastMapTick >= MAP_SIM_TICK_MS) {
+        lastMapTick = timestamp;
+        stepVisibleMapUniverses();
+      }
+      renderSpaceMap();
+    }
     }, 180));
   }
 
@@ -327,7 +361,13 @@
       updateLiveStats();
     }
 
-    if (mapView.open) renderSpaceMap();
+    if (mapView.open) {
+      if (timestamp - lastMapTick >= MAP_SIM_TICK_MS) {
+        lastMapTick = timestamp;
+        stepVisibleMapUniverses();
+      }
+      renderSpaceMap();
+    }
   }
 
   function updateParallax() {
@@ -598,7 +638,13 @@
     jumpInput.value = compactRule;
     updateLiveStats();
     renderOrb();
-    if (mapView.open) renderSpaceMap();
+    if (mapView.open) {
+      if (timestamp - lastMapTick >= MAP_SIM_TICK_MS) {
+        lastMapTick = timestamp;
+        stepVisibleMapUniverses();
+      }
+      renderSpaceMap();
+    }
   }
 
   function updateLiveStats() {
@@ -769,7 +815,18 @@
     }
 
     spaceMapCtx.save();
-    spaceMapCtx.strokeStyle = "rgba(142, 205, 255, 0.18)";
+    spaceMapCtx.fillStyle = "rgba(5, 10, 22, 0.18)";
+    roundedRectPath(
+      spaceMapCtx,
+      origin.x - 34 * scale,
+      origin.y - 54 * scale,
+      (9 - bs) * (universeSize + gap) + 52 * scale,
+      (9 - ss) * (universeSize + gap) + 92 * scale,
+      28 * scale
+    );
+    spaceMapCtx.fill();
+
+    spaceMapCtx.strokeStyle = "rgba(142, 205, 255, 0.22)";
     spaceMapCtx.lineWidth = Math.max(1, 1.4 * scale);
     spaceMapCtx.setLineDash([10 * scale, 16 * scale]);
     roundedRectPath(
@@ -832,56 +889,78 @@
   }
 
   function drawUniverseThumbnailFromRule(ruleObject, x, y, size) {
-    const key = connectedId(ruleObject);
-    let thumb = thumbnailCache.get(key);
-
-    if (!thumb) {
-      thumb = generateThumbnail(ruleObject);
-      thumbnailCache.set(key, thumb);
-    }
+    const state = getMapUniverseState(ruleObject);
+    updateMapStateCanvas(state);
 
     spaceMapCtx.fillStyle = "#000";
     spaceMapCtx.fillRect(x, y, size, size);
-    spaceMapCtx.drawImage(thumb, x, y, size, size);
-    spaceMapCtx.strokeStyle = "rgba(169, 214, 255, 0.22)";
+    spaceMapCtx.drawImage(state.canvas, x, y, size, size);
+    spaceMapCtx.strokeStyle = "rgba(169, 214, 255, 0.24)";
     spaceMapCtx.lineWidth = Math.max(1, 1.2 * mapView.zoom);
     spaceMapCtx.strokeRect(x, y, size, size);
   }
 
-  function generateThumbnail(ruleObject) {
+  function getMapUniverseState(ruleObject) {
+    const key = connectedId(ruleObject);
+    let state = mapUniverseStates.get(key);
+
+    if (state) return state;
+
     const offscreen = document.createElement("canvas");
     offscreen.width = GRID_SIZE;
     offscreen.height = GRID_SIZE;
-    const offCtx = offscreen.getContext("2d", { alpha: false });
-    const offImage = offCtx.createImageData(GRID_SIZE, GRID_SIZE);
 
-    const localCells = new Uint8Array(CELL_COUNT);
-    const localNextCells = new Uint8Array(CELL_COUNT);
-    const localAges = new Uint16Array(CELL_COUNT);
-    const localNextAges = new Uint16Array(CELL_COUNT);
+    state = {
+      rule: { ...ruleObject },
+      cells: new Uint8Array(CELL_COUNT),
+      nextCells: new Uint8Array(CELL_COUNT),
+      ages: new Uint16Array(CELL_COUNT),
+      nextAges: new Uint16Array(CELL_COUNT),
+      canvas: offscreen,
+      ctx: offscreen.getContext("2d", { alpha: false }),
+      image: null,
+      stableTicks: 0,
+      dirty: true,
+      running: false
+    };
+
+    state.ctx.imageSmoothingEnabled = false;
+    state.image = state.ctx.createImageData(GRID_SIZE, GRID_SIZE);
+    seedMapUniverse(state);
+    mapUniverseStates.set(key, state);
+    return state;
+  }
+
+  function seedMapUniverse(state) {
+    state.cells.fill(0);
+    state.nextCells.fill(0);
+    state.ages.fill(0);
+    state.nextAges.fill(0);
 
     const start = Math.floor((GRID_SIZE - INITIAL_PATTERN_SIZE) / 2);
-    let seed = hashRule(ruleObject);
+    let seed = hashRule(state.rule);
 
     for (let y = start; y < start + INITIAL_PATTERN_SIZE; y += 1) {
       for (let x = start; x < start + INITIAL_PATTERN_SIZE; x += 1) {
         seed = seededNext(seed);
         if ((seed / 4294967296) < INITIAL_LIVE_CHANCE) {
-          const i = idx(x, y);
-          localCells[i] = 1;
+          state.cells[idx(x, y)] = 1;
         }
       }
     }
 
-    for (let step = 0; step < 42; step += 1) {
-      stepCells(ruleObject, localCells, localNextCells, localAges, localNextAges);
-    }
+    state.stableTicks = 0;
+    state.dirty = true;
+  }
 
-    const data = offImage.data;
+  function updateMapStateCanvas(state) {
+    if (!state.dirty) return;
+
+    const data = state.image.data;
     for (let i = 0; i < CELL_COUNT; i += 1) {
       const o = i * 4;
-      if (localCells[i]) {
-        const color = colorForAge(localAges[i]);
+      if (state.cells[i]) {
+        const color = colorForAge(state.ages[i]);
         data[o] = color[0];
         data[o + 1] = color[1];
         data[o + 2] = color[2];
@@ -894,8 +973,58 @@
       }
     }
 
-    offCtx.putImageData(offImage, 0, 0);
-    return offscreen;
+    state.ctx.putImageData(state.image, 0, 0);
+    state.dirty = false;
+  }
+
+  function stepVisibleMapUniverses() {
+    const visibleRules = getVisibleMapRules();
+    const shouldRun = visibleRules.length <= MAP_VISIBLE_RUN_LIMIT || mapView.zoom >= 0.9;
+
+    if (!shouldRun) return;
+
+    for (const visibleRule of visibleRules) {
+      const state = getMapUniverseState(visibleRule);
+      const changed = stepCells(state.rule, state.cells, state.nextCells, state.ages, state.nextAges);
+      state.dirty = true;
+
+      if (changed) state.stableTicks = 0;
+      else state.stableTicks += 1;
+
+      if (state.stableTicks >= STABLE_RESET_DELAY) {
+        seedMapUniverse(state);
+      }
+    }
+  }
+
+  function getVisibleMapRules() {
+    const rules = [];
+    const currentVisible = [];
+
+    for (let bs = 1; bs <= 8; bs += 1) {
+      for (let ss = 1; ss <= 8; ss += 1) {
+        const cluster = clusterWorldPosition(bs, ss);
+        const origin = worldToScreen(cluster.x, cluster.y);
+        const scale = mapView.zoom;
+        const universeSize = 54 * scale;
+        const gap = 22 * scale;
+
+        for (let be = bs; be <= 8; be += 1) {
+          for (let se = ss; se <= 8; se += 1) {
+            const x = origin.x + (be - bs) * (universeSize + gap);
+            const y = origin.y + (se - ss) * (universeSize + gap);
+
+            if (x + universeSize < -80 || y + universeSize < -80 || x > window.innerWidth + 80 || y > window.innerHeight + 80) {
+              continue;
+            }
+
+            currentVisible.push({ bStart: bs, bEnd: be, sStart: ss, sEnd: se });
+          }
+        }
+      }
+    }
+
+    return currentVisible;
   }
 
   function hitTestSpaceMap(clientX, clientY) {
