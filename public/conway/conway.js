@@ -8,7 +8,7 @@
   const TICK_MS = 100;
   const STABLE_RESET_DELAY = 2;
   const MAP_SIM_TICK_MS = 120;
-  const MAP_VISIBLE_RUN_LIMIT = 180;
+  const MAP_VISIBLE_RUN_LIMIT = 5000;
 
   const root = document.documentElement;
   const stars = document.getElementById("stars");
@@ -64,6 +64,7 @@
   let lastMapTick = 0;
   let paused = false;
   let pageHidden = document.hidden;
+  let mapSeedSalt = Math.floor(Math.random() * 0xffffffff);
 
   let orbYaw = 0.38;
   let orbPitch = -0.2;
@@ -130,6 +131,8 @@
     });
 
     resetButton.addEventListener("click", () => {
+      mapSeedSalt = Math.floor(Math.random() * 0xffffffff);
+      mapUniverseStates.clear();
       resetPattern();
       drawMainUniverse();
       updateUi();
@@ -411,6 +414,7 @@
     spaceMapCanvas.style.width = `${w}px`;
     spaceMapCanvas.style.height = `${h}px`;
     spaceMapCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    spaceMapCtx.imageSmoothingEnabled = false;
   }
 
   function idx(x, y) {
@@ -754,6 +758,7 @@
   }
 
   function renderSpaceMap() {
+    spaceMapCtx.imageSmoothingEnabled = false;
     const width = window.innerWidth;
     const height = window.innerHeight;
 
@@ -795,7 +800,7 @@
     const origin = worldToScreen(cluster.x, cluster.y);
     const scale = mapView.zoom;
     const universeSize = 54 * scale;
-    const gap = 22 * scale;
+    const gap = autoUniverseGap(scale);
     const labelGap = 18 * scale;
 
     const visibleBounds = {
@@ -863,9 +868,10 @@
         drawUniverseThumbnailFromRule(currentRule, x, y, universeSize);
 
         if (id === currentId) {
+          roundedRectPath(spaceMapCtx, x - 7 * scale, y - 7 * scale, universeSize + 14 * scale, universeSize + 14 * scale, Math.max(8, 14 * scale));
           spaceMapCtx.strokeStyle = "#ffffff";
           spaceMapCtx.lineWidth = Math.max(2, 3 * scale);
-          spaceMapCtx.strokeRect(x - 3 * scale, y - 3 * scale, universeSize + 6 * scale, universeSize + 6 * scale);
+          spaceMapCtx.stroke();
         }
 
         if (scale > 0.55) {
@@ -892,12 +898,28 @@
     const state = getMapUniverseState(ruleObject);
     updateMapStateCanvas(state);
 
+    const borderRadius = Math.max(5, 10 * mapView.zoom);
+    const pad = Math.max(2, 4 * mapView.zoom);
+
+    spaceMapCtx.save();
+
+    roundedRectPath(spaceMapCtx, x - pad, y - pad, size + pad * 2, size + pad * 2, borderRadius);
+    spaceMapCtx.fillStyle = "rgba(7, 14, 30, 0.82)";
+    spaceMapCtx.fill();
+    spaceMapCtx.strokeStyle = "rgba(169, 214, 255, 0.42)";
+    spaceMapCtx.lineWidth = Math.max(1, 1.35 * mapView.zoom);
+    spaceMapCtx.stroke();
+
+    spaceMapCtx.imageSmoothingEnabled = false;
     spaceMapCtx.fillStyle = "#000";
     spaceMapCtx.fillRect(x, y, size, size);
-    spaceMapCtx.drawImage(state.canvas, x, y, size, size);
-    spaceMapCtx.strokeStyle = "rgba(169, 214, 255, 0.24)";
-    spaceMapCtx.lineWidth = Math.max(1, 1.2 * mapView.zoom);
-    spaceMapCtx.strokeRect(x, y, size, size);
+    spaceMapCtx.drawImage(state.canvas, Math.round(x), Math.round(y), Math.round(size), Math.round(size));
+
+    spaceMapCtx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+    spaceMapCtx.lineWidth = Math.max(1, 1 * mapView.zoom);
+    spaceMapCtx.strokeRect(Math.round(x) + 0.5, Math.round(y) + 0.5, Math.round(size) - 1, Math.round(size) - 1);
+
+    spaceMapCtx.restore();
   }
 
   function getMapUniverseState(ruleObject) {
@@ -938,7 +960,7 @@
     state.nextAges.fill(0);
 
     const start = Math.floor((GRID_SIZE - INITIAL_PATTERN_SIZE) / 2);
-    let seed = hashRule(state.rule);
+    let seed = (Math.floor(Math.random() * 0xffffffff) ^ hashRule(state.rule) ^ mapSeedSalt) >>> 0;
 
     for (let y = start; y < start + INITIAL_PATTERN_SIZE; y += 1) {
       for (let x = start; x < start + INITIAL_PATTERN_SIZE; x += 1) {
@@ -979,9 +1001,7 @@
 
   function stepVisibleMapUniverses() {
     const visibleRules = getVisibleMapRules();
-    const shouldRun = visibleRules.length <= MAP_VISIBLE_RUN_LIMIT || mapView.zoom >= 0.9;
-
-    if (!shouldRun) return;
+    if (visibleRules.length > MAP_VISIBLE_RUN_LIMIT) return;
 
     for (const visibleRule of visibleRules) {
       const state = getMapUniverseState(visibleRule);
@@ -1007,7 +1027,7 @@
         const origin = worldToScreen(cluster.x, cluster.y);
         const scale = mapView.zoom;
         const universeSize = 54 * scale;
-        const gap = 22 * scale;
+        const gap = autoUniverseGap(scale);
 
         for (let be = bs; be <= 8; be += 1) {
           for (let se = ss; se <= 8; se += 1) {
@@ -1057,19 +1077,37 @@
     };
   }
 
+  function autoUniverseGap(scale = 1) {
+    return 24 * scale;
+  }
+
+  function subsetSpan(start) {
+    const columns = 9 - start;
+    const baseUniverseSize = 54;
+    const baseGap = 24;
+    return columns * baseUniverseSize + Math.max(0, columns - 1) * baseGap;
+  }
+
   function clusterWorldPosition(bs, ss) {
-    const clusterGapX = 560;
-    const clusterGapY = 560;
-    return {
-      x: (bs - 1) * clusterGapX,
-      y: (ss - 1) * clusterGapY
-    };
+    let x = 0;
+    let y = 0;
+    const subsetGap = 190;
+
+    for (let n = 1; n < bs; n += 1) {
+      x += subsetSpan(n) + subsetGap;
+    }
+
+    for (let n = 1; n < ss; n += 1) {
+      y += subsetSpan(n) + subsetGap;
+    }
+
+    return { x, y };
   }
 
   function centerMapOnCurrent() {
     const cluster = clusterWorldPosition(rule.bStart, rule.sStart);
-    const localX = (rule.bEnd - rule.bStart) * (54 + 22);
-    const localY = (rule.sEnd - rule.sStart) * (54 + 22);
+    const localX = (rule.bEnd - rule.bStart) * (54 + 24);
+    const localY = (rule.sEnd - rule.sStart) * (54 + 24);
     const worldX = cluster.x + localX + 27;
     const worldY = cluster.y + localY + 27;
 

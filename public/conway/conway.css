@@ -360,6 +360,10 @@ h1 {
   padding: 12px;
   user-select: none;
   box-shadow: 0 8px 34px rgba(0, 0, 0, 0.34);
+  opacity: 0;
+  transform: translate3d(calc(var(--px) * 0.44), calc(14px + (var(--py) * 0.44)), 0);
+  will-change: transform, opacity;
+  animation: orb-panel-fade-in 900ms ease 220ms forwards;
 }
 
 .orb-title,
@@ -578,6 +582,8 @@ h1 {
   height: 100vh;
   display: block;
   cursor: grab;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 #space-map-canvas.dragging {
@@ -604,6 +610,17 @@ h1 {
 @keyframes page-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes orb-panel-fade-in {
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--px) * 0.44), calc(28px + (var(--py) * 0.44)), 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(calc(var(--px) * 0.44), calc(var(--py) * 0.44), 0);
+  }
 }
 
 @keyframes grow-out {
@@ -693,6 +710,11 @@ h1 {
   }
 
   .universe-frame.grow {
+    animation: none;
+  }
+
+  .neighbor-orb-panel {
+    opacity: 1;
     animation: none;
   }
 
