@@ -75,9 +75,30 @@ input {
   visibility: hidden;
 }
 
+#map-transition-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  pointer-events: none;
+  background: #000;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 520ms ease,
+    visibility 0s linear 520ms;
+}
+
+body.map-transitioning #map-transition-fade {
+  opacity: 1;
+  visibility: visible;
+  transition:
+    opacity 520ms ease,
+    visibility 0s;
+}
+
+
 body.intro-pending #intro-fade,
-body.transitioning #intro-fade,
-body.map-transitioning #intro-fade {
+body.transitioning #intro-fade {
   opacity: 1;
   visibility: visible;
 }
@@ -205,31 +226,39 @@ h1 {
 
 .sim-layout {
   display: grid;
-  grid-template-columns: minmax(220px, 310px) minmax(320px, 1fr);
+  grid-template-columns:
+    minmax(280px, 390px)
+    minmax(320px, min(50vw, 680px))
+    minmax(280px, 390px);
+  justify-content: center;
   align-items: center;
   align-self: center;
   gap: clamp(18px, 3vw, 34px);
   min-height: 0;
   margin-block: auto;
-  padding-right: min(430px, 28vw);
+  padding-right: 0;
 }
 
 .rule-card,
 .description-card {
-  border: 1px solid var(--line);
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.055), transparent 36%),
-    rgba(5, 10, 22, 0.72);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow), var(--panel-glow);
-  backdrop-filter: blur(18px);
-  will-change: transform;
+  width: 100%;
+  max-width: 390px;
+  justify-self: start;
+  padding: 22px;
+  color: var(--muted);
+  line-height: 1.5;
+  transform: translate3d(calc(var(--px) * 0.38), calc(var(--py) * 0.38), 0);
+  max-height: min(68vh, 590px);
+  overflow: auto;
 }
 
 .rule-card {
   padding: 22px;
   transform: translate3d(calc(var(--px) * 0.50), calc(var(--py) * 0.50), 0);
   min-width: 0;
+  width: 100%;
+  max-width: 390px;
+  justify-self: end;
   overflow: hidden;
 }
 
@@ -334,13 +363,14 @@ h1 {
   place-items: center;
   perspective: 900px;
   min-width: 0;
+  justify-self: center;
   transform: translate3d(calc(var(--px) * 0.64), calc(var(--py) * 0.64), 0);
   will-change: transform;
 }
 
 .universe-frame {
   position: relative;
-  width: min(62vh, 52vw, 720px);
+  width: min(62vh, 100%, 680px);
   aspect-ratio: 1;
   border: 1px solid rgba(168, 210, 255, 0.35);
   border-radius: 34px;
@@ -685,7 +715,6 @@ h1 {
   }
 
   .description-card {
-    position: static;
     transform: translate3d(calc(var(--px) * 0.34), calc(var(--py) * 0.34), 0);
     max-height: none;
   }

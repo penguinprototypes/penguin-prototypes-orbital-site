@@ -200,11 +200,8 @@
 
   function closeSpaceMapImmediate() {
     mapView.open = false;
-    spaceMapOverlay.style.transition = "none";
     spaceMapOverlay.classList.remove("active");
     spaceMapOverlay.setAttribute("aria-hidden", "true");
-    void spaceMapOverlay.offsetWidth;
-    spaceMapOverlay.style.transition = "";
   }
 
   function transitionThroughBlack(callback) {
@@ -215,8 +212,8 @@
 
       window.setTimeout(() => {
         document.body.classList.remove("map-transitioning");
-      }, 140);
-    }, 520);
+      }, 120);
+    }, 540);
   }
 
   function handleSpaceMapClick(clickedRule) {
