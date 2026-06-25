@@ -471,6 +471,7 @@
     }
   }
 
+
   function updateParallax() {
     pointer.x = lerp(pointer.x, pointer.targetX, 0.08);
     pointer.y = lerp(pointer.y, pointer.targetY, 0.08);
