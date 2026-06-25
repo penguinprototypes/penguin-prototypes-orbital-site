@@ -8,7 +8,7 @@
   const TICK_MS = 100;
   const STABLE_RESET_DELAY = 2;
   const MAP_SIM_TICK_MS = 120;
-  const MAP_VISIBLE_RUN_LIMIT = 5000;
+  const MAP_VISIBLE_RUN_LIMIT = 640;
 
   const root = document.documentElement;
   const stars = document.getElementById("stars");
@@ -82,7 +82,17 @@
     dragging: false,
     moved: false,
     lastX: 0,
-    lastY: 0
+    lastY: 0,
+    animating: false,
+    animStartX: 0,
+    animStartY: 0,
+    animStartZoom: 1,
+    animTargetX: 0,
+    animTargetY: 0,
+    animTargetZoom: 1,
+    animStartTime: 0,
+    animDuration: 620,
+    pendingRule: null
   };
 
   const pointer = { targetX: 0, targetY: 0, x: 0, y: 0 };
@@ -155,8 +165,7 @@
       transitionThroughBlack(closeSpaceMapImmediate);
     });
     mapCenterButton.addEventListener("click", () => {
-      centerMapOnCurrent();
-      renderSpaceMap();
+      glideMapToRule(rule, Math.max(mapView.zoom, 0.9));
     });
 
     jumpForm.addEventListener("submit", (event) => {
@@ -190,6 +199,73 @@
         document.body.classList.remove("transitioning");
       }, 80);
     }, 520);
+  }
+
+  function handleSpaceMapClick(clickedRule) {
+    if (sameRule(clickedRule, rule)) {
+      closeSpaceMap();
+      return;
+    }
+
+    setRule(clickedRule, false);
+    glideMapToRule(clickedRule, Math.max(mapView.zoom, 0.9));
+  }
+
+  function glideMapToRule(targetRule, targetZoom = mapView.zoom) {
+    const target = mapCameraForRule(targetRule, targetZoom);
+
+    mapView.animating = true;
+    mapView.animStartX = mapView.x;
+    mapView.animStartY = mapView.y;
+    mapView.animStartZoom = mapView.zoom;
+    mapView.animTargetX = target.x;
+    mapView.animTargetY = target.y;
+    mapView.animTargetZoom = target.zoom;
+    mapView.animStartTime = performance.now();
+  }
+
+  function updateMapCameraAnimation(timestamp) {
+    if (!mapView.animating) return;
+
+    const t = clamp((timestamp - mapView.animStartTime) / mapView.animDuration, 0, 1);
+    const eased = easeInOutCubic(t);
+
+    mapView.x = lerp(mapView.animStartX, mapView.animTargetX, eased);
+    mapView.y = lerp(mapView.animStartY, mapView.animTargetY, eased);
+    mapView.zoom = lerp(mapView.animStartZoom, mapView.animTargetZoom, eased);
+
+    if (t >= 1) {
+      mapView.animating = false;
+    }
+  }
+
+  function mapCameraForRule(targetRule, targetZoom = mapView.zoom) {
+    const cluster = clusterWorldPosition(targetRule.bStart, targetRule.sStart);
+    const localX = (targetRule.bEnd - targetRule.bStart) * (54 + 24);
+    const localY = (targetRule.sEnd - targetRule.sStart) * (54 + 24);
+    const worldX = cluster.x + localX + 27;
+    const worldY = cluster.y + localY + 27;
+
+    return {
+      zoom: targetZoom,
+      x: window.innerWidth / 2 - worldX * targetZoom,
+      y: window.innerHeight / 2 - worldY * targetZoom
+    };
+  }
+
+  function sameRule(a, b) {
+    return (
+      a.bStart === b.bStart &&
+      a.bEnd === b.bEnd &&
+      a.sStart === b.sStart &&
+      a.sEnd === b.sEnd
+    );
+  }
+
+  function easeInOutCubic(t) {
+    return t < 0.5
+      ? 4 * t * t * t
+      : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
 
   function attachPointerHandlers() {
@@ -269,6 +345,7 @@
 
   function attachSpaceMapHandlers() {
     spaceMapCanvas.addEventListener("pointerdown", (event) => {
+      mapView.animating = false;
       mapView.dragging = true;
       mapView.moved = false;
       mapView.lastX = event.clientX;
@@ -301,8 +378,7 @@
       if (!mapView.moved) {
         const hit = hitTestSpaceMap(event.clientX, event.clientY);
         if (hit) {
-          setRule(hit.rule, true);
-          closeSpaceMap();
+          handleSpaceMapClick(hit.rule);
         }
       }
 
@@ -342,6 +418,8 @@
       generateRandomStarfield();
       resizeSpaceMapCanvas();
       if (mapView.open) {
+      updateMapCameraAnimation(timestamp);
+
       if (timestamp - lastMapTick >= MAP_SIM_TICK_MS) {
         lastMapTick = timestamp;
         stepVisibleMapUniverses();
@@ -365,6 +443,8 @@
     }
 
     if (mapView.open) {
+      updateMapCameraAnimation(timestamp);
+
       if (timestamp - lastMapTick >= MAP_SIM_TICK_MS) {
         lastMapTick = timestamp;
         stepVisibleMapUniverses();
@@ -643,6 +723,8 @@
     updateLiveStats();
     renderOrb();
     if (mapView.open) {
+      updateMapCameraAnimation(timestamp);
+
       if (timestamp - lastMapTick >= MAP_SIM_TICK_MS) {
         lastMapTick = timestamp;
         stepVisibleMapUniverses();
