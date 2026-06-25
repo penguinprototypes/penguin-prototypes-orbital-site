@@ -8,18 +8,17 @@
   <link rel="stylesheet" href="./conway.css" />
 </head>
 <body>
-  <div class="fade-curtain" aria-hidden="true"></div>
-  <canvas id="star-canvas" aria-hidden="true"></canvas>
-  <div class="ambient-glow glow-one" aria-hidden="true"></div>
-  <div class="ambient-glow glow-two" aria-hidden="true"></div>
+  <div id="intro-fade" aria-hidden="true"></div>
+  <div id="stars" aria-hidden="true"></div>
+  <div id="background-layer" aria-hidden="true"></div>
 
-  <main class="page-shell" id="page-shell">
-    <header class="top-bar parallax-layer" data-depth="0.35">
+  <main class="page-shell" id="scene">
+    <header class="top-bar chrome-layer">
       <a class="home-link" href="/">← Penguin Prototypes</a>
       <span class="status-pill" id="status-pill">running</span>
     </header>
 
-    <section class="hero parallax-layer" data-depth="0.55">
+    <section class="hero chrome-layer">
       <p class="eyebrow">Connected Life-like cellular automata</p>
       <h1>Conway Multiverse</h1>
       <p class="subtitle">
@@ -29,42 +28,27 @@
     </section>
 
     <section class="sim-layout">
-      <aside class="rule-card parallax-layer" data-depth="0.75">
+      <aside class="rule-card chrome-layer">
         <p class="card-label">Current universe</p>
         <h2 id="rule-name">B3/S2-3</h2>
 
         <dl>
-          <div>
-            <dt>Birth range</dt>
-            <dd id="birth-range">3</dd>
-          </div>
-          <div>
-            <dt>Survival range</dt>
-            <dd id="survival-range">2-3</dd>
-          </div>
-          <div>
-            <dt>Group</dt>
-            <dd id="group-name">B3+/S2+</dd>
-          </div>
-          <div>
-            <dt>Generation</dt>
-            <dd id="generation">0</dd>
-          </div>
-          <div>
-            <dt>Living cells</dt>
-            <dd id="live-count">0</dd>
-          </div>
+          <div><dt>Birth range</dt><dd id="birth-range">3</dd></div>
+          <div><dt>Survival range</dt><dd id="survival-range">2-3</dd></div>
+          <div><dt>Group</dt><dd id="group-name">B3+/S2+</dd></div>
+          <div><dt>Generation</dt><dd id="generation">0</dd></div>
+          <div><dt>Living cells</dt><dd id="live-count">0</dd></div>
         </dl>
       </aside>
 
-      <section class="universe-stage parallax-layer" data-depth="1.0" aria-label="Current Conway universe">
+      <section class="universe-stage chrome-layer" aria-label="Current Conway universe">
         <div class="universe-frame" id="universe-frame">
           <canvas id="universe-canvas" width="50" height="50"></canvas>
           <div class="screen-sheen" aria-hidden="true"></div>
         </div>
       </section>
 
-      <aside class="description-card parallax-layer" data-depth="0.65">
+      <aside class="description-card chrome-layer">
         <p class="card-label">What you are seeing</p>
         <p>
           A Life-like cellular automaton is controlled by a <strong>B/S rule</strong>.
