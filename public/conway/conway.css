@@ -839,3 +839,12 @@ body.map-fade-active #map-fade {
     max-height: none !important;
   }
 }
+
+
+.description-card.js-screen-centered {
+  position: fixed !important;
+  top: 50vh !important;
+  top: 50dvh !important;
+  right: clamp(18px, 3vw, 44px) !important;
+  transform: translate3d(calc(var(--px) * 0.38), calc(-50% + (var(--py) * 0.38)), 0) !important;
+}

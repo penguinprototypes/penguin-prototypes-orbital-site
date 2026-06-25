@@ -29,6 +29,7 @@
 
   const spaceMapOverlay = document.getElementById("space-map-overlay");
   const spaceMapCanvas = document.getElementById("space-map-canvas");
+  const descriptionCard = document.querySelector(".description-card");
   const spaceMapCtx = spaceMapCanvas.getContext("2d", { alpha: false });
   spaceMapCtx.imageSmoothingEnabled = false;
 
@@ -141,6 +142,7 @@
     drawMainUniverse();
     centerMapOnCurrent();
     updateUi();
+    lockDescriptionCardToScreenCenter();
 
     startIntroAnimation();
     requestAnimationFrame(loop);
@@ -450,6 +452,7 @@
   function loop(timestamp) {
     requestAnimationFrame(loop);
     updateParallax();
+    lockDescriptionCardToScreenCenter();
 
     if (pageHidden) return;
 
@@ -469,6 +472,36 @@
       }
       renderSpaceMap();
     }
+  }
+
+  function lockDescriptionCardToScreenCenter() {
+    if (!descriptionCard) return;
+
+    if (window.innerWidth < 820) {
+      descriptionCard.classList.remove("js-screen-centered");
+      descriptionCard.style.position = "";
+      descriptionCard.style.top = "";
+      descriptionCard.style.right = "";
+      descriptionCard.style.width = "";
+      descriptionCard.style.transform = "";
+      descriptionCard.style.maxHeight = "";
+      descriptionCard.style.overflow = "";
+      descriptionCard.style.justifySelf = "";
+      return;
+    }
+
+    descriptionCard.classList.add("js-screen-centered");
+    descriptionCard.style.position = "fixed";
+    descriptionCard.style.top = `${window.innerHeight / 2}px`;
+    descriptionCard.style.right = "clamp(18px, 3vw, 44px)";
+    descriptionCard.style.width = "min(390px, 27vw)";
+    descriptionCard.style.maxHeight = "min(68dvh, 590px)";
+    descriptionCard.style.overflow = "auto";
+    descriptionCard.style.justifySelf = "auto";
+
+    const px = Number.parseFloat(document.documentElement.style.getPropertyValue("--px")) || 0;
+    const py = Number.parseFloat(document.documentElement.style.getPropertyValue("--py")) || 0;
+    descriptionCard.style.transform = `translate3d(${px * 0.38}px, calc(-50% + ${py * 0.38}px), 0)`;
   }
 
   function updateParallax() {
