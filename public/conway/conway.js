@@ -904,19 +904,19 @@
     spaceMapCtx.fillRect(0, 0, width, height);
 
     const blueWash = spaceMapCtx.createRadialGradient(width * 0.18, height * 0.18, 0, width * 0.18, height * 0.18, width * 0.62);
-    blueWash.addColorStop(0, "rgba(68, 153, 255, 0.16)");
+    blueWash.addColorStop(0, "rgba(68, 153, 255, 0.07)");
     blueWash.addColorStop(1, "rgba(68, 153, 255, 0)");
     spaceMapCtx.fillStyle = blueWash;
     spaceMapCtx.fillRect(0, 0, width, height);
 
     const violetWash = spaceMapCtx.createRadialGradient(width * 0.86, height * 0.76, 0, width * 0.86, height * 0.76, width * 0.58);
-    violetWash.addColorStop(0, "rgba(173, 92, 255, 0.13)");
+    violetWash.addColorStop(0, "rgba(173, 92, 255, 0.05)");
     violetWash.addColorStop(1, "rgba(173, 92, 255, 0)");
     spaceMapCtx.fillStyle = violetWash;
     spaceMapCtx.fillRect(0, 0, width, height);
 
     const cyanMist = spaceMapCtx.createRadialGradient(width * 0.52, height * 0.52, 0, width * 0.52, height * 0.52, width * 0.72);
-    cyanMist.addColorStop(0, "rgba(79, 204, 255, 0.055)");
+    cyanMist.addColorStop(0, "rgba(79, 204, 255, 0.025)");
     cyanMist.addColorStop(1, "rgba(79, 204, 255, 0)");
     spaceMapCtx.fillStyle = cyanMist;
     spaceMapCtx.fillRect(0, 0, width, height);
