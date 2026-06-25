@@ -208,15 +208,15 @@
   }
 
   function transitionThroughBlack(callback) {
-    document.body.classList.add("transitioning");
+    document.body.classList.add("map-transitioning");
 
     window.setTimeout(() => {
       callback();
 
       window.setTimeout(() => {
-        document.body.classList.remove("transitioning");
-      }, 150);
-    }, 540);
+        document.body.classList.remove("map-transitioning");
+      }, 140);
+    }, 520);
   }
 
   function handleSpaceMapClick(clickedRule) {

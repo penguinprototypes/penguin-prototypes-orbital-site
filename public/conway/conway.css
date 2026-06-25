@@ -76,7 +76,8 @@ input {
 }
 
 body.intro-pending #intro-fade,
-body.transitioning #intro-fade {
+body.transitioning #intro-fade,
+body.map-transitioning #intro-fade {
   opacity: 1;
   visibility: visible;
 }
