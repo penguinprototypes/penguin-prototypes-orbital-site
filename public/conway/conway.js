@@ -52,9 +52,17 @@ updateUi();
 draw();
 setupParallax();
 
-window.addEventListener("load", () => {
+function markLoaded() {
   document.body.classList.add("is-loaded");
-});
+}
+
+if (document.readyState === "complete" || document.readyState === "interactive") {
+  markLoaded();
+} else {
+  window.addEventListener("load", markLoaded, { once: true });
+}
+
+setTimeout(markLoaded, 350);
 
 requestAnimationFrame(loop);
 

@@ -61,7 +61,7 @@ a {
   pointer-events: none;
   background: #000;
   opacity: 1;
-  transition: opacity 900ms ease;
+  animation: page-fade-out 900ms ease 120ms forwards;
 }
 
 body.is-loaded .fade-curtain {
@@ -405,6 +405,13 @@ h1 {
 
 .reset-button {
   color: #d8eeff;
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 @keyframes grow-out {

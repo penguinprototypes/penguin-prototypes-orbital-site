@@ -18,6 +18,11 @@
 </head>
 <body>
   <div class="fade-curtain" aria-hidden="true"></div>
+  <script>
+    // Failsafe: the intro fade must never be able to permanently cover the page.
+    requestAnimationFrame(() => document.body.classList.add("is-loaded"));
+    setTimeout(() => document.body.classList.add("is-loaded"), 350);
+  </script>
   <div class="stars" aria-hidden="true"></div>
   <div class="mouse-glow" aria-hidden="true"></div>
   <div class="glow glow-a" aria-hidden="true"></div>
