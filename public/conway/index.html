@@ -1,24 +1,444 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Conway Multiverse | Penguin Prototypes</title>
-  <meta name="description" content="An interactive connected-rule Conway Multiverse viewer for Life-like cellular automata." />
-  <link rel="stylesheet" href="./conway.css" />
+  <meta name="description" content="An interactive connected-rule Conway Multiverse viewer for Life-like cellular automata.">
+  <style>
+    :root {
+      --bg: #050912;
+      --text: #f0f7ff;
+      --muted: #a9bad0;
+      --accent: #8ed0ff;
+      --line: rgba(169, 214, 255, 0.22);
+      --line-bright: rgba(142, 205, 255, 0.62);
+      --panel: rgba(5, 10, 22, 0.74);
+      --shadow: 0 22px 90px rgba(0, 0, 0, 0.48);
+      --radius: 24px;
+      --px: 0px;
+      --py: 0px;
+      --stars-x: 0px;
+      --stars-y: 0px;
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 22% 18%, rgba(48, 112, 176, 0.18), transparent 32%),
+        radial-gradient(circle at 76% 72%, rgba(115, 92, 255, 0.12), transparent 36%),
+        radial-gradient(circle at 50% 50%, rgba(64, 166, 255, 0.07), transparent 48%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button,
+    a {
+      font: inherit;
+    }
+
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      transform: translate3d(var(--stars-x), var(--stars-y), 0);
+      will-change: transform;
+    }
+
+    #background-layer {
+      position: fixed;
+      inset: -12vmax;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(60, 150, 255, 0.18), transparent 30%),
+        radial-gradient(circle at 86% 78%, rgba(150, 90, 255, 0.13), transparent 34%);
+      transform: translate3d(calc(var(--px) * -0.3), calc(var(--py) * -0.3), 0);
+      will-change: transform;
+    }
+
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      padding: 26px clamp(18px, 3vw, 44px) 116px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 22px;
+      opacity: 0;
+      animation: page-fade-in 900ms ease 90ms forwards;
+      transform: translate3d(var(--px), var(--py), 0);
+      will-change: transform, opacity;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .home-link,
+    .status-pill,
+    .dimension-pad button,
+    .action-cluster button {
+      border: 1px solid var(--line);
+      background: rgba(7, 14, 30, 0.76);
+      color: var(--text);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.26);
+      backdrop-filter: blur(14px);
+    }
+
+    .home-link {
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 10px 14px;
+      color: var(--muted);
+      transition: border-color 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .home-link:hover {
+      color: var(--text);
+      border-color: var(--line-bright);
+      transform: translateY(-1px);
+    }
+
+    .status-pill {
+      border-radius: 999px;
+      padding: 8px 14px;
+      color: #b8ffd5;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 12px;
+    }
+
+    .status-pill.paused {
+      color: #ffd28c;
+    }
+
+    .hero {
+      max-width: 880px;
+      transform: translate3d(calc(var(--px) * 0.35), calc(var(--py) * 0.35), 0);
+      will-change: transform;
+    }
+
+    .eyebrow,
+    .card-label {
+      margin: 0 0 8px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(40px, 8vw, 96px);
+      line-height: 0.9;
+      letter-spacing: -0.065em;
+    }
+
+    .subtitle {
+      max-width: 790px;
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1.55;
+    }
+
+    .subtitle strong {
+      color: var(--text);
+    }
+
+    .sim-layout {
+      display: grid;
+      grid-template-columns: minmax(220px, 310px) minmax(320px, 1fr) minmax(260px, 390px);
+      align-items: center;
+      gap: clamp(18px, 3vw, 34px);
+      min-height: 0;
+    }
+
+    .rule-card,
+    .description-card {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      will-change: transform;
+    }
+
+    .rule-card {
+      padding: 22px;
+      transform: translate3d(calc(var(--px) * 0.75), calc(var(--py) * 0.75), 0);
+    }
+
+    .rule-card h2 {
+      margin: 0 0 18px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: clamp(28px, 4vw, 46px);
+      letter-spacing: -0.04em;
+    }
+
+    .rule-card dl {
+      margin: 0;
+      display: grid;
+      gap: 12px;
+    }
+
+    .rule-card dl div {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      border-top: 1px solid rgba(168, 210, 255, 0.14);
+      padding-top: 11px;
+    }
+
+    .rule-card dt {
+      color: var(--muted);
+    }
+
+    .rule-card dd {
+      margin: 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: #fff;
+      text-align: right;
+    }
+
+    .description-card {
+      align-self: center;
+      padding: 22px;
+      color: var(--muted);
+      line-height: 1.55;
+      transform: translate3d(calc(var(--px) * 0.62), calc(var(--py) * 0.62), 0);
+    }
+
+    .description-card p {
+      margin: 0 0 14px;
+    }
+
+    .description-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .description-card strong,
+    .inspiration {
+      color: var(--text);
+    }
+
+    .inspiration {
+      font-style: italic;
+    }
+
+    .universe-stage {
+      display: grid;
+      place-items: center;
+      perspective: 900px;
+      min-width: 0;
+      transform: translate3d(calc(var(--px) * 1.0), calc(var(--py) * 1.0), 0);
+      will-change: transform;
+    }
+
+    .universe-frame {
+      position: relative;
+      width: min(62vh, 52vw, 720px);
+      aspect-ratio: 1;
+      border: 1px solid rgba(168, 210, 255, 0.35);
+      border-radius: 34px;
+      padding: clamp(12px, 2vw, 22px);
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 28%),
+        rgba(2, 5, 12, 0.84);
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+        0 32px 120px rgba(38, 137, 255, 0.16),
+        0 26px 80px rgba(0, 0, 0, 0.55);
+      overflow: hidden;
+      transform-origin: center;
+    }
+
+    .universe-frame.grow {
+      animation: grow-out 260ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #universe-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 20px;
+      background: #000;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      box-shadow: 0 0 0 1px rgba(168, 210, 255, 0.16);
+    }
+
+    .screen-sheen {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.08), transparent 18%),
+        linear-gradient(135deg, rgba(255,255,255,0.06), transparent 35%);
+      mix-blend-mode: screen;
+    }
+
+    .dimension-pad {
+      position: fixed;
+      left: 22px;
+      bottom: 22px;
+      z-index: 5;
+      width: min(380px, calc(100vw - 44px));
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .dimension-pad button,
+    .action-cluster button {
+      cursor: pointer;
+      border-radius: 16px;
+      min-height: 44px;
+      transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease, opacity 150ms ease;
+    }
+
+    .dimension-pad button:hover,
+    .action-cluster button:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-bright);
+      background: rgba(17, 31, 64, 0.88);
+    }
+
+    .dimension-pad button:disabled {
+      cursor: not-allowed;
+      opacity: 0.34;
+      transform: none;
+    }
+
+    .action-cluster {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 5;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      max-width: min(470px, calc(100vw - 44px));
+    }
+
+    .action-cluster button {
+      padding: 0 18px;
+    }
+
+    @keyframes page-fade-in {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes grow-out {
+      0% {
+        transform: translateY(28px) rotateX(54deg) scale(0.82);
+        opacity: 0.28;
+      }
+
+      100% {
+        transform: translateY(0) rotateX(0deg) scale(1);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 1060px) {
+      body {
+        overflow: auto;
+      }
+
+      .page-shell {
+        padding-bottom: 190px;
+      }
+
+      .sim-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .rule-card,
+      .description-card {
+        max-width: 760px;
+        width: 100%;
+        justify-self: center;
+      }
+
+      .universe-frame {
+        width: min(88vw, 680px);
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page-shell {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .dimension-pad {
+        left: 14px;
+        width: calc(100vw - 28px);
+      }
+
+      .action-cluster {
+        right: 14px;
+        bottom: 122px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page-shell {
+        opacity: 1;
+        animation: none;
+      }
+
+      .universe-frame.grow {
+        animation: none;
+      }
+
+      :root {
+        --px: 0px !important;
+        --py: 0px !important;
+        --stars-x: 0px !important;
+        --stars-y: 0px !important;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div id="intro-fade" aria-hidden="true"></div>
   <div id="stars" aria-hidden="true"></div>
   <div id="background-layer" aria-hidden="true"></div>
 
   <main class="page-shell" id="scene">
-    <header class="top-bar chrome-layer">
+    <header class="top-bar">
       <a class="home-link" href="/">← Penguin Prototypes</a>
       <span class="status-pill" id="status-pill">running</span>
     </header>
 
-    <section class="hero chrome-layer">
+    <section class="hero">
       <p class="eyebrow">Connected Life-like cellular automata</p>
       <h1>Conway Multiverse</h1>
       <p class="subtitle">
@@ -28,9 +448,9 @@
     </section>
 
     <section class="sim-layout">
-      <aside class="rule-card chrome-layer">
+      <aside class="rule-card">
         <p class="card-label">Current universe</p>
-        <h2 id="rule-name">B3/S2-3</h2>
+        <h2 id="rule-name">B3/S23</h2>
 
         <dl>
           <div><dt>Birth range</dt><dd id="birth-range">3</dd></div>
@@ -41,14 +461,14 @@
         </dl>
       </aside>
 
-      <section class="universe-stage chrome-layer" aria-label="Current Conway universe">
+      <section class="universe-stage" aria-label="Current Conway universe">
         <div class="universe-frame" id="universe-frame">
           <canvas id="universe-canvas" width="50" height="50"></canvas>
           <div class="screen-sheen" aria-hidden="true"></div>
         </div>
       </section>
 
-      <aside class="description-card chrome-layer">
+      <aside class="description-card">
         <p class="card-label">What you are seeing</p>
         <p>
           A Life-like cellular automaton is controlled by a <strong>B/S rule</strong>.
@@ -62,8 +482,9 @@
         </p>
         <p>
           White cells are newborn, then smoothly shift through red, orange, yellow,
-          green, cyan, blue, purple, and magenta as they age. If nothing changes, the
-          universe resets with a new 10×10 seed in the center.
+          green, cyan, blue, purple, and magenta as they age. Reloading the page,
+          pressing Reset, or reaching a static state generates a new random 10×10 seed
+          in the center.
         </p>
         <p class="inspiration">Inspired by Cary Huang.</p>
       </aside>
@@ -88,6 +509,484 @@
     <button type="button" id="random-button">Random universe</button>
   </div>
 
-  <script type="module" src="./conway.js"></script>
+  <script>
+    (() => {
+      "use strict";
+
+      const GRID_SIZE = 50;
+      const CELL_COUNT = GRID_SIZE * GRID_SIZE;
+      const INITIAL_PATTERN_SIZE = 10;
+      const INITIAL_LIVE_CHANCE = 0.34;
+      const TICK_MS = 100;
+      const STABLE_RESET_DELAY = 2;
+
+      const root = document.documentElement;
+      const scene = document.getElementById("scene");
+      const stars = document.getElementById("stars");
+      const canvas = document.getElementById("universe-canvas");
+      const frameEl = document.getElementById("universe-frame");
+
+      const ruleNameEl = document.getElementById("rule-name");
+      const birthRangeEl = document.getElementById("birth-range");
+      const survivalRangeEl = document.getElementById("survival-range");
+      const groupNameEl = document.getElementById("group-name");
+      const generationEl = document.getElementById("generation");
+      const liveCountEl = document.getElementById("live-count");
+      const statusPill = document.getElementById("status-pill");
+      const randomButton = document.getElementById("random-button");
+      const resetButton = document.getElementById("reset-button");
+      const pauseButton = document.getElementById("pause-button");
+
+      if (!canvas) {
+        console.error("Conway page could not find #universe-canvas.");
+        return;
+      }
+
+      const ctx = canvas.getContext("2d", { alpha: false });
+      ctx.imageSmoothingEnabled = false;
+
+      const image = ctx.createImageData(GRID_SIZE, GRID_SIZE);
+      const cells = new Uint8Array(CELL_COUNT);
+      const nextCells = new Uint8Array(CELL_COUNT);
+      const ages = new Uint16Array(CELL_COUNT);
+      const nextAges = new Uint16Array(CELL_COUNT);
+      const neighbors = Array.from({ length: CELL_COUNT }, () => new Uint16Array(8));
+
+      let rule = {
+        bStart: 3,
+        bEnd: 3,
+        sStart: 2,
+        sEnd: 3
+      };
+
+      let generation = 0;
+      let stableTicks = 0;
+      let lastTick = 0;
+      let paused = false;
+      let pageHidden = document.hidden;
+
+      const pointer = {
+        targetX: 0,
+        targetY: 0,
+        x: 0,
+        y: 0
+      };
+
+      init();
+
+      function init() {
+        precomputeNeighbors();
+        generateRandomStarfield();
+        attachButtonHandlers();
+        attachPointerHandlers();
+        attachVisibilityHandlers();
+
+        resetPattern();
+        draw();
+        updateUi();
+
+        requestAnimationFrame(loop);
+      }
+
+      function attachButtonHandlers() {
+        document.querySelectorAll(".dimension-pad button").forEach((button) => {
+          button.addEventListener("click", () => {
+            const axis = button.getAttribute("data-axis");
+            const dir = Number(button.getAttribute("data-dir"));
+            moveAxis(axis, dir);
+          });
+        });
+
+        pauseButton.addEventListener("click", () => {
+          paused = !paused;
+          pauseButton.textContent = paused ? "Resume" : "Pause";
+          statusPill.textContent = paused ? "paused" : "running";
+          statusPill.classList.toggle("paused", paused);
+        });
+
+        resetButton.addEventListener("click", () => {
+          resetPattern();
+          draw();
+          updateUi();
+        });
+
+        randomButton.addEventListener("click", () => {
+          randomizeRule();
+        });
+      }
+
+      function attachPointerHandlers() {
+        window.addEventListener("pointermove", (event) => {
+          const w = Math.max(1, window.innerWidth);
+          const h = Math.max(1, window.innerHeight);
+
+          const nx = (event.clientX / w) * 2 - 1;
+          const ny = (event.clientY / h) * 2 - 1;
+
+          pointer.targetX = clamp(nx, -1, 1) * 16;
+          pointer.targetY = clamp(ny, -1, 1) * 12;
+
+          root.style.setProperty("--mouse-x", `${event.clientX}px`);
+          root.style.setProperty("--mouse-y", `${event.clientY}px`);
+        }, { passive: true });
+
+        window.addEventListener("pointerleave", () => {
+          pointer.targetX = 0;
+          pointer.targetY = 0;
+        }, { passive: true });
+      }
+
+      function attachVisibilityHandlers() {
+        document.addEventListener("visibilitychange", () => {
+          pageHidden = document.hidden;
+          lastTick = 0;
+        });
+
+        window.addEventListener("resize", debounce(generateRandomStarfield, 180));
+      }
+
+      function loop(timestamp) {
+        requestAnimationFrame(loop);
+
+        updateParallax();
+
+        if (pageHidden) {
+          return;
+        }
+
+        if (!paused && timestamp - lastTick >= TICK_MS) {
+          lastTick = timestamp;
+          step();
+          draw();
+          updateUi();
+        }
+      }
+
+      function updateParallax() {
+        pointer.x = lerp(pointer.x, pointer.targetX, 0.08);
+        pointer.y = lerp(pointer.y, pointer.targetY, 0.08);
+
+        root.style.setProperty("--px", `${pointer.x}px`);
+        root.style.setProperty("--py", `${pointer.y}px`);
+        root.style.setProperty("--stars-x", `${pointer.x * 0.55}px`);
+        root.style.setProperty("--stars-y", `${pointer.y * 0.55}px`);
+      }
+
+      function generateRandomStarfield() {
+        if (!stars) {
+          return;
+        }
+
+        const width = Math.max(1, window.innerWidth);
+        const height = Math.max(1, window.innerHeight);
+        const count = 280;
+        const rects = [];
+
+        for (let i = 0; i < count; i += 1) {
+          const size = randomRange(1, 2.2);
+          const x = randomRange(0, width);
+          const y = randomRange(0, height);
+          const opacity = randomRange(0.20, 0.92);
+
+          rects.push(
+            `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${size.toFixed(2)}" height="${size.toFixed(2)}" rx="${(size / 2).toFixed(2)}" fill="white" opacity="${opacity.toFixed(3)}"/>`
+          );
+        }
+
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${rects.join("")}</svg>`;
+        stars.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+        stars.style.backgroundSize = `${width}px ${height}px`;
+        stars.style.backgroundRepeat = "no-repeat";
+        stars.style.backgroundPosition = "center center";
+      }
+
+      function idx(x, y) {
+        x = ((x % GRID_SIZE) + GRID_SIZE) % GRID_SIZE;
+        y = ((y % GRID_SIZE) + GRID_SIZE) % GRID_SIZE;
+        return y * GRID_SIZE + x;
+      }
+
+      function precomputeNeighbors() {
+        for (let y = 0; y < GRID_SIZE; y += 1) {
+          for (let x = 0; x < GRID_SIZE; x += 1) {
+            const i = idx(x, y);
+            let k = 0;
+
+            for (let dy = -1; dy <= 1; dy += 1) {
+              for (let dx = -1; dx <= 1; dx += 1) {
+                if (dx === 0 && dy === 0) continue;
+                neighbors[i][k] = idx(x + dx, y + dy);
+                k += 1;
+              }
+            }
+          }
+        }
+      }
+
+      function resetPattern() {
+        cells.fill(0);
+        nextCells.fill(0);
+        ages.fill(0);
+        nextAges.fill(0);
+
+        const start = Math.floor((GRID_SIZE - INITIAL_PATTERN_SIZE) / 2);
+
+        for (let y = start; y < start + INITIAL_PATTERN_SIZE; y += 1) {
+          for (let x = start; x < start + INITIAL_PATTERN_SIZE; x += 1) {
+            const i = idx(x, y);
+
+            if (Math.random() < INITIAL_LIVE_CHANCE) {
+              cells[i] = 1;
+              ages[i] = 0;
+            }
+          }
+        }
+
+        generation = 0;
+        stableTicks = 0;
+        animateGrow();
+      }
+
+      function step() {
+        let changed = false;
+
+        for (let i = 0; i < CELL_COUNT; i += 1) {
+          const neighborCount = countNeighbors(i);
+          const alive = cells[i] === 1;
+          let nextAlive = 0;
+
+          if (alive) {
+            nextAlive = neighborCount >= rule.sStart && neighborCount <= rule.sEnd ? 1 : 0;
+          } else {
+            nextAlive = neighborCount >= rule.bStart && neighborCount <= rule.bEnd ? 1 : 0;
+          }
+
+          nextCells[i] = nextAlive;
+
+          if (nextAlive) {
+            nextAges[i] = alive ? Math.min(65535, ages[i] + 1) : 0;
+          } else {
+            nextAges[i] = 0;
+          }
+
+          if (nextAlive !== cells[i]) {
+            changed = true;
+          }
+        }
+
+        cells.set(nextCells);
+        ages.set(nextAges);
+        generation += 1;
+
+        if (changed) {
+          stableTicks = 0;
+        } else {
+          stableTicks += 1;
+        }
+
+        if (stableTicks >= STABLE_RESET_DELAY) {
+          resetPattern();
+        }
+      }
+
+      function countNeighbors(i) {
+        const list = neighbors[i];
+
+        return (
+          cells[list[0]] +
+          cells[list[1]] +
+          cells[list[2]] +
+          cells[list[3]] +
+          cells[list[4]] +
+          cells[list[5]] +
+          cells[list[6]] +
+          cells[list[7]]
+        );
+      }
+
+      function draw() {
+        const data = image.data;
+
+        for (let i = 0; i < CELL_COUNT; i += 1) {
+          const o = i * 4;
+
+          if (cells[i]) {
+            const color = colorForAge(ages[i]);
+            data[o] = color[0];
+            data[o + 1] = color[1];
+            data[o + 2] = color[2];
+            data[o + 3] = 255;
+          } else {
+            data[o] = 0;
+            data[o + 1] = 0;
+            data[o + 2] = 0;
+            data[o + 3] = 255;
+          }
+        }
+
+        ctx.putImageData(image, 0, 0);
+      }
+
+      function colorForAge(age) {
+        const stops = [
+          [0, [255, 255, 255]],
+          [8, [255, 0, 0]],
+          [16, [255, 128, 0]],
+          [32, [255, 255, 0]],
+          [64, [0, 255, 0]],
+          [128, [0, 255, 255]],
+          [256, [0, 96, 255]],
+          [512, [180, 0, 255]],
+          [1024, [255, 0, 255]]
+        ];
+
+        if (age <= stops[0][0]) return stops[0][1];
+        if (age >= stops[stops.length - 1][0]) return stops[stops.length - 1][1];
+
+        for (let s = 0; s < stops.length - 1; s += 1) {
+          const ageA = stops[s][0];
+          const colorA = stops[s][1];
+          const ageB = stops[s + 1][0];
+          const colorB = stops[s + 1][1];
+
+          if (age >= ageA && age <= ageB) {
+            const t = (age - ageA) / (ageB - ageA);
+            return [
+              Math.round(lerp(colorA[0], colorB[0], t)),
+              Math.round(lerp(colorA[1], colorB[1], t)),
+              Math.round(lerp(colorA[2], colorB[2], t))
+            ];
+          }
+        }
+
+        return [255, 255, 255];
+      }
+
+      function moveAxis(axis, dir) {
+        if (!axis || !Number.isFinite(dir)) {
+          return;
+        }
+
+        const next = {
+          bStart: rule.bStart,
+          bEnd: rule.bEnd,
+          sStart: rule.sStart,
+          sEnd: rule.sEnd
+        };
+
+        next[axis] += dir;
+
+        if (!isValidRule(next)) {
+          return;
+        }
+
+        rule = next;
+        resetPattern();
+        draw();
+        updateUi();
+      }
+
+      function randomizeRule() {
+        const bStart = randomInt(1, 8);
+        const bEnd = randomInt(bStart, 8);
+        const sStart = randomInt(1, 8);
+        const sEnd = randomInt(sStart, 8);
+
+        rule = { bStart, bEnd, sStart, sEnd };
+        resetPattern();
+        draw();
+        updateUi();
+      }
+
+      function isValidRule(candidate) {
+        return (
+          candidate.bStart >= 1 &&
+          candidate.bStart <= 8 &&
+          candidate.bEnd >= 1 &&
+          candidate.bEnd <= 8 &&
+          candidate.sStart >= 1 &&
+          candidate.sStart <= 8 &&
+          candidate.sEnd >= 1 &&
+          candidate.sEnd <= 8 &&
+          candidate.bStart <= candidate.bEnd &&
+          candidate.sStart <= candidate.sEnd
+        );
+      }
+
+      function updateUi() {
+        ruleNameEl.textContent = `B${rangeDigits(rule.bStart, rule.bEnd)}/S${rangeDigits(rule.sStart, rule.sEnd)}`;
+        birthRangeEl.textContent = rangeDash(rule.bStart, rule.bEnd);
+        survivalRangeEl.textContent = rangeDash(rule.sStart, rule.sEnd);
+        groupNameEl.textContent = `B${rule.bStart}+/S${rule.sStart}+`;
+        generationEl.textContent = String(generation);
+        liveCountEl.textContent = String(countLiveCells());
+
+        document.querySelectorAll(".dimension-pad button").forEach((button) => {
+          const axis = button.getAttribute("data-axis");
+          const dir = Number(button.getAttribute("data-dir"));
+          const candidate = {
+            bStart: rule.bStart,
+            bEnd: rule.bEnd,
+            sStart: rule.sStart,
+            sEnd: rule.sEnd
+          };
+
+          candidate[axis] += dir;
+          button.disabled = !isValidRule(candidate);
+        });
+      }
+
+      function countLiveCells() {
+        let count = 0;
+        for (let i = 0; i < CELL_COUNT; i += 1) {
+          count += cells[i];
+        }
+        return count;
+      }
+
+      function rangeDigits(start, end) {
+        let value = "";
+        for (let n = start; n <= end; n += 1) {
+          value += String(n);
+        }
+        return value;
+      }
+
+      function rangeDash(start, end) {
+        return start === end ? String(start) : `${start}-${end}`;
+      }
+
+      function animateGrow() {
+        frameEl.classList.remove("grow");
+        void frameEl.offsetWidth;
+        frameEl.classList.add("grow");
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function lerp(a, b, t) {
+        return a + (b - a) * t;
+      }
+
+      function randomRange(min, max) {
+        return min + Math.random() * (max - min);
+      }
+
+      function randomInt(min, max) {
+        return min + Math.floor(Math.random() * (max - min + 1));
+      }
+
+      function debounce(fn, delay) {
+        let handle = null;
+
+        return (...args) => {
+          window.clearTimeout(handle);
+          handle = window.setTimeout(() => fn(...args), delay);
+        };
+      }
+    })();
+  </script>
 </body>
 </html>
