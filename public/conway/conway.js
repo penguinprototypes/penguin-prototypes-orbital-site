@@ -7,6 +7,8 @@
   const INITIAL_LIVE_CHANCE = 0.34;
   const TICK_MS = 100;
   const STABLE_RESET_DELAY = 2;
+  const INTRO_FADE_DELAY_MS = 90;
+  const INTRO_FADE_DURATION_MS = 1450;
   const MAP_SIM_TICK_MS = 120;
   const MAP_VISIBLE_RUN_LIMIT = 640;
 
@@ -108,7 +110,22 @@
     { axis: "sEnd",   delta:  1, label: "Sₑ+", kind: "survival", pos: [ 0.26, -0.80, -0.28] }
   ];
 
+  prepareIntroShell();
   init();
+
+  function prepareIntroShell() {
+    document.documentElement.style.setProperty("--intro-black-fade-delay", `${INTRO_FADE_DELAY_MS}ms`);
+    document.documentElement.style.setProperty("--intro-black-fade-duration", `${INTRO_FADE_DURATION_MS}ms`);
+    document.body.classList.add("intro-pending", "intro-running");
+  }
+
+  function startIntroAnimation() {
+    document.body.classList.add("intro-fade-running");
+
+    window.setTimeout(() => {
+      document.body.classList.remove("intro-pending", "intro-running", "intro-fade-running");
+    }, INTRO_FADE_DELAY_MS + INTRO_FADE_DURATION_MS + 180);
+  }
 
   function init() {
     precomputeNeighbors();
@@ -125,10 +142,7 @@
     centerMapOnCurrent();
     updateUi();
 
-    requestAnimationFrame(() => {
-      document.body.classList.add("loaded");
-    });
-
+    startIntroAnimation();
     requestAnimationFrame(loop);
   }
 
@@ -198,12 +212,11 @@
 
     window.setTimeout(() => {
       callback();
+
       window.setTimeout(() => {
         document.body.classList.remove("transitioning");
       }, 150);
     }, 540);
-  }, 80);
-    }, 520);
   }
 
   function handleSpaceMapClick(clickedRule) {

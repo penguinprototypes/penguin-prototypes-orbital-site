@@ -14,6 +14,8 @@
   --py: 0px;
   --stars-x: 0px;
   --stars-y: 0px;
+  --intro-black-fade-delay: 90ms;
+  --intro-black-fade-duration: 1450ms;
   color-scheme: dark;
 }
 
@@ -63,31 +65,44 @@ input {
   will-change: transform;
 }
 
-#black-transition {
+#intro-fade {
   position: fixed;
   inset: 0;
   z-index: 100;
   pointer-events: none;
   background: #000;
-  opacity: 1;
-  visibility: visible;
-  transition:
-    opacity var(--transition-black-duration) ease,
-    visibility 0s linear var(--transition-black-duration);
-}
-
-body.loaded #black-transition {
   opacity: 0;
   visibility: hidden;
 }
 
-body.transitioning #black-transition {
+body.intro-pending #intro-fade,
+body.transitioning #intro-fade {
   opacity: 1;
   visibility: visible;
-  transition:
-    opacity var(--transition-black-duration) ease,
-    visibility 0s;
 }
+
+body.intro-fade-running #intro-fade {
+  animation: intro-black-fade-away var(--intro-black-fade-duration) ease var(--intro-black-fade-delay) forwards;
+}
+
+@keyframes intro-black-fade-away {
+  from {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+
+
+
+body.loaded 
+
+body.transitioning 
 
 
 .page-shell {
@@ -333,8 +348,8 @@ h1 {
     linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 28%),
     rgba(2, 5, 12, 0.84);
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.055) inset,
-    0 32px 120px rgba(38, 137, 255, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 32px 120px rgba(38, 137, 255, 0.16),
     0 26px 80px rgba(0, 0, 0, 0.55);
   overflow: hidden;
   transform-origin: center;
@@ -368,7 +383,7 @@ h1 {
   opacity: 0;
   transform: translate3d(calc(var(--px) * 0.44), calc(var(--py) * 0.44), 0);
   will-change: transform, opacity;
-  animation: orb-panel-fade-in 900ms ease 90ms forwards;
+  animation: page-fade-in 900ms ease 90ms forwards;
 }
 
 .orb-title,
@@ -566,17 +581,15 @@ h1 {
   top: 20px;
   z-index: 2;
   display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  align-items: flex-start;
   padding: 18px 20px;
   border: 1px solid var(--line);
   border-radius: 24px;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.06), transparent 36%),
-    rgba(5, 10, 22, 0.64);
-  box-shadow: 0 16px 60px rgba(0,0,0,0.32), var(--panel-glow);
+  background: rgba(5, 10, 22, 0.62);
+  box-shadow: 0 16px 60px rgba(0,0,0,0.32);
   backdrop-filter: blur(16px);
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
   pointer-events: none;
 }
 
@@ -616,14 +629,11 @@ h1 {
   padding: 10px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.055), transparent 42%),
-    rgba(5, 10, 22, 0.78);
+  background: rgba(5, 10, 22, 0.78);
   color: var(--muted);
   font-size: 13px;
   text-align: center;
   backdrop-filter: blur(14px);
-  box-shadow: var(--panel-glow);
 }
 
 @keyframes page-fade-in {
@@ -632,9 +642,10 @@ h1 {
 }
 
 @keyframes orb-panel-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+  from {
+    opacity: 0;
+    transform: translate3d(calc(var(--px) * 0.44), calc(28px + (var(--py) * 0.44)), 0);
+  }
   to {
     opacity: 1;
     transform: translate3d(calc(var(--px) * 0.44), calc(var(--py) * 0.44), 0);
@@ -701,25 +712,8 @@ h1 {
   }
 
   .space-map-topbar {
-  position: absolute;
-  left: 24px;
-  right: 24px;
-  top: 20px;
-  z-index: 2;
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  align-items: flex-start;
-  padding: 18px 20px;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background:
-    linear-gradient(135deg, rgba(255,255,255,0.06), transparent 36%),
-    rgba(5, 10, 22, 0.64);
-  box-shadow: 0 16px 60px rgba(0,0,0,0.32), var(--panel-glow);
-  backdrop-filter: blur(16px);
-  pointer-events: none;
-}
+    flex-direction: column;
+  }
 }
 
 @media (max-width: 560px) {
