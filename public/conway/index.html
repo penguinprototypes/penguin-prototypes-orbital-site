@@ -93,7 +93,8 @@
 
     .home-link,
     .status-pill,
-    .dimension-pad button,
+    .neighbor-orb-panel,
+    .connected-map-panel,
     .action-cluster button {
       border: 1px solid var(--line);
       background: rgba(7, 14, 30, 0.76);
@@ -313,36 +314,153 @@
       mix-blend-mode: screen;
     }
 
-    .dimension-pad {
+    .neighbor-orb-panel,
+    .connected-map-panel {
       position: fixed;
+      z-index: 5;
+      box-shadow: 0 8px 34px rgba(0, 0, 0, 0.34);
+    }
+
+    .neighbor-orb-panel {
       left: 22px;
       bottom: 22px;
-      z-index: 5;
-      width: min(380px, calc(100vw - 44px));
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      width: 270px;
+      border-radius: 24px;
+      padding: 12px;
+      user-select: none;
     }
 
-    .dimension-pad button,
-    .action-cluster button {
+    .orb-title,
+    .map-title,
+    .map-hint {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    #neighbor-orb {
+      width: 100%;
+      height: 250px;
+      display: block;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    #neighbor-orb.dragging {
+      cursor: grabbing;
+    }
+
+    .orb-shell {
+      fill: url(#orb-gradient);
+      stroke: rgba(142, 205, 255, 0.42);
+      stroke-width: 1.5;
+      filter: url(#orb-glow);
+    }
+
+    .orb-ring {
+      fill: none;
+      stroke: rgba(169, 214, 255, 0.18);
+      stroke-width: 1;
+    }
+
+    .orb-center-label {
+      pointer-events: none;
+      fill: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .orb-center-subtitle {
+      pointer-events: none;
+      fill: rgba(230, 242, 255, 0.58);
+      font-size: 8px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .orb-node {
       cursor: pointer;
-      border-radius: 16px;
-      min-height: 44px;
-      transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease, opacity 150ms ease;
+      transition: opacity 120ms ease;
     }
 
-    .dimension-pad button:hover,
-    .action-cluster button:hover {
-      transform: translateY(-2px);
-      border-color: var(--line-bright);
-      background: rgba(17, 31, 64, 0.88);
+    .orb-node circle {
+      stroke: rgba(255, 255, 255, 0.74);
+      stroke-width: 1.2;
     }
 
-    .dimension-pad button:disabled {
+    .orb-node.birth circle {
+      fill: rgba(92, 184, 255, 0.92);
+    }
+
+    .orb-node.survival circle {
+      fill: rgba(180, 128, 255, 0.92);
+    }
+
+    .orb-node.invalid {
+      opacity: 0.22;
       cursor: not-allowed;
-      opacity: 0.34;
-      transform: none;
+    }
+
+    .orb-node.invalid circle {
+      fill: rgba(120, 130, 150, 0.45);
+      stroke: rgba(255,255,255,0.28);
+    }
+
+    .orb-node:hover:not(.invalid) circle {
+      filter: url(#orb-glow);
+      stroke: #fff;
+    }
+
+    .orb-node text {
+      pointer-events: none;
+      fill: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 8px;
+      font-weight: 800;
+      paint-order: stroke;
+      stroke: rgba(0, 0, 0, 0.75);
+      stroke-width: 2.6px;
+      stroke-linejoin: round;
+    }
+
+    .orb-hover-label {
+      min-height: 18px;
+      color: var(--muted);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 11px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .connected-map-panel {
+      left: 310px;
+      bottom: 22px;
+      width: 190px;
+      border-radius: 20px;
+      padding: 10px 12px 11px;
+    }
+
+    #connected-map {
+      display: block;
+      width: 144px;
+      height: 144px;
+      margin: 8px auto 6px;
+      border-radius: 10px;
+      background: #02050c;
+      image-rendering: pixelated;
+      box-shadow: 0 0 0 1px rgba(168, 210, 255, 0.18);
+      cursor: crosshair;
+    }
+
+    .map-hint {
+      font-size: 10px;
+      letter-spacing: 0.1em;
     }
 
     .action-cluster {
@@ -358,17 +476,22 @@
     }
 
     .action-cluster button {
+      cursor: pointer;
+      border-radius: 16px;
+      min-height: 44px;
       padding: 0 18px;
+      transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease, opacity 150ms ease;
+    }
+
+    .action-cluster button:hover {
+      transform: translateY(-2px);
+      border-color: var(--line-bright);
+      background: rgba(17, 31, 64, 0.88);
     }
 
     @keyframes page-fade-in {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
 
     @keyframes grow-out {
@@ -376,10 +499,16 @@
         transform: translateY(28px) rotateX(54deg) scale(0.82);
         opacity: 0.28;
       }
-
       100% {
         transform: translateY(0) rotateX(0deg) scale(1);
         opacity: 1;
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .connected-map-panel {
+        left: 22px;
+        bottom: 318px;
       }
     }
 
@@ -389,11 +518,12 @@
       }
 
       .page-shell {
-        padding-bottom: 190px;
+        padding-bottom: 420px;
       }
 
       .sim-layout {
         grid-template-columns: 1fr;
+        padding-right: 0;
       }
 
       .rule-card,
@@ -409,29 +539,67 @@
         max-height: none;
       }
 
-      .sim-layout {
-        padding-right: 0;
-      }
-
       .universe-frame {
         width: min(88vw, 680px);
       }
-    }
 
-    @media (max-width: 620px) {
-      .page-shell {
-        padding-left: 14px;
-        padding-right: 14px;
+      .neighbor-orb-panel {
+        width: min(270px, calc(100vw - 44px));
       }
 
-      .dimension-pad {
+      .connected-map-panel {
+        left: 310px;
+        bottom: 22px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .neighbor-orb-panel {
         left: 14px;
-        width: calc(100vw - 28px);
+        bottom: 14px;
+        width: min(240px, calc(100vw - 28px));
+      }
+
+      #neighbor-orb {
+        height: 220px;
+      }
+
+      .connected-map-panel {
+        left: 14px;
+        bottom: 292px;
       }
 
       .action-cluster {
         right: 14px;
-        bottom: 122px;
+        bottom: 14px;
+        max-width: calc(100vw - 280px);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page-shell {
+        padding-left: 14px;
+        padding-right: 14px;
+        padding-bottom: 560px;
+      }
+
+      .neighbor-orb-panel,
+      .connected-map-panel,
+      .action-cluster {
+        position: fixed;
+      }
+
+      .connected-map-panel {
+        left: 14px;
+        bottom: 278px;
+      }
+
+      .action-cluster {
+        left: 14px;
+        right: 14px;
+        bottom: 448px;
+        justify-content: flex-start;
+        max-width: none;
       }
     }
 
@@ -482,6 +650,7 @@
           <div><dt>Birth range</dt><dd id="birth-range">3</dd></div>
           <div><dt>Survival range</dt><dd id="survival-range">2-3</dd></div>
           <div><dt>Group</dt><dd id="group-name">B3+/S2+</dd></div>
+          <div><dt>Connected ID</dt><dd id="connected-id">3323</dd></div>
           <div><dt>Generation</dt><dd id="generation">0</dd></div>
           <div><dt>Living cells</dt><dd id="live-count">0</dd></div>
         </dl>
@@ -502,32 +671,61 @@
           living cell survives when its neighbor count is in the survival range.
         </p>
         <p>
-          This prototype only uses the connected rules for now, meaning each range is
-          continuous. The navigation pad moves through four dimensions:
-          birth start, birth end, survival start, and survival end.
+          This prototype shows the connected rules: contiguous ranges described by
+          birth start/end and survival start/end. The orb shows nearby universes in
+          that four-dimensional neighborhood.
+        </p>
+        <p>
+          The map is the larger connected multiverse: 36 possible birth ranges by
+          36 possible survival ranges. Click any point on it to jump directly there.
         </p>
         <p>
           White cells are newborn, then smoothly shift through red, orange, yellow,
-          green, cyan, blue, purple, and magenta as they age. Reloading the page,
-          pressing Reset, or reaching a static state generates a new random 10×10 seed
-          in the center.
+          green, cyan, blue, purple, and magenta as they age. Reloading, pressing
+          Reset, changing universes, or reaching a static state generates a new
+          random 10×10 seed.
         </p>
         <p class="inspiration">Inspired by Cary Huang.</p>
       </aside>
     </section>
   </main>
 
-  <nav class="dimension-pad" aria-label="Four-dimensional rule navigation">
-    <button type="button" data-axis="bStart" data-dir="1">Bₛ+</button>
-    <button type="button" data-axis="bEnd" data-dir="1">Bₑ+</button>
-    <button type="button" data-axis="sStart" data-dir="1">Sₛ+</button>
-    <button type="button" data-axis="sEnd" data-dir="1">Sₑ+</button>
+  <section class="neighbor-orb-panel" aria-label="Nearby connected universes">
+    <div class="orb-title">Nearby universes</div>
+    <svg id="neighbor-orb" viewBox="-140 -140 280 280" role="img" aria-label="Draggable local-neighborhood universe navigator">
+      <defs>
+        <radialGradient id="orb-gradient" cx="35%" cy="28%" r="75%">
+          <stop offset="0%" stop-color="rgba(210,240,255,0.42)" />
+          <stop offset="42%" stop-color="rgba(90,160,255,0.16)" />
+          <stop offset="100%" stop-color="rgba(90,80,255,0.08)" />
+        </radialGradient>
+        <filter id="orb-glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="4" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
 
-    <button type="button" data-axis="bStart" data-dir="-1">Bₛ−</button>
-    <button type="button" data-axis="bEnd" data-dir="-1">Bₑ−</button>
-    <button type="button" data-axis="sStart" data-dir="-1">Sₛ−</button>
-    <button type="button" data-axis="sEnd" data-dir="-1">Sₑ−</button>
-  </nav>
+      <circle class="orb-shell" r="90"></circle>
+      <ellipse class="orb-ring ring-a" rx="90" ry="28"></ellipse>
+      <ellipse class="orb-ring ring-b" rx="90" ry="28" transform="rotate(60)"></ellipse>
+      <ellipse class="orb-ring ring-c" rx="90" ry="28" transform="rotate(-60)"></ellipse>
+
+      <text class="orb-center-label" id="orb-current-rule" text-anchor="middle" y="-4">B3/S23</text>
+      <text class="orb-center-subtitle" text-anchor="middle" y="16">drag to rotate</text>
+
+      <g id="orb-node-layer"></g>
+    </svg>
+    <div id="orb-hover-label" class="orb-hover-label">Click a nearby rule to jump there.</div>
+  </section>
+
+  <section class="connected-map-panel" aria-label="Connected multiverse map">
+    <div class="map-title">Connected map</div>
+    <canvas id="connected-map" width="144" height="144"></canvas>
+    <div class="map-hint">36×36 · click to jump</div>
+  </section>
 
   <div class="action-cluster" aria-label="Simulation actions">
     <button type="button" id="pause-button">Pause</button>
@@ -551,22 +749,25 @@
       const stars = document.getElementById("stars");
       const canvas = document.getElementById("universe-canvas");
       const frameEl = document.getElementById("universe-frame");
+      const mapCanvas = document.getElementById("connected-map");
+      const mapCtx = mapCanvas.getContext("2d");
+
+      const orbSvg = document.getElementById("neighbor-orb");
+      const orbNodeLayer = document.getElementById("orb-node-layer");
+      const orbHoverLabel = document.getElementById("orb-hover-label");
+      const orbCurrentRule = document.getElementById("orb-current-rule");
 
       const ruleNameEl = document.getElementById("rule-name");
       const birthRangeEl = document.getElementById("birth-range");
       const survivalRangeEl = document.getElementById("survival-range");
       const groupNameEl = document.getElementById("group-name");
+      const connectedIdEl = document.getElementById("connected-id");
       const generationEl = document.getElementById("generation");
       const liveCountEl = document.getElementById("live-count");
       const statusPill = document.getElementById("status-pill");
       const randomButton = document.getElementById("random-button");
       const resetButton = document.getElementById("reset-button");
       const pauseButton = document.getElementById("pause-button");
-
-      if (!canvas) {
-        console.error("Conway page could not find #universe-canvas.");
-        return;
-      }
 
       const ctx = canvas.getContext("2d", { alpha: false });
       ctx.imageSmoothingEnabled = false;
@@ -577,6 +778,7 @@
       const ages = new Uint16Array(CELL_COUNT);
       const nextAges = new Uint16Array(CELL_COUNT);
       const neighbors = Array.from({ length: CELL_COUNT }, () => new Uint16Array(8));
+      const connectedIntervals = buildConnectedIntervals();
 
       let rule = {
         bStart: 3,
@@ -591,12 +793,30 @@
       let paused = false;
       let pageHidden = document.hidden;
 
+      let orbYaw = 0.38;
+      let orbPitch = -0.2;
+      let orbDragging = false;
+      let orbMoved = false;
+      let orbLastX = 0;
+      let orbLastY = 0;
+
       const pointer = {
         targetX: 0,
         targetY: 0,
         x: 0,
         y: 0
       };
+
+      const connectedMoves = [
+        { axis: "bStart", delta: -1, label: "Bₛ−", kind: "birth", pos: [-0.80, -0.22,  0.52] },
+        { axis: "bStart", delta:  1, label: "Bₛ+", kind: "birth", pos: [ 0.80, -0.22,  0.52] },
+        { axis: "bEnd",   delta: -1, label: "Bₑ−", kind: "birth", pos: [-0.26,  0.80,  0.42] },
+        { axis: "bEnd",   delta:  1, label: "Bₑ+", kind: "birth", pos: [ 0.26,  0.80,  0.42] },
+        { axis: "sStart", delta: -1, label: "Sₛ−", kind: "survival", pos: [-0.78,  0.24, -0.38] },
+        { axis: "sStart", delta:  1, label: "Sₛ+", kind: "survival", pos: [ 0.78,  0.24, -0.38] },
+        { axis: "sEnd",   delta: -1, label: "Sₑ−", kind: "survival", pos: [-0.26, -0.80, -0.28] },
+        { axis: "sEnd",   delta:  1, label: "Sₑ+", kind: "survival", pos: [ 0.26, -0.80, -0.28] }
+      ];
 
       init();
 
@@ -605,6 +825,8 @@
         generateRandomStarfield();
         attachButtonHandlers();
         attachPointerHandlers();
+        attachOrbHandlers();
+        attachMapHandlers();
         attachVisibilityHandlers();
 
         resetPattern();
@@ -615,14 +837,6 @@
       }
 
       function attachButtonHandlers() {
-        document.querySelectorAll(".dimension-pad button").forEach((button) => {
-          button.addEventListener("click", () => {
-            const axis = button.getAttribute("data-axis");
-            const dir = Number(button.getAttribute("data-dir"));
-            moveAxis(axis, dir);
-          });
-        });
-
         pauseButton.addEventListener("click", () => {
           paused = !paused;
           pauseButton.textContent = paused ? "Resume" : "Pause";
@@ -637,7 +851,7 @@
         });
 
         randomButton.addEventListener("click", () => {
-          randomizeRule();
+          randomizeConnectedRule();
         });
       }
 
@@ -662,6 +876,71 @@
         }, { passive: true });
       }
 
+      function attachOrbHandlers() {
+        orbSvg.addEventListener("pointerdown", (event) => {
+          orbDragging = true;
+          orbMoved = false;
+          orbLastX = event.clientX;
+          orbLastY = event.clientY;
+          orbSvg.classList.add("dragging");
+          orbSvg.setPointerCapture(event.pointerId);
+        });
+
+        orbSvg.addEventListener("pointermove", (event) => {
+          if (!orbDragging) return;
+
+          const dx = event.clientX - orbLastX;
+          const dy = event.clientY - orbLastY;
+
+          if (Math.abs(dx) + Math.abs(dy) > 2) {
+            orbMoved = true;
+          }
+
+          orbYaw += dx * 0.012;
+          orbPitch = clamp(orbPitch - dy * 0.012, -1.1, 1.1);
+
+          orbLastX = event.clientX;
+          orbLastY = event.clientY;
+
+          renderOrb();
+        });
+
+        orbSvg.addEventListener("pointerup", (event) => {
+          orbDragging = false;
+          orbSvg.classList.remove("dragging");
+          try {
+            orbSvg.releasePointerCapture(event.pointerId);
+          } catch {}
+          setTimeout(() => { orbMoved = false; }, 0);
+        });
+
+        orbSvg.addEventListener("pointercancel", () => {
+          orbDragging = false;
+          orbSvg.classList.remove("dragging");
+          orbMoved = false;
+        });
+      }
+
+      function attachMapHandlers() {
+        mapCanvas.addEventListener("click", (event) => {
+          const rect = mapCanvas.getBoundingClientRect();
+          const x = Math.floor(((event.clientX - rect.left) / rect.width) * 36);
+          const y = Math.floor(((event.clientY - rect.top) / rect.height) * 36);
+
+          if (x < 0 || x >= 36 || y < 0 || y >= 36) return;
+
+          const b = connectedIntervals[x];
+          const s = connectedIntervals[y];
+
+          setRule({
+            bStart: b.start,
+            bEnd: b.end,
+            sStart: s.start,
+            sEnd: s.end
+          });
+        });
+      }
+
       function attachVisibilityHandlers() {
         document.addEventListener("visibilitychange", () => {
           pageHidden = document.hidden;
@@ -673,18 +952,15 @@
 
       function loop(timestamp) {
         requestAnimationFrame(loop);
-
         updateParallax();
 
-        if (pageHidden) {
-          return;
-        }
+        if (pageHidden) return;
 
         if (!paused && timestamp - lastTick >= TICK_MS) {
           lastTick = timestamp;
           step();
           draw();
-          updateUi();
+          updateLiveStats();
         }
       }
 
@@ -699,9 +975,7 @@
       }
 
       function generateRandomStarfield() {
-        if (!stars) {
-          return;
-        }
+        if (!stars) return;
 
         const width = Math.max(1, window.innerWidth);
         const height = Math.max(1, window.innerHeight);
@@ -795,9 +1069,7 @@
             nextAges[i] = 0;
           }
 
-          if (nextAlive !== cells[i]) {
-            changed = true;
-          }
+          if (nextAlive !== cells[i]) changed = true;
         }
 
         cells.set(nextCells);
@@ -888,40 +1160,31 @@
         return [255, 255, 255];
       }
 
-      function moveAxis(axis, dir) {
-        if (!axis || !Number.isFinite(dir)) {
-          return;
-        }
+      function setRule(nextRule) {
+        if (!isValidRule(nextRule)) return;
 
-        const next = {
-          bStart: rule.bStart,
-          bEnd: rule.bEnd,
-          sStart: rule.sStart,
-          sEnd: rule.sEnd
+        rule = {
+          bStart: nextRule.bStart,
+          bEnd: nextRule.bEnd,
+          sStart: nextRule.sStart,
+          sEnd: nextRule.sEnd
         };
 
-        next[axis] += dir;
-
-        if (!isValidRule(next)) {
-          return;
-        }
-
-        rule = next;
         resetPattern();
         draw();
         updateUi();
       }
 
-      function randomizeRule() {
-        const bStart = randomInt(1, 8);
-        const bEnd = randomInt(bStart, 8);
-        const sStart = randomInt(1, 8);
-        const sEnd = randomInt(sStart, 8);
+      function randomizeConnectedRule() {
+        const b = connectedIntervals[randomInt(0, connectedIntervals.length - 1)];
+        const s = connectedIntervals[randomInt(0, connectedIntervals.length - 1)];
 
-        rule = { bStart, bEnd, sStart, sEnd };
-        resetPattern();
-        draw();
-        updateUi();
+        setRule({
+          bStart: b.start,
+          bEnd: b.end,
+          sStart: s.start,
+          sEnd: s.end
+        });
       }
 
       function isValidRule(candidate) {
@@ -940,18 +1203,36 @@
       }
 
       function updateUi() {
-        const compactRule = `B${rangeDigits(rule.bStart, rule.bEnd)}/S${rangeDigits(rule.sStart, rule.sEnd)}`;
+        const compactRule = ruleString(rule);
+
         ruleNameEl.textContent = compactRule;
         ruleNameEl.title = compactRule;
         birthRangeEl.textContent = rangeDash(rule.bStart, rule.bEnd);
         survivalRangeEl.textContent = rangeDash(rule.sStart, rule.sEnd);
         groupNameEl.textContent = `B${rule.bStart}+/S${rule.sStart}+`;
+        connectedIdEl.textContent = `${rule.bStart}${rule.bEnd}${rule.sStart}${rule.sEnd}`;
+
+        orbCurrentRule.textContent = compactRule;
+        updateLiveStats();
+        renderOrb();
+        renderConnectedMap();
+      }
+
+      function updateLiveStats() {
         generationEl.textContent = String(generation);
         liveCountEl.textContent = String(countLiveCells());
+      }
 
-        document.querySelectorAll(".dimension-pad button").forEach((button) => {
-          const axis = button.getAttribute("data-axis");
-          const dir = Number(button.getAttribute("data-dir"));
+      function countLiveCells() {
+        let count = 0;
+        for (let i = 0; i < CELL_COUNT; i += 1) count += cells[i];
+        return count;
+      }
+
+      function renderOrb() {
+        orbNodeLayer.replaceChildren();
+
+        const nodes = connectedMoves.map((move) => {
           const candidate = {
             bStart: rule.bStart,
             bEnd: rule.bEnd,
@@ -959,24 +1240,152 @@
             sEnd: rule.sEnd
           };
 
-          candidate[axis] += dir;
-          button.disabled = !isValidRule(candidate);
-        });
+          candidate[move.axis] += move.delta;
+
+          const valid = isValidRule(candidate);
+          const rotated = rotatePoint(move.pos, orbYaw, orbPitch);
+          const depthScale = 0.78 + (rotated.z + 1) * 0.20;
+          const radius = valid ? 10 * depthScale : 8 * depthScale;
+
+          return {
+            move,
+            candidate,
+            valid,
+            x: rotated.x * 92,
+            y: rotated.y * 92,
+            z: rotated.z,
+            radius
+          };
+        }).sort((a, b) => a.z - b.z);
+
+        for (const node of nodes) {
+          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+          g.classList.add("orb-node", node.move.kind);
+          if (!node.valid) g.classList.add("invalid");
+
+          g.setAttribute("transform", `translate(${node.x.toFixed(2)} ${node.y.toFixed(2)})`);
+          g.dataset.rule = node.valid ? ruleString(node.candidate) : "invalid";
+          g.dataset.axis = node.move.axis;
+          g.dataset.delta = String(node.move.delta);
+
+          const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          circle.setAttribute("r", node.radius.toFixed(2));
+
+          const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("dominant-baseline", "middle");
+          text.textContent = node.move.label;
+
+          g.append(circle, text);
+
+          g.addEventListener("mouseenter", () => {
+            orbHoverLabel.textContent = node.valid
+              ? `${node.move.label} → ${ruleString(node.candidate)}`
+              : `${node.move.label} is not valid here`;
+          });
+
+          g.addEventListener("mouseleave", () => {
+            orbHoverLabel.textContent = "Click a nearby rule to jump there.";
+          });
+
+          g.addEventListener("click", (event) => {
+            event.stopPropagation();
+            if (orbMoved || !node.valid) return;
+            setRule(node.candidate);
+          });
+
+          orbNodeLayer.append(g);
+        }
       }
 
-      function countLiveCells() {
-        let count = 0;
-        for (let i = 0; i < CELL_COUNT; i += 1) {
-          count += cells[i];
+      function renderConnectedMap() {
+        const width = mapCanvas.width;
+        const height = mapCanvas.height;
+        const cell = width / 36;
+
+        mapCtx.clearRect(0, 0, width, height);
+        mapCtx.fillStyle = "#02050c";
+        mapCtx.fillRect(0, 0, width, height);
+
+        const currentBIndex = intervalIndex(rule.bStart, rule.bEnd);
+        const currentSIndex = intervalIndex(rule.sStart, rule.sEnd);
+
+        for (let by = 0; by < 36; by += 1) {
+          const s = connectedIntervals[by];
+
+          for (let bx = 0; bx < 36; bx += 1) {
+            const b = connectedIntervals[bx];
+            const bSize = b.end - b.start + 1;
+            const sSize = s.end - s.start + 1;
+            const brightness = 22 + (bSize + sSize) * 8;
+            const blue = 48 + bSize * 18;
+            const purple = 42 + sSize * 17;
+
+            mapCtx.fillStyle = `rgb(${brightness}, ${Math.floor((blue + purple) * 0.34)}, ${Math.min(255, blue + purple)})`;
+            mapCtx.fillRect(bx * cell, by * cell, Math.ceil(cell), Math.ceil(cell));
+          }
         }
-        return count;
+
+        // Current B-range column and S-range row.
+        mapCtx.fillStyle = "rgba(255,255,255,0.15)";
+        mapCtx.fillRect(currentBIndex * cell, 0, cell, height);
+        mapCtx.fillRect(0, currentSIndex * cell, width, cell);
+
+        // Current universe.
+        mapCtx.strokeStyle = "#ffffff";
+        mapCtx.lineWidth = 2;
+        mapCtx.strokeRect(currentBIndex * cell + 1, currentSIndex * cell + 1, cell - 2, cell - 2);
+
+        mapCtx.fillStyle = "#ffffff";
+        mapCtx.fillRect(
+          currentBIndex * cell + cell * 0.35,
+          currentSIndex * cell + cell * 0.35,
+          cell * 0.3,
+          cell * 0.3
+        );
+      }
+
+      function buildConnectedIntervals() {
+        const intervals = [];
+        for (let start = 1; start <= 8; start += 1) {
+          for (let end = start; end <= 8; end += 1) {
+            intervals.push({ start, end });
+          }
+        }
+        return intervals;
+      }
+
+      function intervalIndex(start, end) {
+        for (let i = 0; i < connectedIntervals.length; i += 1) {
+          const interval = connectedIntervals[i];
+          if (interval.start === start && interval.end === end) return i;
+        }
+        return 0;
+      }
+
+      function rotatePoint(point, yaw, pitch) {
+        let [x, y, z] = point;
+
+        const cy = Math.cos(yaw);
+        const sy = Math.sin(yaw);
+        const x1 = x * cy + z * sy;
+        const z1 = -x * sy + z * cy;
+
+        const cp = Math.cos(pitch);
+        const sp = Math.sin(pitch);
+        const y2 = y * cp - z1 * sp;
+        const z2 = y * sp + z1 * cp;
+
+        return { x: x1, y: y2, z: z2 };
+      }
+
+      function ruleString(value) {
+        return `B${rangeDigits(value.bStart, value.bEnd)}/S${rangeDigits(value.sStart, value.sEnd)}`;
       }
 
       function rangeDigits(start, end) {
         let value = "";
-        for (let n = start; n <= end; n += 1) {
-          value += String(n);
-        }
+        for (let n = start; n <= end; n += 1) value += String(n);
         return value;
       }
 
@@ -1008,7 +1417,6 @@
 
       function debounce(fn, delay) {
         let handle = null;
-
         return (...args) => {
           window.clearTimeout(handle);
           handle = window.setTimeout(() => fn(...args), delay);
