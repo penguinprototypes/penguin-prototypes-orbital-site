@@ -14,7 +14,7 @@
   --py: 0px;
   --stars-x: 0px;
   --stars-y: 0px;
-  --sim-layout-offset-x: clamp(28px, 4vw, 76px);
+  --page-balance-offset-x: clamp(9px, 1.35vw, 26px);
   --intro-black-fade-delay: 90ms;
   --intro-black-fade-duration: 1450ms;
   color-scheme: dark;
@@ -170,7 +170,7 @@ body.transitioning
 
 .hero {
   max-width: 880px;
-  transform: translate3d(calc(var(--px) * 0.25), calc(var(--py) * 0.25), 0);
+  transform: translate3d(calc(var(--page-balance-offset-x) + (var(--px) * 0.25)), calc(var(--py) * 0.25), 0);
   will-change: transform;
 }
 
@@ -212,7 +212,7 @@ h1 {
   min-height: 0;
   margin-block: auto;
   padding-right: min(430px, 28vw);
-  transform: translateX(var(--sim-layout-offset-x));
+  transform: translateX(var(--page-balance-offset-x));
   will-change: transform;
 }
 
@@ -785,5 +785,12 @@ body.map-fade-active #map-fade {
 @media (max-width: 1060px) {
   .sim-layout {
     transform: none !important;
+  }
+}
+
+
+@media (max-width: 1060px) {
+  .hero {
+    transform: translate3d(calc(var(--px) * 0.25), calc(var(--py) * 0.25), 0) !important;
   }
 }
