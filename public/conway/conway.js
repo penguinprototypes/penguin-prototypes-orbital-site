@@ -17,6 +17,7 @@ const generationEl = document.querySelector("#generation");
 const liveCountEl = document.querySelector("#live-count");
 const statusPill = document.querySelector("#status-pill");
 const randomButton = document.querySelector("#random-button");
+const resetButton = document.querySelector("#reset-button");
 const pauseButton = document.querySelector("#pause-button");
 
 canvas.width = GRID_SIZE;
@@ -42,11 +43,18 @@ let generation = 0;
 let stableTicks = 0;
 let lastTick = 0;
 let paused = false;
+let pointerX = 0;
+let pointerY = 0;
 
 precomputeNeighbors();
 resetPattern();
 updateUi();
 draw();
+setupParallax();
+
+window.addEventListener("load", () => {
+  document.body.classList.add("is-loaded");
+});
 
 requestAnimationFrame(loop);
 
@@ -63,11 +71,14 @@ randomButton.addEventListener("click", () => {
   randomizeRule();
 });
 
+resetButton.addEventListener("click", () => {
+  resetPattern();
+  draw();
+  updateUi();
+});
+
 pauseButton.addEventListener("click", () => {
-  paused = !paused;
-  pauseButton.textContent = paused ? "Resume" : "Pause";
-  statusPill.textContent = paused ? "paused" : "running";
-  statusPill.classList.toggle("paused", paused);
+  togglePause();
 });
 
 window.addEventListener("keydown", (event) => {
@@ -95,19 +106,24 @@ window.addEventListener("keydown", (event) => {
 
   if (event.key === " ") {
     event.preventDefault();
-    paused = !paused;
-    pauseButton.textContent = paused ? "Resume" : "Pause";
-    statusPill.textContent = paused ? "paused" : "running";
-    statusPill.classList.toggle("paused", paused);
+    togglePause();
   }
 
   if (event.key.toLowerCase() === "x") {
     randomizeRule();
   }
+
+  if (event.key.toLowerCase() === "z") {
+    resetPattern();
+    draw();
+    updateUi();
+  }
 });
 
 function loop(timestamp) {
   requestAnimationFrame(loop);
+
+  updateParallax();
 
   if (paused) {
     return;
@@ -255,16 +271,47 @@ function draw() {
   ctx.putImageData(image, 0, 0);
 }
 
+const ageStops = [
+  [0, [255, 255, 255]],
+  [8, [255, 0, 0]],
+  [16, [255, 128, 0]],
+  [32, [255, 255, 0]],
+  [64, [0, 255, 0]],
+  [128, [0, 255, 255]],
+  [256, [0, 96, 255]],
+  [512, [180, 0, 255]],
+  [1024, [255, 0, 255]]
+];
+
 function colorForAge(age) {
-  if (age < 8) return [255, 255, 255];
-  if (age < 16) return [255, 0, 0];
-  if (age < 32) return [255, 128, 0];
-  if (age < 64) return [255, 255, 0];
-  if (age < 128) return [0, 255, 0];
-  if (age < 256) return [0, 255, 255];
-  if (age < 512) return [0, 96, 255];
-  if (age < 1024) return [180, 0, 255];
-  return [255, 0, 255];
+  if (age <= 0) {
+    return ageStops[0][1];
+  }
+
+  for (let i = 0; i < ageStops.length - 1; i += 1) {
+    const [ageA, colorA] = ageStops[i];
+    const [ageB, colorB] = ageStops[i + 1];
+
+    if (age >= ageA && age <= ageB) {
+      const t = smoothstep((age - ageA) / (ageB - ageA));
+      return mixColor(colorA, colorB, t);
+    }
+  }
+
+  return ageStops[ageStops.length - 1][1];
+}
+
+function mixColor(a, b, t) {
+  return [
+    Math.round(a[0] + (b[0] - a[0]) * t),
+    Math.round(a[1] + (b[1] - a[1]) * t),
+    Math.round(a[2] + (b[2] - a[2]) * t)
+  ];
+}
+
+function smoothstep(t) {
+  t = Math.max(0, Math.min(1, t));
+  return t * t * (3 - 2 * t);
 }
 
 function moveAxis(axis, dir) {
@@ -278,19 +325,19 @@ function moveAxis(axis, dir) {
   next.sEnd = clamp(next.sEnd, 1, 8);
 
   if (axis === "bStart" && next.bStart > next.bEnd) {
-    next.bEnd = next.bStart;
+    return;
   }
 
   if (axis === "bEnd" && next.bEnd < next.bStart) {
-    next.bStart = next.bEnd;
+    return;
   }
 
   if (axis === "sStart" && next.sStart > next.sEnd) {
-    next.sEnd = next.sStart;
+    return;
   }
 
   if (axis === "sEnd" && next.sEnd < next.sStart) {
-    next.sStart = next.sEnd;
+    return;
   }
 
   rule = next;
@@ -312,15 +359,22 @@ function randomizeRule() {
   updateUi();
 }
 
+function togglePause() {
+  paused = !paused;
+  pauseButton.textContent = paused ? "Resume" : "Pause";
+  statusPill.textContent = paused ? "paused" : "running";
+  statusPill.classList.toggle("paused", paused);
+}
+
 function ruleString() {
-  return `B${rangeString(rule.bStart, rule.bEnd)}/S${rangeString(rule.sStart, rule.sEnd)}`;
+  return `B${compactRangeString(rule.bStart, rule.bEnd)}/S${compactRangeString(rule.sStart, rule.sEnd)}`;
 }
 
 function groupString() {
   return `B${rule.bStart}+/S${rule.sStart}+`;
 }
 
-function rangeString(start, end) {
+function compactRangeString(start, end) {
   let s = "";
 
   for (let n = start; n <= end; n += 1) {
@@ -330,10 +384,18 @@ function rangeString(start, end) {
   return s;
 }
 
+function displayRangeString(start, end) {
+  if (start === end) {
+    return String(start);
+  }
+
+  return `${start}-${end}`;
+}
+
 function updateUi() {
   ruleNameEl.textContent = ruleString();
-  birthRangeEl.textContent = rangeString(rule.bStart, rule.bEnd);
-  survivalRangeEl.textContent = rangeString(rule.sStart, rule.sEnd);
+  birthRangeEl.textContent = displayRangeString(rule.bStart, rule.bEnd);
+  survivalRangeEl.textContent = displayRangeString(rule.sStart, rule.sEnd);
   groupNameEl.textContent = groupString();
   generationEl.textContent = String(generation);
   liveCountEl.textContent = String(countLiveCells());
@@ -386,6 +448,33 @@ function animateGrow() {
   frameEl.classList.remove("grow");
   void frameEl.offsetWidth;
   frameEl.classList.add("grow");
+}
+
+function setupParallax() {
+  document.querySelectorAll(".parallax-layer").forEach((el) => {
+    const depth = Number(el.dataset.depth ?? 0.2);
+    el.style.setProperty("--depth-x", `${depth * 0.018}px`);
+    el.style.setProperty("--depth-y", `${depth * 0.018}px`);
+  });
+
+  window.addEventListener("pointermove", (event) => {
+    const nx = (event.clientX / window.innerWidth - 0.5) * 2;
+    const ny = (event.clientY / window.innerHeight - 0.5) * 2;
+
+    pointerX = nx * 42;
+    pointerY = ny * 42;
+  }, { passive: true });
+}
+
+function updateParallax() {
+  const currentX = Number.parseFloat(document.documentElement.style.getPropertyValue("--mouse-x")) || 0;
+  const currentY = Number.parseFloat(document.documentElement.style.getPropertyValue("--mouse-y")) || 0;
+
+  const nextX = currentX + (pointerX - currentX) * 0.08;
+  const nextY = currentY + (pointerY - currentY) * 0.08;
+
+  document.documentElement.style.setProperty("--mouse-x", `${nextX}px`);
+  document.documentElement.style.setProperty("--mouse-y", `${nextY}px`);
 }
 
 function clamp(value, min, max) {

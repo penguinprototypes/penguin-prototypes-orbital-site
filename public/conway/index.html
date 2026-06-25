@@ -17,17 +17,19 @@
   <link rel="stylesheet" href="./conway.css" />
 </head>
 <body>
+  <div class="fade-curtain" aria-hidden="true"></div>
   <div class="stars" aria-hidden="true"></div>
+  <div class="mouse-glow" aria-hidden="true"></div>
   <div class="glow glow-a" aria-hidden="true"></div>
   <div class="glow glow-b" aria-hidden="true"></div>
 
   <main class="page-shell">
-    <header class="top-bar">
+    <header class="top-bar parallax-layer" data-depth="0.22">
       <a class="home-link" href="/" aria-label="Back to Penguin Prototypes">← Penguin Prototypes</a>
       <div class="status-pill" id="status-pill">running</div>
     </header>
 
-    <section class="hero">
+    <section class="hero parallax-layer" data-depth="0.12">
       <p class="eyebrow">Connected Life-like cellular automata</p>
       <h1>Conway Multiverse</h1>
       <p class="subtitle">
@@ -37,7 +39,7 @@
     </section>
 
     <section class="sim-layout" aria-label="Conway Multiverse simulation">
-      <aside class="rule-card" aria-label="Current rule">
+      <aside class="rule-card parallax-layer" data-depth="0.32" aria-label="Current rule">
         <p class="card-label">Current universe</p>
         <h2 id="rule-name">B3/S23</h2>
         <dl>
@@ -47,7 +49,7 @@
           </div>
           <div>
             <dt>Survival range</dt>
-            <dd id="survival-range">23</dd>
+            <dd id="survival-range">2-3</dd>
           </div>
           <div>
             <dt>Group</dt>
@@ -64,7 +66,7 @@
         </dl>
       </aside>
 
-      <div class="universe-stage">
+      <div class="universe-stage parallax-layer" data-depth="0.5">
         <div class="universe-frame" id="universe-frame">
           <canvas
             id="universe-canvas"
@@ -76,7 +78,7 @@
         </div>
       </div>
 
-      <aside class="description-card">
+      <aside class="description-card parallax-layer" data-depth="0.24">
         <p class="card-label">What you are seeing</p>
         <p>
           Life-like cellular automata use rules like <strong>B3/S23</strong>.
@@ -85,9 +87,8 @@
         </p>
         <p>
           This page currently shows only the <strong>connected</strong> rules:
-          contiguous ranges such as <strong>B3/S23</strong>,
-          <strong>B678/S1234</strong>, or <strong>B24/S7</strong> if the range
-          itself has no gaps.
+          contiguous birth and survival ranges with no gaps, such as
+          <strong>B3/S23</strong> or <strong>B678/S1234</strong>.
         </p>
         <p>
           The eight navigation buttons move through four dimensions:
@@ -99,23 +100,22 @@
   </main>
 
   <nav class="dimension-pad" aria-label="Four-dimensional rule navigation">
-    <button data-axis="bStart" data-dir="-1" title="Decrease B start">Bₛ−</button>
     <button data-axis="bStart" data-dir="1" title="Increase B start">Bₛ+</button>
-    <button data-axis="bEnd" data-dir="-1" title="Decrease B end">Bₑ−</button>
     <button data-axis="bEnd" data-dir="1" title="Increase B end">Bₑ+</button>
-    <button data-axis="sStart" data-dir="-1" title="Decrease S start">Sₛ−</button>
     <button data-axis="sStart" data-dir="1" title="Increase S start">Sₛ+</button>
-    <button data-axis="sEnd" data-dir="-1" title="Decrease S end">Sₑ−</button>
     <button data-axis="sEnd" data-dir="1" title="Increase S end">Sₑ+</button>
+
+    <button data-axis="bStart" data-dir="-1" title="Decrease B start">Bₛ−</button>
+    <button data-axis="bEnd" data-dir="-1" title="Decrease B end">Bₑ−</button>
+    <button data-axis="sStart" data-dir="-1" title="Decrease S start">Sₛ−</button>
+    <button data-axis="sEnd" data-dir="-1" title="Decrease S end">Sₑ−</button>
   </nav>
 
-  <button class="random-button" id="random-button" type="button">
-    Random universe
-  </button>
-
-  <button class="pause-button" id="pause-button" type="button">
-    Pause
-  </button>
+  <div class="action-cluster" aria-label="Simulation actions">
+    <button class="pause-button" id="pause-button" type="button">Pause</button>
+    <button class="reset-button" id="reset-button" type="button">Reset</button>
+    <button class="random-button" id="random-button" type="button">Random universe</button>
+  </div>
 
   <script type="module" src="./conway.js"></script>
 </body>
