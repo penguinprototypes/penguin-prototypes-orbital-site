@@ -758,7 +758,7 @@
     for (const node of renderedOrbNodes) {
       if (!node.valid) continue;
       const distance = Math.hypot(point.x - node.x, point.y - node.y);
-      const threshold = node.radius + 18;
+      const threshold = node.radius + 10;
       if (distance <= threshold && distance < bestDistance) {
         best = node;
         bestDistance = distance;
@@ -795,8 +795,8 @@
 
       const valid = isValidRule(candidate);
       const rotated = rotatePoint(move.pos, orbYaw, orbPitch);
-      const depthScale = 0.78 + (rotated.z + 1) * 0.20;
-      const radius = valid ? 10 * depthScale : 8 * depthScale;
+      const depthScale = clamp(0.46 + (rotated.z + 1) * 0.34, 0.46, 1.14);
+      const radius = valid ? 30 * depthScale : 20 * depthScale;
 
       return { move, candidate, valid, x: rotated.x * 92, y: rotated.y * 92, z: rotated.z, radius };
     }).sort((a, b) => a.z - b.z);
@@ -829,7 +829,7 @@
       const dest = document.createElementNS("http://www.w3.org/2000/svg", "text");
       dest.classList.add("orb-destination-label");
       dest.setAttribute("text-anchor", "middle");
-      dest.setAttribute("y", String(node.radius + 10));
+      dest.setAttribute("y", String(node.radius + 13));
       dest.textContent = node.valid ? ruleString(node.candidate) : "";
 
       g.append(circle, text, dest);
