@@ -78,12 +78,11 @@
       min-height: 100vh;
       padding: 26px clamp(18px, 3vw, 44px) 116px;
       display: grid;
-      grid-template-rows: auto auto 1fr;
+      grid-template-rows: auto auto minmax(0, 1fr);
       gap: 22px;
       opacity: 0;
       animation: page-fade-in 900ms ease 90ms forwards;
-      transform: translate3d(var(--px), var(--py), 0);
-      will-change: transform, opacity;
+      will-change: opacity;
     }
 
     .top-bar {
@@ -132,7 +131,7 @@
 
     .hero {
       max-width: 880px;
-      transform: translate3d(calc(var(--px) * 0.35), calc(var(--py) * 0.35), 0);
+      transform: translate3d(calc(var(--px) * 0.18), calc(var(--py) * 0.18), 0);
       will-change: transform;
     }
 
@@ -169,6 +168,7 @@
       display: grid;
       grid-template-columns: minmax(220px, 310px) minmax(320px, 1fr) minmax(260px, 390px);
       align-items: center;
+      align-self: center;
       gap: clamp(18px, 3vw, 34px);
       min-height: 0;
     }
@@ -185,14 +185,21 @@
 
     .rule-card {
       padding: 22px;
-      transform: translate3d(calc(var(--px) * 0.75), calc(var(--py) * 0.75), 0);
+      transform: translate3d(calc(var(--px) * 0.32), calc(var(--py) * 0.32), 0);
+      min-width: 0;
+      overflow: hidden;
     }
 
     .rule-card h2 {
       margin: 0 0 18px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: clamp(28px, 4vw, 46px);
-      letter-spacing: -0.04em;
+      font-size: clamp(22px, 2.55vw, 38px);
+      line-height: 1.05;
+      letter-spacing: -0.075em;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .rule-card dl {
@@ -222,10 +229,11 @@
 
     .description-card {
       align-self: center;
+      justify-self: stretch;
       padding: 22px;
       color: var(--muted);
       line-height: 1.55;
-      transform: translate3d(calc(var(--px) * 0.62), calc(var(--py) * 0.62), 0);
+      transform: translate3d(calc(var(--px) * 0.24), calc(var(--py) * 0.24), 0);
     }
 
     .description-card p {
@@ -250,7 +258,7 @@
       place-items: center;
       perspective: 900px;
       min-width: 0;
-      transform: translate3d(calc(var(--px) * 1.0), calc(var(--py) * 1.0), 0);
+      transform: translate3d(calc(var(--px) * 0.42), calc(var(--py) * 0.42), 0);
       will-change: transform;
     }
 
@@ -450,7 +458,7 @@
     <section class="sim-layout">
       <aside class="rule-card">
         <p class="card-label">Current universe</p>
-        <h2 id="rule-name">B3/S23</h2>
+        <h2 id="rule-name" title="B3/S23">B3/S23</h2>
 
         <dl>
           <div><dt>Birth range</dt><dd id="birth-range">3</dd></div>
@@ -623,8 +631,8 @@
           const nx = (event.clientX / w) * 2 - 1;
           const ny = (event.clientY / h) * 2 - 1;
 
-          pointer.targetX = clamp(nx, -1, 1) * 16;
-          pointer.targetY = clamp(ny, -1, 1) * 12;
+          pointer.targetX = clamp(nx, -1, 1) * 7;
+          pointer.targetY = clamp(ny, -1, 1) * 5;
 
           root.style.setProperty("--mouse-x", `${event.clientX}px`);
           root.style.setProperty("--mouse-y", `${event.clientY}px`);
@@ -914,7 +922,9 @@
       }
 
       function updateUi() {
-        ruleNameEl.textContent = `B${rangeDigits(rule.bStart, rule.bEnd)}/S${rangeDigits(rule.sStart, rule.sEnd)}`;
+        const compactRule = `B${rangeDigits(rule.bStart, rule.bEnd)}/S${rangeDigits(rule.sStart, rule.sEnd)}`;
+        ruleNameEl.textContent = compactRule;
+        ruleNameEl.title = compactRule;
         birthRangeEl.textContent = rangeDash(rule.bStart, rule.bEnd);
         survivalRangeEl.textContent = rangeDash(rule.sStart, rule.sEnd);
         groupNameEl.textContent = `B${rule.bStart}+/S${rule.sStart}+`;
