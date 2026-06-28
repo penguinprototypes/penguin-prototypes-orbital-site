@@ -1,22 +1,22 @@
 # A simple planet with one moon and clickable information panels.
 
-planet: /images/campfire.png
-title: Campfire
-nav-name: Campfire
-text: A cozy campfire for sitting around.
-alt: Campfire
+planet: /images/Penguin-Prototypes-Rift.png
+title: Multiversal Center
+nav-name: Multiversal Center
+text: The list of interesting or interactive multiverses Penguin Prototypes has come across.
+alt: Rift
 size: 84
 orbit-radius: 380
 orbit-speed: 0.000085
 start-angle: 0.35
 orbit-line: true
 
-moon: /images/chair.png
-moon-title: Chair
-moon-nav-name: Chair
-moon-text: Camping
-moon-link: Placeholder | /conway/
-moon-alt: Chair
+moon: /images/Conway-multiverse.png
+moon-title: Conway Multiverse
+moon-nav-name: Conway Multiverse
+moon-text: The Conway Multiverse, a set of unvierses that follow Conway's Game of Life, with a specific ruleset that each universe follows a modified version of.
+moon-link: Conway Multiverse | /conway/
+moon-alt: Conway Multiverse
 moon-size: 22
 moon-radius: 58
 moon-speed: 0.001
