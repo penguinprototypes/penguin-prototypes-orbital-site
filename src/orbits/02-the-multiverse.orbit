@@ -5,7 +5,7 @@ title: Multiversal Center
 nav-name: Multiversal Center
 text: The list of interesting or interactive multiverses Penguin Prototypes has come across.
 alt: Rift
-size: 70
+size: 50
 orbit-radius: 380
 orbit-speed: 0.000085
 start-angle: 0.35
@@ -19,6 +19,6 @@ moon-link: Conway Multiverse | /conway/
 moon-alt: Conway Multiverse
 moon-size: 22
 moon-radius: 58
-moon-speed: 0.001
+moon-speed: 0.000
 moon-start-angle: 1.2
 moon-orbit-line: true
