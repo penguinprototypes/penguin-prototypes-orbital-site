@@ -5,7 +5,6 @@
     "folder": "inspirations",
     "files": [
       "Outer Wilds.credit",
-      "Factorio.credit",
       "Conway Game of Life.credit"
     ]
   },
@@ -14,34 +13,8 @@
     "name": "Artists",
     "folder": "artists",
     "files": [
-      "Placeholder Artist.credit"
-    ]
-  },
-  {
-    "id": "contributors",
-    "name": "Contributors",
-    "folder": "contributors",
-    "files": [
-      "Site Feedback.credit",
-      "Testing Help.credit"
-    ]
-  },
-  {
-    "id": "tools",
-    "name": "Tools",
-    "folder": "tools",
-    "files": [
-      "GitHub Pages.credit",
-      "Vite.credit",
-      "Inkscape.credit"
-    ]
-  },
-  {
-    "id": "special-thanks",
-    "name": "Special Thanks",
-    "folder": "special-thanks",
-    "files": [
-      "Archive Placeholder.credit"
+      "AmericanWilliams.credit",
+      "WestWyvern.credit"
     ]
   }
 ]
