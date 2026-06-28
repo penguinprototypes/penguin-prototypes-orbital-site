@@ -5,13 +5,13 @@ title: Multiversal Center
 nav-name: Multiversal Center
 text: The list of interesting or interactive multiverses Penguin Prototypes has come across.
 alt: Rift
-size: 84
+size: 70
 orbit-radius: 380
 orbit-speed: 0.000085
 start-angle: 0.35
 orbit-line: true
 
-moon: /images/Conway-multiverse.png
+moon: /images/Conway-Multiverse.png
 moon-title: Conway Multiverse
 moon-nav-name: Conway Multiverse
 moon-text: The Conway Multiverse, a set of unvierses that follow Conway's Game of Life, with a specific ruleset that each universe follows a modified version of.
