@@ -1,0 +1,11 @@
+planet: /images/Credits-Planet.png
+title: Credits & Inspirations
+nav-name: Credits & Inspirations
+text: A world dedicated to the people who helped shape Penguin Prototypes.
+link: Credits | /credits
+alt: Credits Planet
+size: 50
+orbit-radius: 880
+orbit-speed: 0.00001
+start-angle: 0.6
+orbit-line: true

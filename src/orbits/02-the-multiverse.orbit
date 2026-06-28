@@ -15,7 +15,7 @@ moon: /images/Conway-Multiverse.png
 moon-title: Conway Multiverse
 moon-nav-name: Conway Multiverse
 moon-text: The Conway Multiverse, a set of unvierses that follow Conway's Game of Life, with a specific ruleset that each universe follows a modified version of.
-moon-link: Conway Multiverse | /conway/
+moon-link: Conway Multiverse | /conway
 moon-alt: Conway Multiverse
 moon-size: 22
 moon-radius: 58
