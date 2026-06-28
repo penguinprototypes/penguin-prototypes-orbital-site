@@ -36,17 +36,18 @@
         <div class="category-title-wrap">
           <p class="category-label">Cylinder</p>
           <h2 id="categoryName">Loading</h2>
+          <p class="category-counter" id="categoryCounter"></p>
         </div>
         <button class="category-button" id="nextCategory" type="button" aria-label="Next cylinder category">›</button>
       </div>
 
-      <div class="cylinder-shell">
-        <div class="cylinder" id="cylinder" tabindex="0" aria-label="Use mouse wheel or up and down arrow keys to rotate through names">
+      <div class="cylinder-shell" id="cylinderStage" tabindex="0" aria-label="Use mouse wheel or up and down arrow keys to rotate names. Use left and right arrows to switch cylinders.">
+        <div class="cylinder-ring" id="cylinderRing">
           <p class="loading-message">Loading archive…</p>
         </div>
       </div>
 
-      <p class="usage-hint">Scroll or use ↑/↓ to rotate names. Click a segment to view details. Use ←/→ to switch cylinders.</p>
+      <p class="usage-hint">Scroll or use ↑/↓ to rotate the focused cylinder. Click any visible segment to view details. Use ←/→ to rotate the ring of cylinders.</p>
     </section>
   </main>
 </body>

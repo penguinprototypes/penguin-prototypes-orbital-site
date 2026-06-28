@@ -283,51 +283,110 @@ body::after {
   min-height: 0;
   display: grid;
   place-items: center;
-}
-
-.cylinder {
-  position: relative;
-  width: min(90vw, 880px);
-  height: min(35vh, 340px);
-  min-height: 270px;
-  perspective: 900px;
+  perspective: 1100px;
   transform-style: preserve-3d;
   outline: none;
 }
 
-.cylinder::before,
-.cylinder::after {
-  content: "";
-  position: absolute;
-  left: 5%;
-  right: 5%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
-  opacity: 0.75;
+.cylinder-shell:focus-visible {
+  box-shadow: inset 0 0 0 1px rgba(125, 193, 255, 0.24);
 }
 
-.cylinder::before {
+.cylinder-ring {
+  position: relative;
+  width: min(96vw, 1120px);
+  height: min(34vh, 340px);
+  min-height: 275px;
+  transform-style: preserve-3d;
+}
+
+.cylinder-ring::before,
+.cylinder-ring::after {
+  content: "";
+  position: absolute;
+  left: 7%;
+  right: 7%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-strong), transparent);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.cylinder-ring::before {
   top: calc(50% - 114px);
 }
 
-.cylinder::after {
+.cylinder-ring::after {
   top: calc(50% + 114px);
+}
+
+.category-cylinder {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(72vw, 680px);
+  height: 285px;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  transition: filter 180ms ease;
+}
+
+.category-cylinder.is-focused {
+  filter: drop-shadow(0 0 24px rgba(125, 193, 255, 0.20));
+}
+
+.category-cylinder.is-side {
+  filter: saturate(0.75);
+}
+
+.cylinder-title {
+  position: absolute;
+  left: 50%;
+  top: -0.9rem;
+  transform: translateX(-50%);
+  z-index: 260;
+  max-width: 90%;
+  padding: 0.28rem 0.7rem;
+  color: var(--muted);
+  background: rgba(5, 11, 27, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.category-cylinder.is-focused .cylinder-title,
+.cylinder-title:hover,
+.cylinder-title:focus-visible {
+  color: var(--text);
+  border-color: var(--accent-strong);
+  background: rgba(125, 193, 255, 0.14);
+  outline: none;
+}
+
+.category-counter {
+  margin: 0.15rem 0 0;
+  color: var(--faint);
+  font-size: 0.74rem;
+  letter-spacing: 0.12em;
 }
 
 .cylinder-segment {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(82vw, 760px);
-  height: 3.25rem;
-  translate: -50% -50%;
+  width: min(68vw, 640px);
+  height: 3.05rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.7rem;
   color: var(--text);
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.015));
+    linear-gradient(90deg, rgba(255, 255, 255, 0.012), rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.012));
   border: 0;
   border-top: 1px solid rgba(210, 230, 255, 0.13);
   border-bottom: 1px solid rgba(210, 230, 255, 0.13);
@@ -335,16 +394,32 @@ body::after {
   cursor: pointer;
   user-select: none;
   transform-style: preserve-3d;
-  transition: filter 160ms ease, background 160ms ease, border-color 160ms ease, color 160ms ease;
+  transition:
+    filter 140ms ease,
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
 }
 
-.cylinder-segment::before {
+.cylinder-segment::before,
+.cylinder-segment::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(125, 193, 255, 0.0), transparent);
+  pointer-events: none;
+}
+
+.cylinder-segment::before {
+  background:
+    linear-gradient(90deg, transparent, rgba(125, 193, 255, 0.0), transparent);
   opacity: 0;
-  transition: opacity 160ms ease;
+  transition: opacity 140ms ease;
+}
+
+.cylinder-segment::after {
+  border-left: 1px solid rgba(210, 230, 255, 0.08);
+  border-right: 1px solid rgba(210, 230, 255, 0.08);
+  opacity: 0.65;
 }
 
 .cylinder-segment:hover,
@@ -352,9 +427,9 @@ body::after {
 .cylinder-segment.is-hovered {
   color: white;
   background:
-    linear-gradient(90deg, rgba(125, 193, 255, 0.035), rgba(125, 193, 255, 0.30), rgba(125, 193, 255, 0.035));
+    linear-gradient(90deg, rgba(125, 193, 255, 0.035), rgba(125, 193, 255, 0.32), rgba(125, 193, 255, 0.035));
   border-color: var(--accent-strong);
-  filter: drop-shadow(0 0 18px rgba(125, 193, 255, 0.55));
+  filter: drop-shadow(0 0 18px rgba(125, 193, 255, 0.58));
   outline: none;
 }
 
@@ -367,7 +442,7 @@ body::after {
 .cylinder-segment.is-selected {
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0.045), var(--selected), rgba(255, 255, 255, 0.045));
-  border-color: rgba(255, 255, 255, 0.65);
+  border-color: rgba(255, 255, 255, 0.68);
 }
 
 .segment-name {
@@ -377,7 +452,7 @@ body::after {
   max-width: calc(100% - 4rem);
   white-space: nowrap;
   text-overflow: ellipsis;
-  font-size: clamp(1rem, 2vw, 1.35rem);
+  font-size: clamp(0.92rem, 1.7vw, 1.22rem);
   letter-spacing: 0.045em;
   text-transform: uppercase;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
@@ -387,7 +462,7 @@ body::after {
   position: relative;
   z-index: 1;
   color: var(--faint);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -411,7 +486,7 @@ body::after {
   position: relative;
   z-index: 2;
   margin: 0.3rem auto 0;
-  max-width: 720px;
+  max-width: 760px;
   color: var(--faint);
   text-align: center;
   font-size: 0.82rem;
@@ -436,13 +511,17 @@ body::after {
     grid-template-columns: 1fr;
   }
 
-  .cylinder {
-    width: 96vw;
+  .cylinder-ring {
+    width: 98vw;
     min-height: 250px;
   }
 
+  .category-cylinder {
+    width: 86vw;
+  }
+
   .cylinder-segment {
-    width: 91vw;
+    width: 82vw;
     height: 2.85rem;
   }
 

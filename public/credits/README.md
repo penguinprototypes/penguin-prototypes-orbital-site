@@ -12,6 +12,28 @@ After deployment, the page will be available at:
 /credits/
 ```
 
+## What this version does
+
+This version uses the cylinder/ring layout:
+
+- The top half of the screen shows the selected credit entry.
+- The bottom half shows a visible ring of category cylinders.
+- Each cylinder shows 7 name segments at a time.
+- Nearby cylinders are visible to the sides instead of only showing one cylinder.
+- Hovering any visible name lights up that whole segment.
+- Clicking any visible segment selects it and updates the top details.
+- Scrolling animates smoothly instead of snapping directly from item to item.
+- The focused cylinder auto-rotates slowly after a few seconds of inactivity.
+
+## Controls
+
+- Scroll over the bottom half to rotate the focused cylinder.
+- Hover a name to light up that cylinder segment.
+- Click any visible name segment to load details in the top half.
+- Use the category buttons or left/right arrow keys to rotate the ring of cylinders.
+- Use up/down arrow keys to rotate the focused cylinder.
+- Hold Shift while scrolling, or use horizontal scroll, to rotate the category ring.
+
 ## How the data works
 
 This version uses one central category index:
@@ -84,14 +106,6 @@ slug: optional-custom-url-slug
 ```
 
 Blank lines and lines beginning with `#` are ignored.
-
-## Controls
-
-- Scroll over the bottom cylinder to rotate names.
-- Hover a name to light up that segment.
-- Click a name to load its details in the top half.
-- Use left/right arrows or the category buttons to switch cylinders.
-- Use up/down arrows to rotate the current cylinder.
 
 ## Linking from the main orbital page
 
